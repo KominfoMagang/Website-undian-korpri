@@ -1,3 +1,3 @@
 <div>
-    <h1 class="">Tes halaman komponen</h1>
+    <h1 class="font-semibold">Tes halaman komponen</h1>
 </div>
