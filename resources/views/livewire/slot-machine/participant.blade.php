@@ -41,7 +41,6 @@
                         <th scope="col" class="px-6 py-5">No</th>
                         <th scope="col" class="px-6 py-5">Pegawai</th>
                         <th scope="col" class="px-6 py-5">Instansi / Unit Kerja</th>
-                        <th scope="col" class="px-6 py-5">Golongan</th>
                         <th scope="col" class="px-6 py-5 text-center">Status</th>
                         <th scope="col" class="px-6 py-5 text-center">Aksi</th>
                     </tr>
@@ -67,7 +66,6 @@
                             <span
                                 class="bg-blue-50 text-blue-700 py-1.5 px-3 rounded-full text-xs font-bold border border-blue-100">BAPPEDA</span>
                         </td>
-                        <td class="px-6 py-4 font-semibold text-slate-600">III/c</td>
                         <td class="px-6 py-4 text-center">
                             <span
                                 class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
@@ -101,7 +99,6 @@
                                 class="bg-green-50 text-green-700 py-1.5 px-3 rounded-full text-xs font-bold border border-green-100">Dinas
                                 Kesehatan</span>
                         </td>
-                        <td class="px-6 py-4 font-semibold text-slate-600">III/b</td>
                         <td class="px-6 py-4 text-center">
                             <span
                                 class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200 shadow-sm">
