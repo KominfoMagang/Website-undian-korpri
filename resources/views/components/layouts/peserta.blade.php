@@ -1,19 +1,5 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>{{ $title ?? 'Page Title' }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-
-<body>
-    <div class="container text-center bg-amber-500">
+<x-layouts.app :title="$title ?? 'Peserta'">
+    <div class="max-w-4xl mx-auto p-4">
         {{ $slot }}
     </div>
-
-</body>
-
-</html>
+</x-layouts.app>
