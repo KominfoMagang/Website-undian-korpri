@@ -12,6 +12,7 @@ class RaffleTicketPage extends Component
 
     public $banners = [];
     public $couponNumber;
+    public $statusCoupon = [];
     public $detailData = [];
 
     public function mount()
@@ -35,6 +36,17 @@ class RaffleTicketPage extends Component
             ],
         ];
 
+        $this->statusCoupon = [
+            [
+                'id' => 1,
+                'status' => 'Aktif'
+            ],
+            [
+                'id' => 2,
+                'status' => 'kadaluarsa'
+            ],
+
+        ];
         $this->couponNumber = '20056';
         $this->detailData = [
             'nama'       => 'John Doe',

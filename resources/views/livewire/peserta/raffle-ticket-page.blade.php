@@ -11,7 +11,7 @@
                 {{-- Status Badge --}}
                 <span
                     class="inline-flex items-center px-3 py-1 rounded-full text-[14px] font-semibold bg-green-700 text-white">
-                    AKTIF
+                    {{ $statusCoupon[0]["status"] }}
                 </span>
 
                 {{-- Nomor Kupon --}}
