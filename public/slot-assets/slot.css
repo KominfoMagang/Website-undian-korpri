@@ -116,3 +116,12 @@ body {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+.table-row-hover:hover {
+            background-color: #f8fafc;
+            transform: scale(1.005);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+            position: relative;
+            transition: all 0.2s;
+        }
