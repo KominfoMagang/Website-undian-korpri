@@ -11,7 +11,7 @@ class PresencePage extends Component
 {
     use WithFileUploads;
 
-    #[Layout('components.layouts.peserta')]
+    #[Layout('components.layouts.pages-peserta.peserta')]
 
     public $title = "Presence page";
     public $nip = '';
@@ -78,6 +78,8 @@ class PresencePage extends Component
             $this->photo->storeAs('selfies', $filename);
 
             session()->flash('success', 'Kupon berhasil diklaim & foto tersimpan!');
+
+            return redirect()->route('halamanKupon');
         }
     }
 
