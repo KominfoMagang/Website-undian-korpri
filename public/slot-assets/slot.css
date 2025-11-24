@@ -1,0 +1,83 @@
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Background Utama */
+.bg-korpri-event {
+    background-color: #0f172a; /* Biru Gelap Slate */
+    background-image: 
+        radial-gradient(circle at 50% 50%, rgba(30, 58, 138, 0.8) 0%, rgba(15, 23, 42, 0) 50%),
+        radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 100% 100%, 20px 20px; 
+    background-position: center, 0 0;
+}
+
+/* Slot Styling */
+.slot-box {
+    background: linear-gradient(to bottom, #ffffff, #e0f2fe);
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1), 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    border: 4px solid #facc15;
+    transform: scale(1);
+    transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.slot-stopped {
+    background: #fef9c3;
+    border-color: #fbbf24;
+    color: #b45309;
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 20px #fbbf24;
+    z-index: 20;
+}
+
+.btn-action:active {
+    transform: scale(0.95);
+}
+
+@keyframes popUp {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-pop {
+    animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.grayscale-img {
+    filter: grayscale(100%);
+    opacity: 0.5;
+}
+
+/* Navbar active state */
+.nav-link.active {
+    background-color: #fbbf24;
+    /* Amber-400 */
+    color: #1e3a8a;
+    /* Blue-900 */
+    font-weight: 800;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.nav-link:not(.active):hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fbbf24;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Sembunyikan scrollbar untuk IE, Edge and Firefox */
+.no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}

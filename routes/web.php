@@ -9,3 +9,5 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', PresencePage::class);
+
+require __DIR__ . '/slot-machine.php';
