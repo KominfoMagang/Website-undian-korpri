@@ -4,6 +4,7 @@ namespace App\Livewire\Peserta;
 
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Illuminate\Support\Str;
 
 class RaffleTicketPage extends Component
 {
@@ -44,15 +45,78 @@ class RaffleTicketPage extends Component
 
     public function downloadCoupon()
     {
-        $filePath = public_path('static/images/kupon-template.jpg'); 
+        $name         = $this->detailData['nama']       ?? 'John Doe';
+        $nip          = $this->detailData['nip']        ?? '123456789012345678';
+        $unitKerja    = $this->detailData['unit_kerja'] ?? 'Dinas Pendidikan';
+        $couponNumber = $this->couponNumber             ?? 'KORPRI-2025-00001';
 
-        if (!file_exists($filePath)) {
-            abort(404, 'Template kupon tidak ditemukan.');
+        $filePath = $this->generateCouponImage($name, $nip, $unitKerja, $couponNumber);
+
+        $downloadName = 'kupon-undian-' . Str::slug($couponNumber) . '.jpg';
+
+        return response()->download($filePath, $downloadName)->deleteFileAfterSend(true);
+    }
+
+    // =========================
+    // HELPER GD DI BAWAH INI
+    // =========================
+
+    private function generateCouponImage(string $name, string $nip, string $unitKerja, string $couponNumber): string
+    {
+        $templatePath = public_path('static/images/Template-coupon.png');
+        $fontBold     = public_path('fonts/Inter_28pt-SemiBold.ttf');
+        $fontRegular  = public_path('fonts/Inter_18pt-Regular.ttf');
+
+        if (! file_exists($templatePath)) {
+            throw new \Exception('Template kupon tidak ditemukan: ' . $templatePath);
         }
 
-        $filename = 'kupon-undian-' . ($this->couponNumber ?? 'template') . '.jpg';
+        if (! file_exists($fontBold)) {
+            throw new \Exception('Font tidak ditemukan: ' . $fontBold);
+        }
 
-        return response()->download($filePath, $filename);
+        $image = imagecreatefrompng($templatePath);
+
+        $textColorDark = imagecolorallocate($image, 40, 40, 40);
+        $textColorBlue = imagecolorallocate($image, 30, 91, 216);
+
+        $width  = imagesx($image);
+        $height = imagesy($image);
+
+        $fontSizeName   = 20;
+        $fontSizeNip    = 16;
+        $fontSizeUnit   = 16;
+        $fontSizeCoupon = 24;
+
+        $yCoupon = (int) ($height * 0.30);
+        $yName   = (int) ($height * 0.45);
+        $yNip    = (int) ($height * 0.55);
+        $yUnit   = (int) ($height * 0.65);
+
+        $this->drawCenteredText($image, $couponNumber, $fontSizeCoupon, 0, $yCoupon, $textColorBlue, $fontBold, $width);
+        $this->drawCenteredText($image, $name,         $fontSizeName,   0, $yName,   $textColorDark, $fontBold,  $width);
+        $this->drawCenteredText($image, $nip,          $fontSizeNip,    0, $yNip,    $textColorDark, $fontRegular ?: $fontBold, $width);
+        $this->drawCenteredText($image, $unitKerja,    $fontSizeUnit,   0, $yUnit,   $textColorDark, $fontRegular ?: $fontBold, $width);
+
+        $tempDir = storage_path('app/tmp');
+        if (! is_dir($tempDir)) {
+            mkdir($tempDir, 0777, true);
+        }
+
+        $filePath = $tempDir . '/kupon-' . uniqid() . '.jpg';
+        imagejpeg($image, $filePath, 90);
+        imagedestroy($image);
+
+        return $filePath;
+    }
+
+    private function drawCenteredText($image, string $text, int $fontSize, int $angle, int $y, $color, string $fontPath, int $imageWidth): void
+    {
+        $bbox = imagettfbbox($fontSize, $angle, $fontPath, $text);
+        $textWidth = $bbox[2] - $bbox[0];
+        $x = (int) (($imageWidth - $textWidth) / 2);
+
+        imagettftext($image, $fontSize, $angle, $x, $y, $color, $fontPath, $text);
     }
 
     public function render()
