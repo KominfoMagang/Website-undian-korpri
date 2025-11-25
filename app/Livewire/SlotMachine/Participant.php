@@ -44,7 +44,7 @@ class Participant extends Component
                 $query->where('unit_kerja', $this->instansi);
             })
             // Urutkan: Yang Hadir duluan, baru abjad nama
-            ->orderBy('status_hadir', 'desc')
+            ->orderBy('status_hadir', 'asc')
             ->orderBy('nama', 'asc')
             ->paginate(10); // Tampilkan 10 per halaman
 

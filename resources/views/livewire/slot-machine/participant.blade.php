@@ -15,8 +15,11 @@
         {{-- FILTER & SEARCH --}}
         <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
             {{-- Filter Instansi --}}
-            <select wire:model.live="instansi"
-                class="bg-blue-900/40 border border-blue-400/30 text-white text-sm rounded-xl px-4 py-3 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none backdrop-blur-md shadow-lg transition cursor-pointer">
+            <select wire:model.live="instansi" class="bg-blue-900/40 border border-blue-400/30 text-white text-sm rounded-xl px-4 py-3 
+           focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none 
+           backdrop-blur-md shadow-lg transition cursor-pointer
+           max-w-[200px] md:max-w-xs truncate pr-8">
+
                 <option value="" class="text-slate-800">Semua Instansi</option>
                 @foreach($unitKerjaList as $unit)
                 <option value="{{ $unit }}" class="text-slate-800">{{ $unit }}</option>
@@ -81,7 +84,8 @@
                         {{-- Instansi --}}
                         <td class="px-6 py-4">
                             <span
-                                class="bg-blue-50 text-blue-700 py-1.5 px-3 rounded-full text-xs font-bold border border-blue-100">
+                                class="bg-blue-50 text-blue-700 py-1.5 px-3 rounded-full text-xs font-bold border border-blue-100 inline-block max-w-[150px] truncate align-middle"
+                                title="{{ $p->unit_kerja }}">
                                 {{ $p->unit_kerja }}
                             </span>
                         </td>

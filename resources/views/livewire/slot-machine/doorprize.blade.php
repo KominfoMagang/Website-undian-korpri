@@ -4,18 +4,18 @@
     <input type="hidden" id="src-win"
         value="https://audio-previews.elements.envatousercontent.com/files/331706982/preview.mp3">
 
-    <div id="gameContainer"
+    <div id="gameContainer" wire:ignore
         class="bg-white rounded-3xl shadow-2xl w-full max-w-6xl overflow-hidden flex flex-col md:flex-row min-h-[600px] border-4 border-yellow-500 relative z-10 transition-all duration-700 ease-in-out">
 
-        <div wire:ignore class="w-full md:w-1/3 bg-slate-50 p-6 flex flex-col border-r-4 border-slate-200">
+        <div class="w-full md:w-1/3 bg-slate-50 p-6 flex flex-col border-r-4 border-slate-200">
             <h2
                 class="text-xl font-bold text-blue-900 mb-2 uppercase border-b-2 border-yellow-400 inline-block self-start">
-                Hadiah Utama</h2>
+                Undian Berhadiah</h2>
 
             <select id="prizeSelect" onchange="changePrize()"
                 class="mb-4 w-full rounded-xl border-2 border-blue-200 bg-white px-4 py-3 font-bold text-blue-900 focus:border-yellow-400 focus:ring-yellow-400 cursor-pointer shadow-sm">
                 @foreach ($jsRewards as $id => $data)
-                    <option value="{{ $id }}">{{ $data['nama_hadiah'] }}</option>
+                <option value="{{ $id }}">{{ $data['nama_hadiah'] }}</option>
                 @endforeach
             </select>
 
@@ -30,7 +30,7 @@
                 </div>
 
                 <img id="prizeImage" src=""
-                    class="relative z-10 max-w-full max-h-56 object-contain transition-all duration-500 drop-shadow-xl">
+                    class="relative z-10 max-w-full max-h-56 object-contain transition-all duration-500 drop-shadow-xl rounded-md">
 
                 <div wire:ignore class="mt-6 flex items-center gap-2">
                     <span class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Ketersediaan:</span>
@@ -64,7 +64,6 @@
                 <div id="slot-2"
                     class="slot-box w-14 h-20 md:w-20 md:h-28 flex items-center justify-center text-5xl md:text-7xl font-black text-slate-800 rounded-xl">
                     0</div>
-                <div class="text-yellow-400 text-4xl md:text-6xl font-bold opacity-80">-</div>
                 <div id="slot-3"
                     class="slot-box w-14 h-20 md:w-20 md:h-28 flex items-center justify-center text-5xl md:text-7xl font-black text-slate-800 rounded-xl">
                     0</div>
@@ -125,7 +124,7 @@
                             <div
                                 class="inline-block bg-slate-100 px-4 py-2 rounded-lg border border-slate-300 mb-2 shadow-sm">
                                 <p id="winnerCoupon" class="font-mono text-lg text-slate-700 font-bold tracking-widest">
-                                    Kupon: 123456xxxx</p>
+                                    Kupon: 123xxx</p>
                             </div>
                             <p id="winnerAgency" class="text-blue-600 font-bold text-lg mb-6">Dinas Instansi Terkait</p>
                         </div>
@@ -155,8 +154,8 @@
 </div>
 
 @script
-    <script>
-        // ==========================================
+<script>
+    // ==========================================
         // 1. UTILITIES (Audio, Confetti, Toggle)
         // ==========================================
 
@@ -471,9 +470,9 @@
                     if (index === slots.length - 1) {
                         isSpinning = false;
                         if (spinAudioObject) spinAudioObject.pause();
-                        setTimeout(() => window.showModal(), 1500);
+                        setTimeout(() => window.showModal(), 1000);
                     }
-                }, index * 1500);
+                }, index * 500);
             });
         }
 
@@ -505,14 +504,19 @@
             modal.classList.remove('hidden');
         }
 
-        // Tombol "Tetapkan Pemenang" (Simpan ke DB)
-        window.confirmWinner = function() {
+        window.confirmWinner = function () {
             const val = document.getElementById('prizeSelect').value;
             const prizeId = prizes[val].id;
+            
+            if (prizes[val].stok > 0) {
+                prizes[val].stok = prizes[val].stok - 1;
+            }
+            
+            window.changePrize(); 
 
-            // Panggil Livewire untuk simpan permanen & kurangi stok
+            // SIMPAN KE DATABASE (Background Process)
             $wire.saveWinner(currentWinner.id, prizeId);
-
+            
             window.closeModal();
         }
 
@@ -545,5 +549,5 @@
         // ==========================================
         // Jalankan sekali saat halaman dimuat untuk set gambar awal
         window.changePrize();
-    </script>
+</script>
 @endscript
