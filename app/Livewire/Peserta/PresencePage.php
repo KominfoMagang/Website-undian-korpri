@@ -31,8 +31,8 @@ class PresencePage extends Component
     public $userLng;
 
     // titik pusat acara (bisa pindah ke config/env)
-    public $centerLat = -7.228483513036513;
-    public $centerLng = 108.17018006490862;
+    public $centerLat = -7.316562875296225;
+    public $centerLng = 108.19676824068117;
     public $radiusMeters = 500;
 
     public $validNips = [
@@ -92,15 +92,12 @@ class PresencePage extends Component
         if ($distance <= $this->radiusMeters) {
             $this->locationGranted = true;
             $this->locationErrorMessage = '';
-
-            // Reload halaman untuk menampilkan form
             $this->dispatch('location-granted');
         } else {
             $this->locationGranted = false;
             $this->locationErrorMessage = 'Anda berada di luar area yang diizinkan (' . round($distance) . ' meter).';
 
-            // Dispatch event ke Alpine.js untuk menampilkan overlay denied
-            $this->dispatch('location-denied');
+            $this->dispatch('location-radius-error');
         }
     }
 
@@ -108,16 +105,18 @@ class PresencePage extends Component
     {
         $this->locationGranted = false;
 
-        $errorMessages = [
-            1 => 'Akses lokasi ditolak. Mohon izinkan akses lokasi untuk melanjutkan.',
-            2 => 'Posisi tidak tersedia. Pastikan GPS aktif.',
-            3 => 'Waktu permintaan lokasi habis. Silakan coba lagi.'
-        ];
-
-        $this->locationErrorMessage = $errorMessages[$code] ?? 'Lokasi tidak dapat diakses dari perangkat Anda.';
-
-        // Dispatch event untuk menampilkan overlay denied
-        $this->dispatch('location-denied');
+        if ($code == 1) {
+            $this->locationErrorMessage = 'Akses lokasi ditolak. Mohon izinkan akses lokasi untuk melanjutkan.';
+            $this->dispatch('permission-blocked');
+        }
+        else {
+            $errorMessages = [
+                2 => 'Posisi tidak tersedia. Pastikan GPS aktif.',
+                3 => 'Waktu permintaan lokasi habis. Silakan coba lagi.'
+            ];
+            $this->locationErrorMessage = $errorMessages[$code] ?? 'Error lokasi tidak diketahui.';
+            $this->dispatch('location-system-error');
+        }
     }
 
     /**
@@ -125,7 +124,7 @@ class PresencePage extends Component
      */
     private function calculateDistanceMeters($lat1, $lon1, $lat2, $lon2)
     {
-        $earthRadius = 6371000; // meter
+        $earthRadius = 6371000;
 
         $lat1 = deg2rad($lat1);
         $lon1 = deg2rad($lon1);
