@@ -11,7 +11,7 @@
                 {{-- Status Badge --}}
                 <span
                     class="inline-flex items-center px-3 py-1 rounded-full text-[14px] font-semibold bg-green-700 text-white">
-                    {{ $statusCoupon[0]["status"] }}
+                    {{ $statusCoupon }}
                 </span>
 
                 {{-- Nomor Kupon --}}
@@ -20,7 +20,7 @@
                         Nomor Kupon Undian Kamu
                     </p>
                     <p class="text-3xl font-extrabold text-[#1E5BD8] leading-tight">
-                        {{ $couponNumber ?? '1239123131010' }}
+                        {{ $couponNumber}}
                     </p>
                 </div>
 
@@ -30,13 +30,13 @@
                         <div>
                             <p class="text-gray-500">Nama peserta</p>
                             <p class="text-gray-800 font-semibold">
-                                {{ $detailData['nama'] ?? 'Yudha' }}
+                                {{ $detailData['nama'] ?? 'tidak ada' }}
                             </p>
                         </div>
                         <div class="text-start">
                             <p class="text-gray-500">NIP</p>
                             <p class="text-gray-800 font-semibold text-[12px] leading-snug">
-                                {{ $detailData['nip'] ?? '19880316201009001' }}
+                                {{ $detailData['nip'] ?? '-' }}
                             </p>
                         </div>
                     </div>
@@ -44,7 +44,7 @@
                     <div class="mt-2">
                         <p class="text-gray-500">Asal Instansi</p>
                         <p class="text-gray-800 font-semibold text-[14px]">
-                            {{ $detailData['unit_kerja'] ?? 'Diskominfo Kota Tasikmalaya' }}
+                            {{ $detailData['unit_kerja'] ?? '-' }}
                         </p>
                     </div>
                 </div>

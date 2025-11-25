@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 
 // PresencePage adalah halaman login
-Route::get('/', PresencePage::class);
+Route::get('/', PresencePage::class)->name('HalamanPresensi');
 Route::get('/halaman-kupon', RaffleTicketPage::class)->name('halamanKupon');
 
 require __DIR__ . '/admin.php';
