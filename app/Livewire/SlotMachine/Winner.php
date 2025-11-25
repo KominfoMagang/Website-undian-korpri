@@ -23,9 +23,10 @@ class Winner extends Component
     {
         // 1. Ambil SEMUA pemenang diurutkan dari yang PERTAMA kali menang
         // Eager load relasi 'participant' dan 'reward' biar query ringan
-        $allWinners = ModelsWinner::with(['participant', 'reward'])
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $allWinners = ModelsWinner::with([
+            'participant.coupons',
+            'reward'
+        ])->orderBy('created_at', 'asc')->get();
 
         // 2. Ambil 3 orang pertama untuk Podium
         // Index 0 = Juara 1, Index 1 = Juara 2, Index 2 = Juara 3
