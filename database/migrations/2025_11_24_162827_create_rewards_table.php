@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('gambar')->nullable();
             $table->integer('stok')->default(0);
             $table->enum('status_hadiah', ['Aktif', 'Tidak aktif'])->default('Aktif')->index();
-            $table->enum('level_hadiah', ['Utama', 'Hiburan'])->default('Hiburan')->index();
             $table->timestamps();
         });
     }

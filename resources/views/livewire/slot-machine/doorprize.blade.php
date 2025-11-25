@@ -13,10 +13,9 @@
 
             <select id="prizeSelect" onchange="changePrize()"
                 class="mb-4 w-full rounded-xl border-2 border-blue-200 bg-white px-4 py-3 font-bold text-blue-900 focus:border-yellow-400 focus:ring-yellow-400 cursor-pointer shadow-sm">
-                <option value="sepeda">Sepeda Gunung Polygon</option>
-                <option value="kulkas">Kulkas 2 Pintu Sharp</option>
-                <option value="tv">Smart TV Samsung 43"</option>
-                <option value="motor">Sepeda Motor Listrik</option>
+                @foreach($jsRewards as $id => $data)
+                <option value="{{ $id }}">{{ $data['nama_hadiah'] }}</option>
+                @endforeach
             </select>
 
             <div
@@ -80,7 +79,7 @@
                 <button id="btnStart" onclick="startSpin()"
                     class="btn-action group relative px-8 py-4 bg-gradient-to-b from-green-400 to-green-600 rounded-full shadow-[0_10px_0_rgb(21,128,61)] active:shadow-[0_2px_0_rgb(21,128,61)] active:translate-y-2 transition-all disabled:from-slate-400 disabled:to-slate-500 disabled:shadow-none disabled:translate-y-2 disabled:cursor-not-allowed">
                     <span
-                        class="text-white font-black text-xl md:text-2xl uppercase tracking-wider flex items-center gap-2">⚙️
+                        class="text-white font-black text-xl md:text-2xl uppercase tracking-wider flex items-center gap-2 cursor-pointer">⚙️
                         Mulai Acak</span>
                 </button>
                 <button id="btnStop" onclick="stopSpinSequence()" disabled
@@ -156,7 +155,11 @@
 
 @script
 <script>
-    // --- 0. FULLSCREEN LOGIC ---
+    // ==========================================
+    // 1. UTILITIES (Audio, Confetti, Toggle)
+    // ==========================================
+
+    // Fungsi Pemicu Tombol Fullscreen Navbar
     window.toggleFullScreen = function() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen();
@@ -165,82 +168,39 @@
         }
     }
 
-    document.addEventListener('fullscreenchange', (event) => {
-        // 1. Definisi Elemen
-        const iconMax = document.getElementById('iconMax');
-        const iconMin = document.getElementById('iconMin');
-        const navbar  = document.getElementById('mainNavbar');
-        const container = document.getElementById('gameContainer');
-        const body = document.body;
+    // Fungsi Audio Player
+    window.playSoundEffect = function(type) {
+        const spinEl = document.getElementById('src-spin');
+        const stopEl = document.getElementById('src-stop');
+        const winEl  = document.getElementById('src-win');
+        
+        // Safety Check
+        if (!spinEl || !stopEl || !winEl) return null;
 
-        if (document.fullscreenElement) {
-            // === MASUK MODE FULLSCREEN ===
-            
-            // A. Matikan Padding & Centering di Body (PENTING!)
-            // Ini yang bikin "pagar" putih di pinggir hilang
-            body.classList.remove('p-4', 'pt-24', 'flex', 'items-center', 'justify-center');
-            
-            // B. Sembunyikan Navbar
-            if (navbar) navbar.classList.add('hidden');
-            
-            // C. Ubah Icon Toggle
-            if (iconMax && iconMin) { 
-                iconMax.classList.add('hidden'); 
-                iconMin.classList.remove('hidden'); 
-            }
-
-            // D. Transformasi Container Slot jadi Full Layar
-            if (container) {
-                // Hapus style kotak/kartu (border, rounded, shadow, max-width)
-                container.classList.remove('max-w-6xl', 'rounded-3xl', 'border-4', 'shadow-2xl', 'min-h-[600px]');
-                
-                // Tambahkan style layar penuh
-                container.classList.add('w-screen', 'h-screen', 'rounded-none', 'border-0');
-                
-                // Paksa ukuran style manual (Override CSS lain)
-                container.style.width = "100vw";
-                container.style.height = "100vh";
-                container.style.maxWidth = "100%";
-                container.style.margin = "0";
-            }
-
-        } else {
-            // === KELUAR MODE FULLSCREEN ===
-
-            // A. Kembalikan Padding Body
-            body.classList.add('p-4', 'pt-24', 'flex', 'items-center', 'justify-center');
-
-            // B. Munculkan Navbar
-            if (navbar) navbar.classList.remove('hidden');
-
-            // C. Balikin Icon
-            if (iconMax && iconMin) { 
-                iconMax.classList.remove('hidden'); 
-                iconMin.classList.add('hidden'); 
-            }
-
-            // D. Kembalikan Container ke Bentuk Kotak Asli
-            if (container) {
-                // Balikin class asli
-                container.classList.add('max-w-6xl', 'rounded-3xl', 'border-4', 'shadow-2xl', 'min-h-[600px]');
-                
-                // Hapus class full layar
-                container.classList.remove('w-screen', 'h-screen', 'rounded-none', 'border-0');
-                
-                // Hapus style manual
-                container.style.width = "";
-                container.style.height = "";
-                container.style.maxWidth = "";
-                container.style.margin = "";
-            }
+        let audio;
+        if (type === 'spin') {
+            audio = new Audio(spinEl.value);
+            audio.loop = true;
+            audio.volume = 0.6;
+        } else if (type === 'stop') {
+            audio = new Audio(stopEl.value);
+            audio.volume = 1.0;
+        } else if (type === 'win') {
+            audio = new Audio(winEl.value);
+            audio.volume = 1.0;
         }
-    });
+        
+        if(audio) {
+            audio.play().catch(e => console.log("Audio play prevented (Browser Policy):", e));
+        }
+        return audio;
+    }
 
-    // --- 1. CONFIG CONFETTI ---
+    // Fungsi Confetti (Hujan Kertas)
     window.fireConfetti = function() {
-        var duration = 3000;
+        var duration = 3000; 
         var animationEnd = Date.now() + duration;
-        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }; 
         var colors = ['#d4af37', '#1e3a8a', '#ef4444', '#ffffff'];
 
         var interval = setInterval(function() {
@@ -252,66 +212,102 @@
         }, 250);
     }
 
-    // --- 2. AUDIO LOGIC ---
-    window.playSoundEffect = function(type) {
-        // Ambil element audio (pastikan input hidden ada di HTML)
-        const spinEl = document.getElementById('src-spin');
-        const stopEl = document.getElementById('src-stop');
-        const winEl  = document.getElementById('src-win');
+    // ==========================================
+    // 2. LISTENER TAMPILAN (FULLSCREEN UI)
+    // ==========================================
+    document.addEventListener('fullscreenchange', (event) => {
+        const iconMax = document.getElementById('iconMax');
+        const iconMin = document.getElementById('iconMin');
+        const navbar  = document.getElementById('mainNavbar');
+        const container = document.getElementById('gameContainer'); // Slot Machine
+        const dataSection = document.getElementById('dataSection'); // Tabel Data
+        const body = document.body;
 
-        // Safety check jika element audio tidak ketemu
-        if (!spinEl || !stopEl || !winEl) return null;
+        if (document.fullscreenElement) {
+            // === MASUK MODE FULLSCREEN ===
+            
+            // 1. Matikan Padding Body biar mepet layar
+            body.classList.remove('p-4', 'pt-24', 'flex', 'items-center', 'justify-center');
+            
+            // 2. Sembunyikan Navbar SAJA (Tabel Tetap Muncul)
+            if (navbar) navbar.classList.add('hidden');
+            
+            // 3. Ganti Icon Toggle
+            if (iconMax && iconMin) { 
+                iconMax.classList.add('hidden'); 
+                iconMin.classList.remove('hidden'); 
+            }
 
-        const spinSrc = spinEl.value;
-        const stopSrc = stopEl.value;
-        const winSrc  = winEl.value;
+            // 4. Perbesar Slot Machine jadi Full Layar
+            if (container) {
+                container.classList.remove('max-w-6xl', 'rounded-3xl', 'border-4', 'shadow-2xl', 'min-h-[600px]');
+                container.classList.add('w-screen', 'h-screen', 'rounded-none', 'border-0');
+                container.style.width = "100vw";
+                container.style.height = "100vh";
+                container.style.maxWidth = "100%";
+                container.style.margin = "0";
+            }
+            
+            // 5. Rapikan Jarak Tabel (Opsional)
+            if (dataSection) {
+                dataSection.classList.remove('hidden'); // Pastikan tabel TIDAK hilang
+                dataSection.classList.add('mt-10'); // Kasih jarak dikit dari slot
+            }
 
-        let audio;
-        if (type === 'spin') {
-            audio = new Audio(spinSrc);
-            audio.loop = true;
-            audio.volume = 0.6;
-        } else if (type === 'stop') {
-            audio = new Audio(stopSrc);
-            audio.volume = 1.0;
-        } else if (type === 'win') {
-            audio = new Audio(winSrc);
-            audio.volume = 1.0;
+        } else {
+            // === KELUAR MODE FULLSCREEN ===
+
+            // 1. Balikin Padding Body
+            body.classList.add('p-4', 'pt-24', 'flex', 'items-center', 'justify-center');
+
+            // 2. Munculkan Navbar
+            if (navbar) navbar.classList.remove('hidden');
+
+            // 3. Balikin Icon Toggle
+            if (iconMax && iconMin) { 
+                iconMax.classList.remove('hidden'); 
+                iconMin.classList.add('hidden'); 
+            }
+
+            // 4. Kecilkan Slot Machine ke Semula
+            if (container) {
+                container.classList.add('max-w-6xl', 'rounded-3xl', 'border-4', 'shadow-2xl', 'min-h-[600px]');
+                container.classList.remove('w-screen', 'h-screen', 'rounded-none', 'border-0');
+                container.style.width = "";
+                container.style.height = "";
+                container.style.maxWidth = "";
+                container.style.margin = "";
+            }
+
+             // 5. Balikin Tabel Normal
+             if (dataSection) {
+                dataSection.classList.remove('mt-10');
+            }
         }
-        
-        if(audio) {
-            audio.play().catch(e => console.log("Audio play prevented:", e));
-        }
-        return audio;
-    }
+    });
 
-    // --- 3. DATA & VARIABLES ---
-    const prizes = {
-        'sepeda': { img: 'https://placehold.co/300x300/png?text=Sepeda+Gunung', name: 'Sepeda Gunung Polygon', stock: 2 },
-        'kulkas': { img: 'https://placehold.co/300x300/png?text=Kulkas+2+Pintu', name: 'Kulkas 2 Pintu Sharp', stock: 1 },
-        'tv': { img: 'https://placehold.co/300x300/png?text=Smart+TV+43"', name: 'Smart TV Samsung 43"', stock: 5 },
-        'motor': { img: 'https://placehold.co/300x300/png?text=Motor+Listrik', name: 'Sepeda Motor Listrik', stock: 0 }
-    };
-
-    const mockWinners = [
-        { nip: '19850320', name: 'Budi Santoso, S.Kom', agency: 'BAPPEDA', photo: 'https://i.pravatar.cc/150?u=1' },
-        { nip: '19901215', name: 'Siti Aminah, M.Si', agency: 'Dinas Kesehatan', photo: 'https://i.pravatar.cc/150?u=2' },
-        { nip: '19880101', name: 'Rahmat Hidayat, ST', agency: 'Dinas PU', photo: 'https://i.pravatar.cc/150?u=3' }
-    ];
-
+    // ==========================================
+    // 3. LOGIKA SLOT MACHINE (INTEGRASI LIVEWIRE)
+    // ==========================================
+    
+    // Ambil data hadiah yang dikirim dari Controller PHP
+    const prizes = @js($jsRewards); 
+    
     let intervalId;
     let isSpinning = false;
-    let currentWinner = null;
+    let currentWinner = null; // Data pemenang dari Server
     let spinAudioObject = null;
 
-    // --- 4. CORE FUNCTIONS ---
-
+    // Fungsi Ganti Hadiah (Dropdown Change)
     window.changePrize = function() {
         const select = document.getElementById('prizeSelect');
-        if(!select) return; // Safety check
+        if(!select || select.options.length === 0) return; 
 
         const val = select.value;
-        const data = prizes[val];
+        // Cek apakah data hadiah ada di array prizes
+        if(!prizes[val]) return;
+
+        const data = prizes[val]; 
         
         const imgEl = document.getElementById('prizeImage');
         const nameEl = document.getElementById('prizeNameDisplay');
@@ -320,125 +316,183 @@
         const msgStockEmpty = document.getElementById('msgStockEmpty');
         const btnStart = document.getElementById('btnStart');
 
-        imgEl.src = data.img;
-        nameEl.innerText = data.name;
-
-        if (data.stock > 0) {
+        imgEl.src = data.gambar;
+        nameEl.innerText = data.nama_hadiah;
+        
+        if (data.stok > 0) {
             btnStart.disabled = false;
-            imgEl.style.filter = "none"; // Reset filter grayscale
+            btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
+            imgEl.style.filter = "none";
+            
             if(outOfStockLabel) outOfStockLabel.classList.add('hidden');
             if(msgStockEmpty) msgStockEmpty.classList.add('hidden');
-            
-            stockBadge.innerText = "Sisa: " + data.stock;
+
+            stockBadge.innerText = "Sisa: " + data.stok;
             stockBadge.className = "bg-green-100 text-green-700 px-3 py-1 rounded-full text-lg font-bold border border-green-200 shadow-sm";
-            btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
         } else {
             btnStart.disabled = true;
+            btnStart.classList.add('opacity-50', 'cursor-not-allowed');
             imgEl.style.filter = "grayscale(100%)";
+            
             if(outOfStockLabel) outOfStockLabel.classList.remove('hidden');
             if(msgStockEmpty) msgStockEmpty.classList.remove('hidden');
-            
+
             stockBadge.innerText = "Stok Habis";
             stockBadge.className = "bg-red-100 text-red-700 px-3 py-1 rounded-full text-lg font-bold border border-red-200 shadow-sm";
-            btnStart.classList.add('opacity-50', 'cursor-not-allowed');
         }
     }
 
-    window.startSpin = function() {
+    // Fungsi Mulai Spin (Request ke Backend)
+    window.startSpin = async function() {
         const val = document.getElementById('prizeSelect').value;
-        if (prizes[val].stock <= 0) return;
-
+        if (!prizes[val] || prizes[val].stok <= 0) return;
+        
         if (isSpinning) return;
         isSpinning = true;
 
-        const slots = Array.from(document.querySelectorAll('.slot-box'));
         const btnStart = document.getElementById('btnStart');
         const btnStop = document.getElementById('btnStop');
+        const slots = Array.from(document.querySelectorAll('.slot-box'));
 
+        // 1. Reset Tampilan Angka
         slots.forEach(slot => {
             slot.classList.remove('slot-stopped');
-            slot.style.transform = "scale(1)";
             slot.innerText = "0";
+            slot.style.transform = "scale(1)";
         });
-
-        if (spinAudioObject) { spinAudioObject.pause(); }
-        spinAudioObject = window.playSoundEffect('spin'); // Pakai window.
-
-        btnStart.disabled = true;
-        btnStop.disabled = false;
-        btnStart.classList.add('opacity-50', 'cursor-not-allowed');
-        btnStop.classList.remove('opacity-50', 'cursor-not-allowed');
-
-        currentWinner = mockWinners[Math.floor(Math.random() * mockWinners.length)];
         
+        // 2. Mainkan Audio Spin
+        if (spinAudioObject) spinAudioObject.pause();
+        spinAudioObject = window.playSoundEffect('spin');
+
+        // 3. Disable Tombol Start
+        btnStart.disabled = true;
+        btnStart.classList.add('opacity-50', 'cursor-not-allowed');
+        
+        // 4. Mulai Animasi Angka Acak (Visual Saja)
         intervalId = setInterval(() => {
             slots.forEach(slot => slot.innerText = Math.floor(Math.random() * 10));
         }, 60);
+
+        // 5. Minta Data Pemenang ke Livewire (Server)
+        try {
+            // Panggil method PHP 'pickWinner'
+            // Tunggu sampai server membalas...
+            const winnerData = await $wire.pickWinner();
+
+            if (!winnerData) {
+                alert("Maaf, tidak ada peserta yang memenuhi syarat atau data kosong!");
+                location.reload(); 
+                return;
+            }
+
+            // Simpan data pemenang
+            currentWinner = winnerData;
+
+            // 6. Nyalakan Tombol Stop (Hanya setelah data diterima)
+            btnStop.disabled = false;
+            btnStop.classList.remove('opacity-50', 'cursor-not-allowed');
+
+        } catch (error) {
+            console.error("Gagal mengambil pemenang:", error);
+            alert("Terjadi kesalahan koneksi ke server.");
+            isSpinning = false;
+            btnStart.disabled = false;
+            btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
+            clearInterval(intervalId);
+            if (spinAudioObject) spinAudioObject.pause();
+        }
     }
 
+    // Fungsi Stop Spin (Menampilkan Angka Asli)
     window.stopSpinSequence = function() {
         if (!isSpinning) return;
         
         const btnStop = document.getElementById('btnStop');
-        const slots = Array.from(document.querySelectorAll('.slot-box'));
-
         btnStop.disabled = true;
         btnStop.classList.add('opacity-50', 'cursor-not-allowed');
         
+        // Hentikan acakan cepat
         clearInterval(intervalId);
 
-        const targetNumbers = currentWinner.nip.substring(0, 6).split(''); 
+        // Ambil NIP Pemenang dari Server
+        // Pastikan jadi string dan ambil 6 digit (atau sesuaikan kebutuhan)
+        const nipString = String(currentWinner.nip || '000000'); 
+        // Kita ambil 6 digit pertama. Kalau NIP panjang, sesuaikan logic substring ini.
+        // Contoh: nipString.substring(nipString.length - 6) untuk 6 digit terakhir
+        const targetNumbers = nipString.substring(0, 6).split(''); 
 
+        const slots = Array.from(document.querySelectorAll('.slot-box'));
+
+        // Loop animasi berhenti satu per satu
         slots.forEach((slot, index) => {
+            // Putar acak lokal sebentar
             let localInterval = setInterval(() => {
                 slot.innerText = Math.floor(Math.random() * 10);
             }, 60);
 
+            // Berhenti bertahap (Delay index * 1000ms)
             setTimeout(() => {
                 clearInterval(localInterval);
-                slot.innerText = targetNumbers[index];
                 
-                window.playSoundEffect('stop'); // Pakai window.
+                // Tampilkan Angka Asli NIP
+                // Jika NIP kurang dari 6 digit, tampilkan 0
+                slot.innerText = targetNumbers[index] !== undefined ? targetNumbers[index] : 0;
                 
+                window.playSoundEffect('stop');
+                
+                // Efek visual
                 slot.classList.add('slot-stopped'); 
                 slot.style.transform = "scale(1.2)";
                 setTimeout(() => slot.style.transform = "scale(1)", 150);
 
+                // Jika ini slot terakhir (Selesai)
                 if (index === slots.length - 1) {
                     isSpinning = false;
                     if (spinAudioObject) spinAudioObject.pause(); 
-                    setTimeout(() => window.showModal(), 1000); // Pakai window.
+                    
+                    // Tampilkan Modal Pemenang
+                    setTimeout(() => window.showModal(), 1000);
                 }
             }, index * 1000); 
         });
     }
 
+    // ==========================================
+    // 4. MODAL & KONFIRMASI
+    // ==========================================
+
     window.showModal = function () {
-        window.playSoundEffect('win'); // Pakai window.
-        window.fireConfetti(); // Pakai window.
+        window.playSoundEffect('win'); 
+        window.fireConfetti();
 
         const modal = document.getElementById('winnerModal');
-        
+        const prizeVal = document.getElementById('prizeSelect').value;
+        const dataHadiah = prizes[prizeVal];
+
+        // Isi data modal dari currentWinner (Server)
         document.getElementById('winnerPhoto').src = currentWinner.photo;
         document.getElementById('winnerName').innerText = currentWinner.name;
         document.getElementById('winnerNip').innerText = "NIP: " + currentWinner.nip;
         document.getElementById('winnerAgency').innerText = currentWinner.agency;
         
-        const prizeVal = document.getElementById('prizeSelect').value;
-        document.getElementById('winnerPrize').innerText = prizes[prizeVal].name;
+        document.getElementById('winnerPrize').innerText = dataHadiah.name;
         
-        const currentStock = prizes[prizeVal].stock;
+        // Info stok sementara (visual)
+        const currentStock = dataHadiah.stok;
         document.getElementById('modalStockInfo').innerText = "Sisa stok saat ini: " + currentStock + " (Akan berkurang jika ditetapkan)";
 
         modal.classList.remove('hidden');
     }
 
+    // Tombol "Tetapkan Pemenang" (Simpan ke DB)
     window.confirmWinner = function () {
         const val = document.getElementById('prizeSelect').value;
-        if (prizes[val].stock > 0) {
-            prizes[val].stock--; 
-            window.changePrize(); 
-        }
+        const prizeId = prizes[val].id;
+        
+        // Panggil Livewire untuk simpan permanen & kurangi stok
+        $wire.saveWinner(currentWinner.id, prizeId);
+        
         window.closeModal();
     }
 
@@ -457,7 +511,8 @@
         const btnStop = document.getElementById('btnStop');
         const val = document.getElementById('prizeSelect').value;
         
-        if (prizes[val].stock > 0) {
+        // Cek stok lagi dari data JS (walaupun belum refresh, minimal visual benar)
+        if (prizes[val] && prizes[val].stok > 0) {
             btnStart.disabled = false;
             btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
         }
@@ -465,7 +520,11 @@
         btnStop.classList.add('opacity-50', 'cursor-not-allowed');
     }
 
-    // Init Logic
+    // ==========================================
+    // 5. INIT PERTAMA KALI
+    // ==========================================
+    // Jalankan sekali saat halaman dimuat untuk set gambar awal
     window.changePrize();
+
 </script>
 @endscript
