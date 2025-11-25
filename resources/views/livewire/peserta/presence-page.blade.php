@@ -276,7 +276,7 @@
         <!-- Checkbox Agreement -->
         <div class="mb-4">
             <label class="flex items-start gap-2 cursor-pointer">
-                <input type="checkbox" class="mt-1" wire:model="agreement">
+                <input type="checkbox" class="mt-1" wire:model.live="agreement">
                 <div class="flex flex-col text-gray-600 text-xs leading-relaxed">
                     <span class="font-semibold">Saya yakin data tersebut sudah benar.</span>
                     <span>
