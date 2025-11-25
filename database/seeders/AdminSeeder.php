@@ -19,17 +19,15 @@ class AdminSeeder extends Seeder
         // Buat Akun Admin Utama
         User::create([
             'nama' => 'Super Admin Korpri',
-            'email' => 'admin@korpri.id',
-            'password' => Hash::make('password'), // Password default: 'password'
-            'email_verified_at' => now(),
+            'username' => 'admin',
+            'password' => Hash::make('admin'), 
         ]);
 
         // Buat Akun Cadangan (Misal untuk Operator)
         User::create([
             'nama' => 'Operator Undian',
-            'email' => 'operator@korpri.id',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
+            'username' => 'operator',
+            'password' => Hash::make('operator'),
         ]);
     }
 }

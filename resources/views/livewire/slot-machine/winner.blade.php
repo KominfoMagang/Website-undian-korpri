@@ -39,7 +39,7 @@
                         class="w-full h-full rounded-full object-cover p-1">
                 </div>
                 <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">{{ $juara2->participant->nama }}</h3>
-                <p class="text-sm font-semibold text-slate-500 mb-3">{{ $juara2->participant->nip }}</p>
+                <p class="text-sm font-semibold text-slate-500 mb-3">Kode kupon : {{ $juara2->coupon->kode_kupon }}</p>
                 <div
                     class="inline-block bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">
                     {{ $juara2->participant->unit_kerja }}
@@ -81,7 +81,7 @@
                     </div>
                 </div>
                 <h3 class="text-2xl font-black text-blue-900 leading-tight mb-1">{{ $juara1->participant->nama }}</h3>
-                <p class="text-sm font-semibold text-slate-500 mb-4">{{ $juara1->participant->nip }}</p>
+                <p class="text-sm font-semibold text-slate-500 mb-4">Kode kupon : {{ $juara1->coupon->kode_kupon }}</p>
                 <div
                     class="inline-block bg-yellow-50 text-yellow-800 px-4 py-1.5 rounded-full text-sm font-bold border border-yellow-200 mb-4">
                     {{ $juara1->participant->unit_kerja }}
@@ -118,7 +118,7 @@
                         class="w-full h-full rounded-full object-cover p-1">
                 </div>
                 <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">{{ $juara3->participant->nama }}</h3>
-                <p class="text-sm font-semibold text-slate-500 mb-3">{{ $juara3->participant->nip }}</p>
+                <p class="text-sm font-semibold text-slate-500 mb-3">Kode kupon : {{ $juara3->coupon->kode_kupon }}</p>
                 <div
                     class="inline-block bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">
                     {{ $juara3->participant->unit_kerja }}
@@ -160,7 +160,7 @@
                     <h4 class="text-blue-900 font-bold truncate group-hover:text-blue-600 transition-colors">
                         {{ $winner->participant->nama }}
                     </h4>
-                    <p class="text-xs text-slate-500 font-mono mb-1">{{ $winner->participant->nip }}</p>
+                    <p class="text-xs text-slate-500 font-mono mb-1">Kode kupon : {{ $winner->coupon->kode_kupon }}</p>
                     <div class="flex items-center justify-between">
                         <span
                             class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded truncate max-w-[100px]">
