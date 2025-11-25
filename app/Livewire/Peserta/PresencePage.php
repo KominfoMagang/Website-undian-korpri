@@ -11,7 +11,7 @@ class PresencePage extends Component
 {
     use WithFileUploads;
 
-    #[Layout('components.layouts.peserta')]
+    #[Layout('components.layouts.pages-peserta.peserta')]
 
     public $title = "Presence page";
     public $nip = '';
@@ -20,6 +20,20 @@ class PresencePage extends Component
 
     #[Validate('required|image|max:2048')]
     public $photo;
+
+    public $detailData = [];
+    public $agreement = false;
+
+    public $locationGranted = false;
+    public $locationErrorMessage = '';
+
+    public $userLat;
+    public $userLng;
+
+    // titik pusat acara (bisa pindah ke config/env)
+    public $centerLat = -7.228483513036513;
+    public $centerLng = 108.17018006490862;
+    public $radiusMeters = 500;
 
     public $validNips = [
         '123456789012345678' => [
@@ -32,13 +46,9 @@ class PresencePage extends Component
         ]
     ];
 
-    public $detailData = [];
-
     public function updated($propertyName)
     {
         if ($propertyName === 'nip') {
-
-            // reset state
             $this->showDetails = false;
             $this->errorMessage = '';
             $this->detailData = [];
@@ -53,13 +63,12 @@ class PresencePage extends Component
     public function validateNip()
     {
         if (isset($this->validNips[$this->nip])) {
-
             $this->showDetails = true;
             $this->errorMessage = '';
 
             $this->detailData = [
-                'nama' => $this->validNips[$this->nip]['nama'],
-                'nip' => $this->nip,
+                'nama'       => $this->validNips[$this->nip]['nama'],
+                'nip'        => $this->nip,
                 'unit_kerja' => $this->validNips[$this->nip]['unit_kerja']
             ];
         } else {
@@ -68,16 +77,110 @@ class PresencePage extends Component
         }
     }
 
+    public function checkLocation($lat, $lng)
+    {
+        $this->userLat = $lat;
+        $this->userLng = $lng;
+
+        $distance = $this->calculateDistanceMeters(
+            $this->centerLat,
+            $this->centerLng,
+            $lat,
+            $lng
+        );
+
+        if ($distance <= $this->radiusMeters) {
+            $this->locationGranted = true;
+            $this->locationErrorMessage = '';
+
+            // Reload halaman untuk menampilkan form
+            $this->dispatch('location-granted');
+        } else {
+            $this->locationGranted = false;
+            $this->locationErrorMessage = 'Anda berada di luar area yang diizinkan (' . round($distance) . ' meter).';
+
+            // Dispatch event ke Alpine.js untuk menampilkan overlay denied
+            $this->dispatch('location-denied');
+        }
+    }
+
+    public function locationFailed($code)
+    {
+        $this->locationGranted = false;
+
+        $errorMessages = [
+            1 => 'Akses lokasi ditolak. Mohon izinkan akses lokasi untuk melanjutkan.',
+            2 => 'Posisi tidak tersedia. Pastikan GPS aktif.',
+            3 => 'Waktu permintaan lokasi habis. Silakan coba lagi.'
+        ];
+
+        $this->locationErrorMessage = $errorMessages[$code] ?? 'Lokasi tidak dapat diakses dari perangkat Anda.';
+
+        // Dispatch event untuk menampilkan overlay denied
+        $this->dispatch('location-denied');
+    }
+
+    /**
+     * Haversine formula untuk hitung jarak 2 titik (meter)
+     */
+    private function calculateDistanceMeters($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371000; // meter
+
+        $lat1 = deg2rad($lat1);
+        $lon1 = deg2rad($lon1);
+        $lat2 = deg2rad($lat2);
+        $lon2 = deg2rad($lon2);
+
+        $latDelta = $lat2 - $lat1;
+        $lonDelta = $lon2 - $lon1;
+
+        $a = sin($latDelta / 2) ** 2 +
+            cos($lat1) * cos($lat2) *
+            sin($lonDelta / 2) ** 2;
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
+    }
+
+
     public function klaimKupon()
     {
-        $this->validateOnly('photo');
+        // Pastikan posisi sudah dicek & di dalam radius
+        if (!$this->locationGranted) {
+            $this->addError('location', 'Anda harus berada di area acara untuk mengklaim kupon.');
+            return;
+        }
 
-        if ($this->showDetails) {
+        // Validasi agreement checkbox
+        if (!$this->agreement) {
+            $this->addError('agreement', 'Anda harus menyetujui pernyataan terlebih dahulu.');
+            return;
+        }
 
-            $filename = $this->nip . '-' . time() . '.jpg';
-            $this->photo->storeAs('selfies', $filename);
+        // Validasi foto
+        $this->validate([
+            'photo' => 'required|image|max:2048'
+        ], [
+            'photo.required' => 'Foto selfie wajib diupload.',
+            'photo.image' => 'File harus berupa gambar.',
+            'photo.max' => 'Ukuran foto maksimal 2MB.'
+        ]);
 
-            session()->flash('success', 'Kupon berhasil diklaim & foto tersimpan!');
+        if ($this->showDetails && $this->photo) {
+            try {
+                // Simpan foto
+                $filename = $this->nip . '-' . time() . '.' . $this->photo->getClientOriginalExtension();
+                $this->photo->storeAs('selfies', $filename, 'public');
+
+                session()->flash('success', 'Kupon berhasil diklaim & foto tersimpan!');
+
+                return redirect()->route('halamanKupon');
+            } catch (\Exception $e) {
+                $this->addError('system', 'Terjadi kesalahan sistem. Silakan coba lagi.');
+                return;
+            }
         }
     }
 
