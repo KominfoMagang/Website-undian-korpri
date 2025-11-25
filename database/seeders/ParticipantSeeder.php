@@ -47,7 +47,7 @@ class ParticipantSeeder extends Seeder
         foreach (range(1, 50) as $i) {
             Participant::create([
                 'nama' => $faker->name,
-                'nip' => $faker->unique()->numerify('19##########1###'),
+                'nip' => $faker->unique()->numerify('19##########1#####'),
                 'unit_kerja' => $faker->randomElement($units),
                 'foto' => null,
                 'status_hadir' => 'Tidak hadir',
@@ -59,7 +59,7 @@ class ParticipantSeeder extends Seeder
         foreach (range(1, 5) as $i) {
             $participant = Participant::create([
                 'nama' => $faker->name,
-                'nip' => $faker->unique()->numerify('19##########1###'),
+                'nip' => $faker->unique()->numerify('19##########1#####'),
                 'unit_kerja' => $faker->randomElement($units),
                 'foto' => null,
                 'status_hadir' => 'Hadir',
