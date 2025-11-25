@@ -3,114 +3,158 @@
     {{-- ================== CEK LOKASI DALAM RADIUS ================== --}}
     @if (!$locationGranted)
         <!-- ================= OVERLAY LOADING (Meminta Akses Lokasi) ================= -->
-        <div x-show="showLoading" x-transition class="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+        <div x-show="showLoading" x-transition
+            class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm">
+            <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-xs w-full mx-4">
+                <div class="flex justify-center mb-5">
+                    <div class="relative">
+                        <div class="w-12 h-12 border-4 border-blue-200 rounded-full"></div>
+                        <div
+                            class="w-12 h-12 border-4 border-blue-600 rounded-full animate-spin absolute top-0 left-0 border-t-transparent">
+                        </div>
+                    </div>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-1">Melacak Lokasi...</h3>
+                <p class="text-gray-500 text-sm">Mohon izinkan akses lokasi.</p>
+            </div>
+        </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-lg text-center max-w-xs w-full mx-4">
+        {{-- ================== 2. OVERLAY LOKASI DITOLAK / ERROR / DI LUAR RADIUS ================== --}}
+        <div x-show="showDenied" x-cloak x-transition
+            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+            <div class="bg-white p-6 rounded-2xl shadow-xl text-center max-w-sm w-full mx-4 relative overflow-hidden">
 
-                <!-- Spinner -->
-                <div class="flex justify-center mb-4">
-                    <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                            stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
-                        </path>
-                    </svg>
+                <img src="{{ asset('static/images/deniedLocation.png') }}" alt="Location Denied"
+                    class="w-32 mx-auto mb-4 drop-shadow-md"
+                    onerror="this.onerror=null; this.src='{{ asset('static/images/deniedLocation.png') }}';">
+
+                <h3 class="text-xl font-bold text-gray-800 leading-tight mb-2">
+                    <span x-text="isPermDenied ? 'Akses Ditolak' : 'Lokasi Tidak Sesuai'"></span>
+                </h3>
+                <p class="text-gray-600 text-sm mb-4 px-2 leading-relaxed" x-text="deniedMessage"></p>
+
+                {{-- ============================================================ --}}
+                {{-- PANDUAN KHUSUS (Hanya muncul jika Browser BLOCK akses) --}}
+                {{-- ============================================================ --}}
+                <div x-show="isPermDenied"
+                    class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-5 text-left animate-fade-in-down">
+                    <p class="text-xs font-bold text-blue-800 mb-2 flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                            </path>
+                        </svg>
+                        Cara Mengaktifkan Izin:
+                    </p>
+                    <ol class="list-decimal ml-4 text-[11px] text-blue-700 space-y-1.5 font-medium">
+                        <li>Klik ikon <strong>Gembok (🔒)</strong> / Pengaturan di bar alamat browser.</li>
+                        <li>Klik menu <strong>Izin / Permissions</strong>.</li>
+                        <li>Aktifkan saklar <strong>Lokasi / Location</strong>.</li>
+                        <li>Lalu klik tombol <strong>Refresh Halaman</strong> di bawah.</li>
+                    </ol>
                 </div>
 
-                <h3 class="text-lg font-semibold text-gray-800 mb-1">
-                    Meminta Akses Lokasi
-                </h3>
+                {{-- TOMBOL AKSI --}}
+                <button @click="retryLocation()"
+                    class="w-full text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transform active:scale-95 transition flex items-center justify-center gap-2"
+                    :class="isPermDenied ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#5065A4] hover:opacity-90'">
 
-                <p class="text-gray-600 text-sm">
-                    Mohon izinkan akses lokasi untuk melanjutkan.
-                </p>
+                    {{-- Ikon Refresh (Muncul jika Blocked) --}}
+                    <svg x-show="isPermDenied" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
 
-                @if ($locationErrorMessage)
-                    <p class="text-red-600 text-sm mt-3 font-semibold whitespace-pre-line">
-                        {{ $locationErrorMessage }}
-                    </p>
-                @endif
-            </div>
+                    {{-- Ikon Pin (Muncul jika Di Luar Radius/GPS Error) --}}
+                    <svg x-show="!isPermDenied" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
 
-        </div>
-
-
-        <!-- ================= OVERLAY LOKASI DITOLAK ATAU DI LUAR RADIUS ================= -->
-        <div x-show="showDenied" x-transition class="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-
-            <div class="bg-white p-6 rounded-2xl shadow-lg text-center max-w-xs w-full mx-4">
-
-                <!-- Illustration -->
-                <img src="{{ asset('static/images/deniedLocation.png') }}" alt="Location Denied"
-                    class="w-40 mx-auto mb-4"
-                    onerror="this.onerror=null; this.src='{{ asset('images/deniedLocation.png') }}';">
-
-                <!-- Title -->
-                <h3 class="text-lg font-bold text-gray-800 leading-relaxed mb-1">
-                    hmmm... Kamu tidak di lokasi<br>Balekota Tasikmalaya
-                </h3>
-
-                <!-- Subtitle -->
-                <p class="text-gray-600 text-sm mb-6">
-                    Absensi kehadiran harus di dalam lingkungan balekota Tasikmalaya
-                </p>
-
-                <!-- Button -->
-                <button @click="requestLocation()"
-                    class="bg-[#5065A4] text-white px-5 py-2.5 rounded-xl w-full font-semibold hover:opacity-90 transition">
-                    Cek Lokasi Lagi
+                    {{-- Teks Tombol Berubah Sesuai Kondisi --}}
+                    <span x-text="isPermDenied ? 'Refresh Halaman' : 'Cek Lokasi Lagi'"></span>
                 </button>
             </div>
-
         </div>
 
-
-        <!-- ================= SCRIPT ALPINE.JS ================= -->
+        {{-- ================= SCRIPT ALPINE.JS ================= --}}
         <script>
-            navigator.geolocation.getCurrentPosition(
-                function(pos) {
-                    console.log("Latitude :", pos.coords.latitude);
-                    console.log("Longitude:", pos.coords.longitude);
-                },
-                function(err) {
-                    console.log("Error:", err.message);
-                }
-            );
-
             function locationHandler() {
                 return {
                     showLoading: true,
                     showDenied: false,
+                    isPermDenied: false, 
+                    deniedMessage: '',
 
                     init() {
-                        // Listen untuk event dari Livewire
-                        window.addEventListener('location-denied', () => {
+                        window.addEventListener('location-radius-error', () => {
                             this.showLoading = false;
                             this.showDenied = true;
+                            this.isPermDenied = false;
+                            this.deniedMessage =
+                                'Kamu berada di luar radius lokasi acara. Silakan merapat ke titik lokasi.';
                         });
 
-                        // Otomatis request lokasi saat load
-                        this.requestLocation();
+                        window.addEventListener('permission-blocked', () => {
+                            this.handlePermissionDenied();
+                        });
+
+                        window.addEventListener('location-system-error', () => {
+                            this.showLoading = false;
+                            this.showDenied = true;
+                            this.isPermDenied = false;
+                            this.deniedMessage = 'Gagal mendapatkan posisi. Pastikan GPS aktif dan sinyal bagus.';
+                        });
+
+                        // Cek permission awal saat load
+                        if (navigator.permissions && navigator.permissions.query) {
+                            navigator.permissions.query({
+                                name: 'geolocation'
+                            }).then((result) => {
+                                if (result.state === 'denied') {
+                                    this.handlePermissionDenied();
+                                } else {
+                                    this.requestLocation();
+                                }
+                            });
+                        } else {
+                            this.requestLocation();
+                        }
+                    },
+
+                    retryLocation() {
+                        if (this.isPermDenied) {
+                            window.location.reload();
+                        } else {
+                            this.requestLocation();
+                        }
                     },
 
                     requestLocation() {
                         this.showDenied = false;
                         this.showLoading = true;
+                        this.isPermDenied = false;
 
                         if ("geolocation" in navigator) {
                             navigator.geolocation.getCurrentPosition(
                                 (pos) => {
-                                    // Kirim ke Livewire untuk validasi
                                     @this.call('checkLocation', pos.coords.latitude, pos.coords.longitude);
                                 },
                                 (error) => {
-                                    // User menolak atau error
+                                    // GAGAL -> Tangani di JS dulu
                                     console.error('Geolocation error:', error);
-                                    this.showLoading = false;
-                                    this.showDenied = true;
 
-                                    @this.call('locationFailed', error.code);
+                                    if (error.code === 1) {
+                                        this.handlePermissionDenied();
+                                        @this.call('locationFailed', 1);
+                                    } else {
+                                        // Error lain kirim ke PHP biar PHP yang dispatch 'location-system-error'
+                                        @this.call('locationFailed', error.code);
+                                    }
                                 }, {
                                     enableHighAccuracy: true,
                                     timeout: 10000,
@@ -118,11 +162,19 @@
                                 }
                             );
                         } else {
-                            alert("Browser tidak mendukung GPS");
                             this.showLoading = false;
                             this.showDenied = true;
+                            this.deniedMessage = "Browser tidak mendukung GPS";
                         }
-                    }
+                    },
+
+                    handlePermissionDenied() {
+                        // Logika UI untuk Blocked
+                        this.showLoading = false;
+                        this.showDenied = true;
+                        this.isPermDenied = true;
+                        this.deniedMessage = "Akses lokasi diblokir browser. Anda perlu mengizinkannya secara manual.";
+                    },
                 }
             }
         </script>
@@ -140,7 +192,7 @@
         <div class="mb-4">
             <input type="text" inputmode="numeric" pattern="[0-9]{18}" wire:model.live.debounce.250ms="nip"
                 maxlength="18" placeholder="Masukkan NIP kamu"
-                class="w-full border-2 border-gray-300 rounded-lg p-3 text-sm font-semibold focus:border-blue-500 focus:outline-none transition-colors @error('nip') border-red-500 @enderror">
+                class="w-full border-2 border-gray-300 rounded-lg p-3 text-sm font-semibold focus:border-blue-500 focus:outline-none transition-colors @error('nip') @enderror">
 
             <!-- Error Message -->
             @if ($errorMessage)
