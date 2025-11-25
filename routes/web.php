@@ -9,9 +9,8 @@ use Illuminate\Support\Facades\Route;
 // });
 
 
+// PresencePage adalah halaman login
 Route::get('/', PresencePage::class);
+Route::get('/halaman-kupon', RaffleTicketPage::class)->name('halamanKupon');
 
 require __DIR__ . '/slot-machine.php';
-// PresencePage adalah halaman login
-Route::get('/', PresencePage::class); 
-Route::get('/halaman-kupon', RaffleTicketPage::class)->name('halamanKupon');
