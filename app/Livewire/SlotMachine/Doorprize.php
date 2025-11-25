@@ -18,8 +18,11 @@ class Doorprize extends Component
     {
         $calon = Participant::where('sudah_menang', false)
             ->whereHas('coupons', function ($q) {
-                $q->where('status_kupon', 'Aktif'); // Pastikan punya kupon aktif
+                $q->where('status_kupon', 'Aktif');
             })
+            ->with(['coupons' => function ($q) {
+                $q->where('status_kupon', 'Aktif');
+            }])
             ->inRandomOrder()
             ->first();
 
@@ -27,11 +30,12 @@ class Doorprize extends Component
             return null;
         }
 
-        $kupon = $calon->coupons()->where('status_kupon', 'Aktif')->first()->kode_kupon;
+        $kuponObj = $calon->coupons->first();
+        $kodeKupon = $kuponObj ? $kuponObj->kode_kupon : 'ERR-NO-COUPON';
 
         return [
             'id' => $calon->id,
-            'kode_kupon' => $kupon,
+            'kode_kupon' => $kodeKupon,
             'nama' => $calon->nama,
             'unit_kerja' => $calon->unit_kerja,
             'foto' => $calon->foto ? asset('storage/' . $calon->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($calon->nama),
@@ -48,29 +52,30 @@ class Doorprize extends Component
             Winner::create([
                 'participant_id' => $peserta->id,
                 'reward_id' => $reward->id,
-                'coupon_id' => $kupon->id,
+                'coupon_id' => $kupon ? $kupon->id : null,
             ]);
 
             $peserta->update(['sudah_menang' => true]);
+
             if ($kupon) {
                 $kupon->update(['status_kupon' => 'Kadaluarsa']);
             }
+
             $reward->decrement('stok');
 
-            return redirect()->route('slot-machine.undian');
+            $this->dispatch('pemenang-tersimpan');
         }
     }
 
     public function render()
     {
         $rewards = Reward::where('status_hadiah', 'Aktif')
-            ->where('stok', '>', 0)
             ->get()
             ->mapWithKeys(function ($item) {
                 return [$item->id => [
                     'id' => $item->id,
                     'nama_hadiah' => $item->nama_hadiah,
-                    'gambar' => $item->gambar ? asset('storage/' . $item->gambar) : 'https://placehold.co/300x300/png?text=No+Image',
+                    'gambar' => $item->gambar ? asset('storage/reward/' . $item->gambar) : 'https://placehold.co/300x300/png?text=No+Image',
                     'stok' => $item->stok
                 ]];
             });

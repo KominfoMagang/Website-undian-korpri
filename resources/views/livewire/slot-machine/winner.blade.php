@@ -163,7 +163,7 @@
                     <p class="text-xs text-slate-500 font-mono mb-1">Kode kupon : {{ $winner->coupon->kode_kupon }}</p>
                     <div class="flex items-center justify-between">
                         <span
-                            class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded truncate max-w-[100px]">
+                            class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded truncate max-w-[200px]">
                             {{ $winner->participant->unit_kerja }}
                         </span>
                         <span class="text-sm font-bold text-yellow-600 text-right truncate ml-2">
