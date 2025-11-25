@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('participant_id')->constrained('participants')->cascadeOnDelete();
             $table->string('kode_kupon')->unique()->index();
-            $table->enum('status_kupon', ['Belum Digunakan', 'Menang', 'Hangus'])
-                ->default('Belum Digunakan')
+            $table->enum('status_kupon', ['Aktif', 'Kadaluarsa'])
+                ->default('Aktif')
                 ->index();
             $table->timestamps();
         });
