@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Peserta\PresencePage;
+use App\Livewire\Peserta\RaffleTicketPage;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -8,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 // });
 
 
+// PresencePage adalah halaman login
 Route::get('/', PresencePage::class);
 
 Route::get('/admin/login', function () {
@@ -17,3 +19,6 @@ Route::get('/admin/login', function () {
 Route::get('/admin/test', function () {
     return view('livewire.admin.dashboard-page'); 
 });
+Route::get('/halaman-kupon', RaffleTicketPage::class)->name('halamanKupon');
+
+require __DIR__ . '/slot-machine.php';
