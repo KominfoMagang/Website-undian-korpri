@@ -40,10 +40,6 @@
                                         </svg>
                                     </button>
                                 </div>
-
-                                <div class="text-muted" style="font-size: 1.2rem; color: #555 !important;">
-                                    Peserta terdaftar : <strong>-</strong> orang
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -73,6 +69,7 @@
                                         <th>Nama & Deskripsi</th>
                                         <th>Gambar</th>
                                         <th>Urutan Pengundian</th>
+                                        <th>Stok</th>
                                         <th style="text-align:center;">Aksi</th>
                                     </tr>
                                 </thead>
@@ -107,6 +104,12 @@
                             <div class="mb-3">
                                 <label class="form-label">Deskripsi (opsional)</label>
                                 <textarea class="form-control" id="deskripsiHadiah" rows="3" placeholder="Deskripsi singkat hadiah..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="inputStok" class="form-label">Stok</label>
+                                <input type="number" class="form-control" id="inputStok" name="stok" min="0"
+                                    placeholder="Masukkan jumlah stok...">
                             </div>
 
                             <div class="mb-3">
@@ -149,27 +152,42 @@
                     // Data hadiah
                     let hadiahList = [];
                     let currentImageData = null;
+                    let isEditMode = false; // Status untuk mode Edit
+                    let editingHadiahId = null; // ID hadiah yang sedang diedit
 
-                    // Fungsi buka modal (DIKOREKSI NAMANYA)
-                    function openHadiahModal() {
+                    // Fungsi buka modal
+                    function openHadiahModal(isEdit = false) {
                         document.getElementById('modalHadiahOverlay').classList.add('active');
-                        resetForm();
-                        renderTable(); // Memastikan tabel di dashboard ter-render ulang
+                        if (!isEdit) {
+                            resetForm();
+                            isEditMode = false;
+                            document.querySelector('.modal-header h3').textContent = 'Tambah Hadiah Baru';
+                            document.querySelector('.modal-body button.btn-primary').textContent = 'Simpan';
+                        }
                     }
 
                     // Fungsi tutup modal
                     function closeHadiahModal() {
                         document.getElementById('modalHadiahOverlay').classList.remove('active');
                         resetForm();
+                        isEditMode = false;
+                        editingHadiahId = null;
                     }
 
                     // Fungsi reset form
                     function resetForm() {
                         document.getElementById('namaHadiah').value = '';
                         document.getElementById('deskripsiHadiah').value = '';
+
+                        const inputStokElement = document.getElementById('inputStok');
+                        if (inputStokElement) {
+                            inputStokElement.value = '';
+                        }
+
                         currentImageData = null;
                         document.getElementById('uploadPlaceholder').style.display = 'block';
                         document.getElementById('previewArea').style.display = 'none';
+
                         if (document.getElementById('fileInput')) {
                             document.getElementById('fileInput').value = '';
                         }
@@ -213,7 +231,37 @@
                         document.getElementById('fileInput').value = '';
                     }
 
-                    // Fungsi simpan hadiah
+                    // 🆕 FUNGSI BARU: Mengisi form dengan data hadiah untuk Edit
+                    function editHadiah(id) {
+                        const hadiahToEdit = hadiahList.find(h => h.id === id);
+                        if (!hadiahToEdit) return;
+
+                        resetForm();
+                        isEditMode = true;
+                        editingHadiahId = id;
+
+                        // Isi data ke dalam form
+                        document.getElementById('namaHadiah').value = hadiahToEdit.nama;
+                        document.getElementById('deskripsiHadiah').value = hadiahToEdit.deskripsi;
+                        document.getElementById('inputStok').value = hadiahToEdit.stok;
+
+                        // Isi data gambar jika ada
+                        if (hadiahToEdit.gambar) {
+                            currentImageData = hadiahToEdit.gambar;
+                            document.getElementById('previewImage').src = currentImageData;
+                            document.getElementById('uploadPlaceholder').style.display = 'none';
+                            document.getElementById('previewArea').style.display = 'block';
+                        }
+
+                        // Ubah judul modal dan tombol
+                        document.querySelector('.modal-header h3').textContent = 'Edit Hadiah';
+                        document.querySelector('.modal-body button.btn-primary').textContent = 'Perbarui';
+
+                        openHadiahModal(true);
+                    }
+
+
+                    // Fungsi simpan hadiah (MENANGANI TAMBAH DAN EDIT)
                     function saveHadiah() {
                         const nama = document.getElementById('namaHadiah').value.trim();
 
@@ -222,19 +270,36 @@
                             return;
                         }
 
-                        const hadiah = {
-                            id: Date.now(),
+                        const stokValue = document.getElementById('inputStok').value.trim();
+                        const stok = parseInt(stokValue, 10) || 0;
+
+                        const dataHadiahBaru = {
                             nama: nama,
                             deskripsi: document.getElementById('deskripsiHadiah').value.trim(),
-                            gambar: currentImageData
+                            gambar: currentImageData,
+                            stok: stok
                         };
 
-                        hadiahList.push(hadiah);
+                        if (isEditMode && editingHadiahId) {
+                            // Mode EDIT: Cari dan Perbarui data lama
+                            const index = hadiahList.findIndex(h => h.id === editingHadiahId);
+                            if (index !== -1) {
+                                hadiahList[index] = {
+                                    ...hadiahList[index],
+                                    ...dataHadiahBaru
+                                };
+                            }
+                        } else {
+                            // Mode TAMBAH BARU
+                            const hadiah = {
+                                id: Date.now(),
+                                ...dataHadiahBaru
+                            };
+                            hadiahList.push(hadiah);
+                        }
+
                         renderTable();
                         closeHadiahModal();
-
-                        // Optional: Tampilkan notifikasi sukses
-                        // alert('Hadiah berhasil ditambahkan!'); // Dihapus agar tidak mengganggu
                     }
 
                     // Fungsi hapus hadiah
@@ -245,7 +310,7 @@
                         }
                     }
 
-                    // Fungsi render tabel
+                    // Fungsi render tabel (SUDAH TERMASUK TOMBOL EDIT)
                     function renderTable() {
                         const tbody = document.getElementById('hadiahTableBody');
 
@@ -263,40 +328,48 @@
                         emptyState.style.display = 'none';
 
                         const newRows = hadiahList.map((hadiah, index) => `
-                                    <tr>
-                                        <td>${index + 1}.</td>
-                                        <td>
-                                            <div style="font-weight:600;">${hadiah.nama}</div>
-                                            ${hadiah.deskripsi ? `<div class="text-muted small">${hadiah.deskripsi}</div>` : ''}
-                                        </td>
-                                        <td>
-                                            ${hadiah.gambar 
-                                                ? `<img src="${hadiah.gambar}" class="prize-image" alt="${hadiah.nama}">` 
-                                                : `<div style="max-width:120px; height:80px; border-radius:8px; background:#e6e9ee; display:flex; align-items:center; justify-content:center; color:#6c757d; font-size:12px;">No Image</div>`
-                                            }
-                                        </td>
-                                        <td>
-                                            <div style="background:#fff; border-radius:16px; padding:6px 12px; box-shadow:0 6px 20px rgba(0,0,0,0.06); display:inline-block;">
-                                                Urutan ke-${index + 1}
-                                            </div>
-                                        </td>
-                                        <td style="text-align:center;">
-                                            <button class="btn btn-sm btn-danger" onclick="deleteHadiah(${hadiah.id})" title="Hapus">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                </svg>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                `).join('');
+            <tr>
+                <td>${index + 1}.</td>
+                <td>
+                    <div style="font-weight:600;">${hadiah.nama}</div>
+                    ${hadiah.deskripsi ? `<div class="text-muted small">${hadiah.deskripsi}</div>` : ''}
+                </td>
+                <td>
+                    ${hadiah.gambar 
+                        ? `<img src="${hadiah.gambar}" class="prize-image" alt="${hadiah.nama}" style="max-width:120px; height:80px; object-fit: cover; border-radius: 4px;">` 
+                        : `<div style="max-width:120px; height:80px; border-radius:8px; background:#e6e9ee; display:flex; align-items:center; justify-content:center; color:#6c757d; font-size:12px;">No Image</div>`
+                    }
+                </td>
+                <td>
+                    <div style="background:#fff; border-radius:16px; padding:6px 12px; box-shadow:0 6px 20px rgba(0,0,0,0.06); display:inline-block;">
+                        Urutan ke-${index + 1}
+                    </div>
+                </td>
+                
+                <td style="font-weight: 600;">${hadiah.stok}</td> 
+                
+                <td style="text-align:center; display: flex; gap: 5px; justify-content: center; align-items: center; padding-top: 15px;">
+                    <button class="btn btn-sm btn-info" onclick="editHadiah(${hadiah.id})" title="Edit" 
+                        style="background: #206bc4; border-color: #206bc4; color: white;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4l-7 7l-1.5 1.5l7 7l1.5 -1.5l7 -7l-7 -7z" />
+                            <path d="M15 6l3 3" />
+                        </svg>
+                    </button>
+                    
+                    <button class="btn btn-sm btn-danger" onclick="deleteHadiah(${hadiah.id})" title="Hapus">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
 
                         // Menambahkan baris baru setelah emptyState
                         emptyState.insertAdjacentHTML('afterend', newRows);
                     }
-
-                    // Menghapus fungsi getOrdinalSuffix karena sudah diubah menjadi 'Urutan ke-'
-                    // function getOrdinalSuffix(num) { ... }
 
                     // Tutup modal jika klik di luar
                     document.getElementById('modalHadiahOverlay').addEventListener('click', function(e) {
