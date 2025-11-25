@@ -178,7 +178,7 @@ class PresencePage extends Component
         return $this->photo->storeAs('selfies', $filename, 'public');
     }
 
-    // Perlu dicek lagi.
+    // Race condition klaim kupon perlu dicek
     private function generateUniqueCoupon(Participant $participant)
     {
         $attempts = 0;
