@@ -17,8 +17,8 @@ class PresencePage extends Component
 {
     use WithFileUploads;
 
-    protected const CENTER_LAT = -7.316538442400661;
-    protected const CENTER_LNG = 108.19675248829186;
+    protected const CENTER_LAT = -7.311787177703361;
+    protected const CENTER_LNG = 108.19932506578725;
     protected const RADIUS_METERS = 500;
     protected const EARTH_RADIUS = 6371000;
 
