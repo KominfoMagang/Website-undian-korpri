@@ -1,12 +1,13 @@
 <div>
     <div class="w-full max-w-[420px]">
-        <div class="bg-[#DDE2FF] rounded-3xl  overflow-hidden mb-6">
+        <div class="bg-[#DDE2FF] rounded-3xl  mb-6 relative mt-12">
+            <div class="absolute -top-16 left-1/2 -translate-x-1/2">
+                <img src="{{ $detailData['fotoSelfie'] }}" alt="Selfie {{ $detailData['nama'] ?? 'Peserta' }}"
+                    class="w-32 h-32 rounded-full object-cover border-4 border-[#DDE2FF] bg-white shadow-md">
+            </div>
 
-            {{-- Foto Selfie --}}
-            <img src="{{ $banners[0]['image'] ?? 'static/images/bannerTest.svg' }}" alt="Selfie Peserta"
-                class="w-full h-44 rounded-xl object-cover">
 
-            <div class="p-4 space-y-3">
+            <div class="p-4 pt-20 space-y-3">
 
                 {{-- Status Badge --}}
                 <span
@@ -20,7 +21,7 @@
                         Nomor Kupon Undian Kamu
                     </p>
                     <p class="text-3xl font-extrabold text-[#1E5BD8] leading-tight">
-                        {{ $couponNumber}}
+                        {{ $couponNumber }}
                     </p>
                 </div>
 

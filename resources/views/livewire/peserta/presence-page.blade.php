@@ -1,4 +1,27 @@
-<div x-data="locationHandler()" x-init="init()">
+<div x-data="presencePage()" x-init="initLocation()">
+
+    {{-- ================== 1. NOTIFIKASI ERROR SYSTEM / RATE LIMIT ================== --}}
+    @error('system')
+        <div class="fixed top-4 left-0 right-0 z-60 px-4 animate-bounce">
+            <div class="bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl max-w-lg mx-auto flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                    <h4 class="font-bold text-lg">Gagal Memproses</h4>
+                    <p class="text-sm font-medium">{{ $message }}</p>
+                </div>
+                <button type="button" class="ml-auto bg-white/20 p-1 rounded-full hover:bg-white/30"
+                    onclick="this.parentElement.parentElement.remove()">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    @enderror
 
     {{-- ================== CEK LOKASI DALAM RADIUS ================== --}}
     @if (!$locationGranted)
@@ -19,23 +42,21 @@
             </div>
         </div>
 
-        {{-- ================== 2. OVERLAY LOKASI DITOLAK / ERROR / DI LUAR RADIUS ================== --}}
+        {{-- ================== OVERLAY LOKASI DITOLAK / ERROR ================== --}}
         <div x-show="showDenied" x-cloak x-transition
             class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
             <div class="bg-white p-6 rounded-2xl shadow-xl text-center max-w-sm w-full mx-4 relative overflow-hidden">
 
                 <img src="{{ asset('static/images/deniedLocation.png') }}" alt="Location Denied"
                     class="w-32 mx-auto mb-4 drop-shadow-md"
-                    onerror="this.onerror=null; this.src='{{ asset('static/images/deniedLocation.png') }}';">
+                    onerror="this.onerror=null; this.src='https://placehold.co/400x400?text=Location+Error';">
 
                 <h3 class="text-xl font-bold text-gray-800 leading-tight mb-2">
                     <span x-text="isPermDenied ? 'Akses Ditolak' : 'Lokasi Tidak Sesuai'"></span>
                 </h3>
                 <p class="text-gray-600 text-sm mb-4 px-2 leading-relaxed" x-text="deniedMessage"></p>
 
-                {{-- ============================================================ --}}
-                {{-- PANDUAN KHUSUS (Hanya muncul jika Browser BLOCK akses) --}}
-                {{-- ============================================================ --}}
+                {{-- PANDUAN KHUSUS (Blocked) --}}
                 <div x-show="isPermDenied"
                     class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-5 text-left animate-fade-in-down">
                     <p class="text-xs font-bold text-blue-800 mb-2 flex items-center gap-1">
@@ -47,10 +68,10 @@
                         Cara Mengaktifkan Izin:
                     </p>
                     <ol class="list-decimal ml-4 text-[11px] text-blue-700 space-y-1.5 font-medium">
-                        <li>Klik ikon <strong>Gembok (🔒)</strong> / Pengaturan di bar alamat browser.</li>
+                        <li>Klik ikon <strong>Gembok (🔒)</strong> di bar alamat.</li>
                         <li>Klik menu <strong>Izin / Permissions</strong>.</li>
-                        <li>Aktifkan saklar <strong>Lokasi / Location</strong>.</li>
-                        <li>Lalu klik tombol <strong>Refresh Halaman</strong> di bawah.</li>
+                        <li>Aktifkan <strong>Lokasi / Location</strong>.</li>
+                        <li>Klik tombol <strong>Refresh Halaman</strong>.</li>
                     </ol>
                 </div>
 
@@ -58,126 +79,10 @@
                 <button @click="retryLocation()"
                     class="w-full text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transform active:scale-95 transition flex items-center justify-center gap-2"
                     :class="isPermDenied ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#5065A4] hover:opacity-90'">
-
-                    {{-- Ikon Refresh (Muncul jika Blocked) --}}
-                    <svg x-show="isPermDenied" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-
-                    {{-- Ikon Pin (Muncul jika Di Luar Radius/GPS Error) --}}
-                    <svg x-show="!isPermDenied" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-
-                    {{-- Teks Tombol Berubah Sesuai Kondisi --}}
                     <span x-text="isPermDenied ? 'Refresh Halaman' : 'Cek Lokasi Lagi'"></span>
                 </button>
             </div>
         </div>
-
-        {{-- ================= SCRIPT ALPINE.JS ================= --}}
-        <script>
-            function locationHandler() {
-                return {
-                    showLoading: true,
-                    showDenied: false,
-                    isPermDenied: false, 
-                    deniedMessage: '',
-
-                    init() {
-                        window.addEventListener('location-radius-error', () => {
-                            this.showLoading = false;
-                            this.showDenied = true;
-                            this.isPermDenied = false;
-                            this.deniedMessage =
-                                'Kamu berada di luar radius lokasi acara. Silakan merapat ke titik lokasi.';
-                        });
-
-                        window.addEventListener('permission-blocked', () => {
-                            this.handlePermissionDenied();
-                        });
-
-                        window.addEventListener('location-system-error', () => {
-                            this.showLoading = false;
-                            this.showDenied = true;
-                            this.isPermDenied = false;
-                            this.deniedMessage = 'Gagal mendapatkan posisi. Pastikan GPS aktif dan sinyal bagus.';
-                        });
-
-                        // Cek permission awal saat load
-                        if (navigator.permissions && navigator.permissions.query) {
-                            navigator.permissions.query({
-                                name: 'geolocation'
-                            }).then((result) => {
-                                if (result.state === 'denied') {
-                                    this.handlePermissionDenied();
-                                } else {
-                                    this.requestLocation();
-                                }
-                            });
-                        } else {
-                            this.requestLocation();
-                        }
-                    },
-
-                    retryLocation() {
-                        if (this.isPermDenied) {
-                            window.location.reload();
-                        } else {
-                            this.requestLocation();
-                        }
-                    },
-
-                    requestLocation() {
-                        this.showDenied = false;
-                        this.showLoading = true;
-                        this.isPermDenied = false;
-
-                        if ("geolocation" in navigator) {
-                            navigator.geolocation.getCurrentPosition(
-                                (pos) => {
-                                    @this.call('checkLocation', pos.coords.latitude, pos.coords.longitude);
-                                },
-                                (error) => {
-                                    // GAGAL -> Tangani di JS dulu
-                                    console.error('Geolocation error:', error);
-
-                                    if (error.code === 1) {
-                                        this.handlePermissionDenied();
-                                        @this.call('locationFailed', 1);
-                                    } else {
-                                        // Error lain kirim ke PHP biar PHP yang dispatch 'location-system-error'
-                                        @this.call('locationFailed', error.code);
-                                    }
-                                }, {
-                                    enableHighAccuracy: true,
-                                    timeout: 10000,
-                                    maximumAge: 0
-                                }
-                            );
-                        } else {
-                            this.showLoading = false;
-                            this.showDenied = true;
-                            this.deniedMessage = "Browser tidak mendukung GPS";
-                        }
-                    },
-
-                    handlePermissionDenied() {
-                        // Logika UI untuk Blocked
-                        this.showLoading = false;
-                        this.showDenied = true;
-                        this.isPermDenied = true;
-                        this.deniedMessage = "Akses lokasi diblokir browser. Anda perlu mengizinkannya secara manual.";
-                    },
-                }
-            }
-        </script>
     @else
         {{-- ================== FORM MUNCUL KALAU DALAM RADIUS ================== --}}
 
@@ -194,12 +99,10 @@
                 maxlength="18" placeholder="Masukkan NIP kamu"
                 class="w-full border-2 border-gray-300 rounded-lg p-3 text-sm font-semibold focus:border-blue-500 focus:outline-none transition-colors @error('nip') @enderror">
 
-            <!-- Error Message -->
             @if ($errorMessage)
-                <p class="text-red-500 text-sm mt-2 text-center">{{ $errorMessage }}</p>
+                <p class="text-red-500 text-sm mt-2 text-center font-bold bg-red-50 p-2 rounded">{{ $errorMessage }}</p>
             @endif
         </div>
-
         <!-- Input form cek NIP END -->
 
         <!-- NIP Verification Status -->
@@ -212,48 +115,60 @@
         @endif
 
         @if ($showDetails)
-            <div class="mb-4">
-                <p class="text-green-600 font-semibold text-center">
+            <div class="mb-4 animate-fade-in-up">
+                <p
+                    class="text-green-600 font-semibold text-center bg-green-50 p-2 rounded border border-green-200 text-sm">
                     NIP kamu Terverifikasi sebagai peserta doorprize
                 </p>
             </div>
         @endif
 
-        <!-- Detail Data Section ketika NIP valid-->
+        <!-- Detail Data Section -->
         @if ($showDetails)
-            <div class="relative bg-blue-50 rounded-lg p-4 mb-4 overflow-hidden">
-
+            <div class="relative bg-blue-50 rounded-lg p-4 mb-4 overflow-hidden animate-fade-in-up">
                 <img src="{{ asset('static/images/pattern.png') }}"
-                    class="absolute top-0 right-0 w-28 opacity-40 pointer-events-none select-none" alt="Pattern" />
+                    class="absolute top-0 right-0 w-28 opacity-40 pointer-events-none select-none" alt="Pattern"
+                    onerror="this.style.display='none'" />
 
                 <h3 class="font-bold text-gray-800 mb-3 relative">Detail Data</h3>
 
                 <div class="space-y-2 relative">
                     <div class="flex justify-start gap-2">
-                        <span class="text-gray-600 text-sm">Nama:</span>
+                        <span class="text-gray-600 text-sm min-w-[70px]">Nama:</span>
                         <span class="text-gray-800 text-sm font-medium">{{ $detailData['nama'] }}</span>
                     </div>
                     <div class="flex justify-start gap-2">
-                        <span class="text-gray-600 text-sm">NIP:</span>
+                        <span class="text-gray-600 text-sm min-w-[70px]">NIP:</span>
                         <span class="text-gray-800 text-sm font-medium">{{ $detailData['nip'] }}</span>
                     </div>
                     <div class="flex justify-start gap-2">
-                        <span class="text-gray-600 text-sm">Unit Kerja:</span>
+                        <span class="text-gray-600 text-sm min-w-[70px]">Unit Kerja:</span>
                         <span class="text-gray-800 text-sm font-medium">{{ $detailData['unit_kerja'] }}</span>
                     </div>
                 </div>
             </div>
 
-            {{-- UPLOAD SELFIE KAMERA --}}
+            {{-- ================== UPLOAD SELFIE (STYLE BARU + KOMPRESI JS) ================== --}}
             <div class="mb-4">
                 <label for="photoInput"
-                    class="cursor-pointer bg-blue-50 border-2 border-dashed border-blue-300 rounded-xl block text-center hover:bg-blue-100 transition overflow-hidden">
+                    class="relative cursor-pointer bg-blue-50 border-2 border-dashed border-blue-300 rounded-xl block text-center hover:bg-blue-100 transition overflow-hidden">
+
+                    {{-- Loading Overlay --}}
+                    <div x-show="isUploading" style="display: none;"
+                        class="absolute inset-0 bg-white/80 z-10 flex flex-col items-center justify-center backdrop-blur-sm">
+                        <div
+                            class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-2">
+                        </div>
+                        <span class="text-xs font-bold text-blue-600">
+                            Upload <span x-text="progress + '%'"></span>
+                        </span>
+                    </div>
 
                     @if ($photo)
                         {{-- Preview foto --}}
-                        <img src="{{ $photo->temporaryUrl() }}" class="w-full h-auto object-cover block" alt="Preview">
+                        <img src="{{ $photo->temporaryUrl() }}" class="w-full h-auto object-cover block"
+                            alt="Preview">
                     @else
-                        {{-- Tampilan awal upload --}}
                         <div class="min-h-[200px] flex flex-col items-center justify-center">
                             <img src="{{ asset('static/images/imgUpload.svg') }}" class="mb-2" alt="Upload" />
                             <p class="text-gray-700 text-sm font-medium">
@@ -263,42 +178,232 @@
                     @endif
                 </label>
 
-                {{-- INPUT FOTO --}}
                 <input type="file" id="photoInput" accept="image/*" capture="user"
-                    wire:model.live.debounce.250ms="photo" class="hidden">
+                    @change="compressAndUpload($event)" class="hidden">
 
                 @error('photo')
-                    <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                    <p class="text-red-500 text-sm mt-2 text-center">{{ $message }}</p>
                 @enderror
             </div>
         @endif
 
         <!-- Checkbox Agreement -->
         <div class="mb-4">
-            <label class="flex items-start gap-2 cursor-pointer">
-                <input type="checkbox" class="mt-1" wire:model.live="agreement">
+            <label class="flex items-start gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
+                <input type="checkbox" class="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    wire:model.live="agreement">
                 <div class="flex flex-col text-gray-600 text-xs leading-relaxed">
-                    <span class="font-semibold">Saya yakin data tersebut sudah benar.</span>
+                    <span class="font-semibold text-gray-800">Saya menyatakan data di atas benar.</span>
                     <span>
-                        Setelah klaim Kupon Anda akan mendapat nomor undian kupon.
+                        Data ini akan digunakan untuk undian doorprize.
                     </span>
                 </div>
             </label>
+            @error('agreement')
+                <span class="text-red-500 text-xs ml-6">{{ $message }}</span>
+            @enderror
         </div>
 
         <!-- Button -->
-        <button wire:click="klaimKupon" wire:loading.attr="disabled" @if (!$showDetails || !$agreement) disabled @endif
-            class="w-full bg-[#5065A4] text-white font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+        <button wire:click="klaimKupon" wire:loading.attr="disabled" wire:loading.class="opacity-75 cursor-wait"
+            @if (!$showDetails || !$agreement || !$photo) disabled @endif
+            class="w-full bg-[#5065A4] text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center gap-2">
+
             <span wire:loading.remove wire:target="klaimKupon">Klaim Kupon</span>
-            <span wire:loading wire:target="klaimKupon">Memproses...</span>
+
+            <span wire:loading wire:target="klaimKupon" class="flex items-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                        stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                Sedang Memproses...
+            </span>
         </button>
 
         <!-- Success Message -->
         @if (session()->has('success'))
-            <div class="mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                {{ session('success') }}
+            <div
+                class="mt-6 bg-green-50 border border-green-200 text-green-800 px-4 py-4 rounded-xl text-center shadow-sm animate-bounce">
+                <h4 class="font-bold text-lg mb-1">🎉 Berhasil!</h4>
+                <p>{{ session('success') }}</p>
             </div>
         @endif
 
     @endif
+
+    {{-- ================= SCRIPT ALPINE.JS (FIXED) ================= --}}
+    <script>
+        function presencePage() {
+            return {
+                // State Lokasi
+                showLoading: true,
+                showDenied: false,
+                isPermDenied: false,
+                deniedMessage: '',
+
+                // State Upload
+                isUploading: false,
+                progress: 0,
+
+                initLocation() {
+                    window.addEventListener('location-radius-error', () => {
+                        this.showDeniedState('Kamu berada di luar radius lokasi acara.');
+                    });
+                    window.addEventListener('permission-blocked', () => {
+                        this.handlePermissionDenied();
+                    });
+                    window.addEventListener('location-system-error', () => {
+                        this.showDeniedState('Gagal mendapatkan posisi. Pastikan GPS aktif.');
+                    });
+
+                    // Cek Permission
+                    if (navigator.permissions && navigator.permissions.query) {
+                        navigator.permissions.query({
+                            name: 'geolocation'
+                        }).then((result) => {
+                            if (result.state === 'denied') {
+                                this.handlePermissionDenied();
+                            } else {
+                                this.requestLocation();
+                            }
+                        });
+                    } else {
+                        this.requestLocation();
+                    }
+                },
+
+                // --- HELPER LOKASI ---
+                showDeniedState(msg) {
+                    this.showLoading = false;
+                    this.showDenied = true;
+                    this.isPermDenied = false;
+                    this.deniedMessage = msg;
+                },
+
+                retryLocation() {
+                    if (this.isPermDenied) window.location.reload();
+                    else this.requestLocation();
+                },
+
+                requestLocation() {
+                    this.showDenied = false;
+                    this.showLoading = true;
+                    this.isPermDenied = false;
+
+                    if ("geolocation" in navigator) {
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                                @this.call('checkLocation', pos.coords.latitude, pos.coords.longitude);
+                            },
+                            (error) => {
+                                console.error('Geolocation error:', error);
+                                if (error.code === 1) {
+                                    this.handlePermissionDenied();
+                                    @this.call('locationFailed', 1);
+                                } else {
+                                    @this.call('locationFailed', error.code);
+                                }
+                            }, {
+                                enableHighAccuracy: true,
+                                timeout: 10000,
+                                maximumAge: 0
+                            }
+                        );
+                    } else {
+                        this.showDeniedState("Browser tidak mendukung GPS");
+                    }
+                },
+
+                handlePermissionDenied() {
+                    this.showLoading = false;
+                    this.showDenied = true;
+                    this.isPermDenied = true;
+                    this.deniedMessage = "Akses lokasi diblokir browser. Anda perlu mengizinkannya secara manual.";
+                },
+
+                // --- LOGIKA KOMPRESI GAMBAR (PERBAIKAN UTAMA DISINI) ---
+                compressAndUpload(event) {
+                    const originalFile = event.target.files[0];
+                    if (!originalFile) return;
+
+                    // Validasi tipe file
+                    if (!originalFile.type.match(/image.*/)) {
+                        alert('Mohon upload file gambar.');
+                        return;
+                    }
+
+                    // Set status uploading
+                    this.isUploading = true;
+                    this.progress = 0;
+
+                    const reader = new FileReader();
+                    reader.readAsDataURL(originalFile);
+
+                    reader.onload = (readerEvent) => {
+                        const image = new Image();
+                        image.onload = () => {
+                            // Setup Canvas
+                            const canvas = document.createElement('canvas');
+                            const max_size = 800; // Resize ke max 800px
+                            let width = image.width;
+                            let height = image.height;
+
+                            // Logika Aspect Ratio
+                            if (width > height) {
+                                if (width > max_size) {
+                                    height *= max_size / width;
+                                    width = max_size;
+                                }
+                            } else {
+                                if (height > max_size) {
+                                    width *= max_size / height;
+                                    height = max_size;
+                                }
+                            }
+
+                            canvas.width = width;
+                            canvas.height = height;
+
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(image, 0, 0, width, height);
+
+                            // Convert Canvas ke Blob (JPG Quality 0.6)
+                            canvas.toBlob((blob) => {
+                                // === PERBAIKAN: Ubah Blob menjadi File Object dengan nama .jpg ===
+                                // Ini mencegah error "extension empty" di Livewire
+                                const fileName = "selfie_compressed.jpg";
+                                const fileToUpload = new File([blob], fileName, {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now()
+                                });
+
+                                // Upload manual ke Livewire
+                                @this.upload('photo', fileToUpload,
+                                    (uploadedFilename) => {
+                                        // Success
+                                        this.isUploading = false;
+                                        this.progress = 100;
+                                    },
+                                    () => {
+                                        // Error
+                                        this.isUploading = false;
+                                        alert('Gagal mengupload gambar. Coba lagi.');
+                                    },
+                                    (event) => {
+                                        // Progress
+                                        this.progress = event.detail.progress;
+                                    }
+                                );
+                            }, 'image/jpeg', 0.6);
+                        }
+                        image.src = readerEvent.target.result;
+                    }
+                }
+            }
+        }
+    </script>
 </div>
