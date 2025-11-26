@@ -224,6 +224,11 @@ class PresencePage extends Component
             }
 
 
+            if (!$availableCoupon) {
+                throw new Exception('Mohon maaf, kupon undian telah habis!');
+            }
+
+            // C. Update Peserta
             $participant->update([
                 'foto'         => basename($uploadedPath),
                 'status_hadir' => 'Hadir',

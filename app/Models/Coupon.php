@@ -15,11 +15,6 @@ class Coupon extends Model
 
     public function store()
     {
-        return $this->belongsTo(Store::class);
-    }
-
-    public function isRedeemed(): bool
-    {
-        return !is_null($this->store_id);
+        return $this->belongsTo(Store::class, 'store_id');
     }
 }
