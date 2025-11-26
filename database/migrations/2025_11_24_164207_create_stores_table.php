@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
             $table->string('nama_toko');
+            $table->string('kode_toko')->unique()->index();
             $table->timestamps();
         });
     }
