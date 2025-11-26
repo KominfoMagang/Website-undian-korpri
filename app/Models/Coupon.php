@@ -12,4 +12,9 @@ class Coupon extends Model
     {
         return $this->belongsTo(Participant::class, 'participant_id');
     }
+
+    public function store()
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
 }
