@@ -112,12 +112,8 @@ class RewardConfigPage extends Component
                 $path = $this->gambar_hadiah->storeAs('hadiah', $filename, 'public');
             }
 
-            // --- LOGIKA STATUS STOK ---
-            // Tentukan status berdasarkan nilai stok yang dimasukkan
             $new_status = ($this->stok == 0) ? 'Tidak aktif' : 'Aktif';
-            // --------------------------
 
-            // 3. Siapkan data yang akan disimpan/diperbarui
             $data = [
                 'nama_hadiah'        => $this->nama_hadiah,
                 'reward_category_id' => $this->kategori_id,
