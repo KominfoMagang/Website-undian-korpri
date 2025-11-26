@@ -4,10 +4,28 @@
             aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href=".">
-                <img src="{{ asset('tabler/static/logo.svg') }}" width="110" height="32" alt="Tabler"
-                    class="navbar-brand-image">
+            <a href="." class="text-decoration-none">
+                <div class="d-flex align-items-center">
+
+                    <img src="/static/images/logoKorpri.png" alt="Logo Korpri"
+                        class="navbar-brand-image img-hover-zoom me-2" style="height: 40px; width: auto;">
+
+                    <img src="/static/images/logoKotaTasik.png" alt="Logo Kota Tasikmalaya"
+                        class="navbar-brand-image img-hover-zoom me-3" style="height: 40px; width: auto;">
+
+                    <div class="d-none d-sm-block text-start lh-1">
+                        <div class="text-uppercase fw-bold text-warning" style="font-size: 10px; letter-spacing: 2px;">
+                            HUT KORPRI KE-53
+                        </div>
+
+                        <div class="fw-bolder text-reset text-uppercase" style="font-size: 14px; letter-spacing: 1px;">
+                            Kota Tasikmalaya
+                        </div>
+                    </div>
+
+                </div>
             </a>
         </h1>
         <div class="navbar-nav flex-row order-md-last">
@@ -15,10 +33,10 @@
                 <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
                     aria-label="Open user menu">
                     <span class="avatar avatar-sm"
-                        style="background-image: url({{ asset('tabler/static/avatars/000m.jpg') }})"></span>
+                        style="background-image: url({{ asset('static/images/unknown_profile.png') }})"></span>
                     <div class="d-none d-xl-block ps-2">
-                        <div>Paweł Kuna</div>
-                        <div class="mt-1 small text-muted">UI Designer</div>
+                        <div>Gojo Satoru</div>
+                        <div class="mt-1 small text-muted">Admin</div>
                     </div>
                 </a>
             </div>
@@ -32,7 +50,8 @@
             <div class="container-xl">
                 <div class="d-flex justify-content-between align-items-center w-full">
                     <ul class="navbar-nav flex-row gap-3">
-                        <li class="nav-item">
+
+                        <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('admin.dashboard') }}" wire:navigate>
                                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
@@ -48,7 +67,7 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item {{ request()->routeIs('admin.coupon') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('admin.coupon') }}" wire:navigate>
                                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
@@ -66,7 +85,7 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item {{ request()->routeIs('admin.participant*') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('admin.participant') }}" wire:navigate>
                                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
@@ -83,7 +102,7 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item {{ request()->routeIs('admin.reward-config') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('admin.reward-config') }}" wire:navigate>
                                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
@@ -100,7 +119,7 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item {{ request()->routeIs('admin.store') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('admin.store') }}" wire:navigate>
                                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
@@ -118,6 +137,7 @@
                                 <span class="nav-link-title ms-1">Toko</span>
                             </a>
                         </li>
+
                     </ul>
 
                     <div class="d-flex align-items-center gap-2 ms-auto d-print-none">
