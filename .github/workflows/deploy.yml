@@ -32,6 +32,10 @@ jobs:
             docker compose stop asnday
             docker compose up -d asnday
 
+            # NPM install dan build
+            npm ci
+            npm run build
+
             # Composer dan artisan
             docker exec asnday composer install --no-interaction --prefer-dist --no-dev
             docker exec asnday php artisan migrate --force

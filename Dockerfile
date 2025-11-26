@@ -1,40 +1,64 @@
-##############################################
-# 1) NODE STAGE — Build Vite Assets
-##############################################
-FROM node:18 AS node_build
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci
-
-COPY . .
-RUN npm run build
-
-
-##############################################
-# 2) PHP STAGE — Production
+############################################################################################
+# 2) PHP STAGE — Main Production Container
 ##############################################
 FROM php:8.3-fpm AS php_app
+
+# Set working directory
 WORKDIR /var/www
 
-# Install PHP extensions
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
-    libzip-dev zip unzip git curl libonig-dev libxml2-dev \
-    && docker-php-ext-install zip pdo_mysql mbstring bcmath exif gd
+    build-essential \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip unzip git curl \
+    libonig-dev \
+    libxml2-dev \
+    locales \
+    jpegoptim optipng pngquant gifsicle \
+    vim \
+    default-mysql-client \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy source code (NO BUILD YET)
-COPY . .
+# Install PHP extensions
+RUN docker-php-ext-configure zip \
+    && docker-php-ext-install zip pdo_mysql mbstring exif pcntl bcmath gd
 
-# Copy Vite assets (overwrite)
-COPY --from=node_build /app/public/build ./public/build
 
-# Install Composer deps
+
+##############################################
+# Install Composer from official image
+##############################################
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+
+
+##############################################
+# Copy source code
+##############################################
+COPY . /var/www
+
+
+##############################################
+# Composer install (Production)
+##############################################
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Permissions
-RUN chown -R www-data:www-data storage bootstrap/cache
 
+
+##############################################
+# Set correct permissions
+##############################################
+RUN chown -R www-data:www-data \
+        /var/www/storage \
+        /var/www/bootstrap/cache
+
+
+
+##############################################
+# FPM
+##############################################
 EXPOSE 9000
 CMD ["php-fpm"]
