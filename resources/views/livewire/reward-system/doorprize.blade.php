@@ -54,24 +54,30 @@
             </div>
 
             <div
-                class="flex items-center gap-2 md:gap-3 mb-12 p-6 bg-blue-900/50 rounded-2xl border border-blue-400/30 backdrop-blur-sm shadow-2xl">
+                class="flex items-center gap-1 md:gap-2 mb-12 p-4 md:p-6 bg-blue-900/50 rounded-2xl border border-blue-400/30 backdrop-blur-sm shadow-2xl overflow-x-auto justify-center">
                 <div id="slot-0"
-                    class="slot-box w-14 h-20 md:w-20 md:h-28 flex items-center justify-center text-5xl md:text-7xl font-black text-slate-800 rounded-xl">
+                    class="slot-box w-12 h-16 md:w-20 md:h-28 flex items-center justify-center text-4xl md:text-7xl font-black text-slate-800 rounded-xl bg-white shadow-inner">
                     0</div>
                 <div id="slot-1"
-                    class="slot-box w-14 h-20 md:w-20 md:h-28 flex items-center justify-center text-5xl md:text-7xl font-black text-slate-800 rounded-xl">
+                    class="slot-box w-12 h-16 md:w-20 md:h-28 flex items-center justify-center text-4xl md:text-7xl font-black text-slate-800 rounded-xl bg-white shadow-inner">
                     0</div>
                 <div id="slot-2"
-                    class="slot-box w-14 h-20 md:w-20 md:h-28 flex items-center justify-center text-5xl md:text-7xl font-black text-slate-800 rounded-xl">
+                    class="slot-box w-12 h-16 md:w-20 md:h-28 flex items-center justify-center text-4xl md:text-7xl font-black text-slate-800 rounded-xl bg-white shadow-inner">
                     0</div>
+
+                <div
+                    class="w-4 md:w-8 flex items-center justify-center text-4xl md:text-6xl font-black text-blue-200 pb-2">
+                    -
+                </div>
+
                 <div id="slot-3"
-                    class="slot-box w-14 h-20 md:w-20 md:h-28 flex items-center justify-center text-5xl md:text-7xl font-black text-slate-800 rounded-xl">
+                    class="slot-box w-12 h-16 md:w-20 md:h-28 flex items-center justify-center text-4xl md:text-7xl font-black text-slate-800 rounded-xl bg-white shadow-inner border-4 border-yellow-400/50">
                     0</div>
                 <div id="slot-4"
-                    class="slot-box w-14 h-20 md:w-20 md:h-28 flex items-center justify-center text-5xl md:text-7xl font-black text-slate-800 rounded-xl">
+                    class="slot-box w-12 h-16 md:w-20 md:h-28 flex items-center justify-center text-4xl md:text-7xl font-black text-slate-800 rounded-xl bg-white shadow-inner border-4 border-yellow-400/50">
                     0</div>
                 <div id="slot-5"
-                    class="slot-box w-14 h-20 md:w-20 md:h-28 flex items-center justify-center text-5xl md:text-7xl font-black text-slate-800 rounded-xl">
+                    class="slot-box w-12 h-16 md:w-20 md:h-28 flex items-center justify-center text-4xl md:text-7xl font-black text-slate-800 rounded-xl bg-white shadow-inner border-4 border-yellow-400/50">
                     0</div>
             </div>
 
@@ -426,7 +432,7 @@
             }
         }
 
-        // Fungsi Stop Spin (Menampilkan Angka Asli)
+        // Fungsi Stop Spin (Dengan Efek Suspense)
         window.stopSpinSequence = function() {
             if (!isSpinning) return;
 
@@ -434,45 +440,73 @@
             btnStop.disabled = true;
             btnStop.classList.add('opacity-50', 'cursor-not-allowed');
 
-            clearInterval(intervalId);
+            clearInterval(intervalId); // Hentikan acakan global
 
-            // --- UBAH BAGIAN INI ---
-            // Ambil Kode Kupon dari server
+            // Ambil Kode Kupon
             const rawKupon = String(currentWinner.kode_kupon || '000000');
-
-            // Logika: Ambil 6 karakter TERAKHIR biar uniknya kelihatan
-            // Misal: "KORPRI-123456" -> Ambil "123456"
-            // Kalau kupon pendek (misal "A12"), padStart akan menjadikannya "000A12"
             const targetString = rawKupon.length > 6 ? rawKupon.slice(-6) : rawKupon.padStart(6, '0');
-
             const targetNumbers = targetString.split('');
-            // -----------------------
 
             const slots = Array.from(document.querySelectorAll('.slot-box'));
 
             slots.forEach((slot, index) => {
-                let localInterval = setInterval(() => {
-                    // Animasi acak angka 0-9
-                    slot.innerText = Math.floor(Math.random() * 10);
-                }, 60);
+                // --- LOGIKA SUSPENSE ---
+                
+                // Apakah ini slot bagian belakang (4, 5, 6)?
+                const isSuspenseSlot = index >= 3;
 
+                // Kecepatan putar angka: 
+                // Slot depan ngebut (60ms), Slot belakang slow motion (150ms)
+                const spinSpeed = isSuspenseSlot ? 150 : 60; 
+
+                // Waktu berhenti (Delay):
+                let stopDelay;
+                if (!isSuspenseSlot) {
+                    // [SLOT 1 - 3]: Jeda 700ms per slot
+                    // Target: 500ms, 1200ms, 1900ms
+                    stopDelay = 500 + (index * 700); 
+                } else {
+                    // [SLOT 4 - 6]: Suspense dimulai sangat lambat (4000ms)
+                    // Target: 4000ms, 5500ms, 7000ms
+                    // JEDA PANJANG ANTARA SLOT 3 & 4 ADALAH 4000ms - 1900ms = 2100ms
+                    stopDelay = 4000 + ((index - 3) * 1500); 
+                }
+
+                // Jalankan animasi per slot
+                let localInterval = setInterval(() => {
+                    slot.innerText = Math.floor(Math.random() * 10);
+                    
+                    // Efek visual tambahan untuk slot suspense (warna teks berubah-ubah dikit)
+                    if(isSuspenseSlot) {
+                        slot.style.color = (Math.random() > 0.5) ? "#1e293b" : "#475569";
+                    }
+                }, spinSpeed);
+
+                // Set waktu berhenti
                 setTimeout(() => {
                     clearInterval(localInterval);
 
-                    // Tampilkan Karakter Asli Kupon (Bisa Huruf/Angka)
+                    // Tampilkan Angka Asli
                     slot.innerText = targetNumbers[index] !== undefined ? targetNumbers[index] : 0;
+                    slot.style.color = ""; // Reset warna
 
                     window.playSoundEffect('stop');
                     slot.classList.add('slot-stopped');
-                    slot.style.transform = "scale(1.2)";
-                    setTimeout(() => slot.style.transform = "scale(1)", 150);
+                    
+                    // Efek Zoom saat berhenti
+                    const scaleSize = isSuspenseSlot ? "1.3" : "1.1"; // Slot belakang zoom lebih gede
+                    slot.style.transform = `scale(${scaleSize})`;
+                    
+                    setTimeout(() => slot.style.transform = "scale(1)", 200);
 
+                    // Jika slot terakhir berhenti, munculkan modal
                     if (index === slots.length - 1) {
                         isSpinning = false;
                         if (spinAudioObject) spinAudioObject.pause();
-                        setTimeout(() => window.showModal(), 1000);
+                        // Jeda sedikit sebelum modal muncul biar gak kaget
+                        setTimeout(() => window.showModal(), 1200); 
                     }
-                }, index * 500);
+                }, stopDelay);
             });
         }
 

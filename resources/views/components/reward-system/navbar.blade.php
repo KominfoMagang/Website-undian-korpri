@@ -10,7 +10,7 @@
             class="h-10 w-auto drop-shadow-md hover:scale-110 transition-transform duration-200">
 
         <div class="hidden sm:flex flex-col leading-tight">
-            <span class="font-bold text-yellow-400 text-xs tracking-widest uppercase">HUT KORPRI KE-53</span>
+            <span class="font-bold text-yellow-400 text-xs tracking-widest uppercase">HUT KORPRI KE-54</span>
             <span class="font-black text-white text-sm tracking-wider">KOTA TASIKMALAYA</span>
         </div>
     </div>
