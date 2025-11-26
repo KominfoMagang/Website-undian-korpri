@@ -2,162 +2,209 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Reward; 
+use App\Models\Reward;
+use App\Models\RewardCategory;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Str;
-use Throwable; 
+use Livewire\WithPagination;
 
-#[Title('Kategori & Hadiah')] 
+#[Title('Kategori & Hadiah')]
 
 class RewardConfigPage extends Component
 {
+    use WithPagination;
     use WithFileUploads;
-    
-    // ==================================
-    // 1. PROPERTI UNTUK DATA DAN MODAL
-    // ==================================
-    public $rewards; 
-    public $is_modal_open = false; 
-    public $reward_id;  
-    public $gambar_lama; 
-    public $nama_hadiah;
-    public $kategori_id;
-    public $stok;
-    public $gambar_hadiah; 
-    
-    protected $listeners = ['rewardAdded' => 'loadRewards']; 
 
     #[Layout('components.layouts.admin')]
 
-    public function mount()
+    protected $paginationTheme = 'bootstrap';
+
+    public $nama_kategori;
+    public $nama_hadiah;
+    public $reward_category_id;
+    public $stok;
+    public $status_hadiah = 'Aktif';
+    public $gambar;
+
+    // === HELPER PROPERTIES ===
+    public $oldGambar;
+    public $rewardId;
+    public $isEditing = false;
+    public $searchCategory = '';
+    public $searchReward = '';
+    public $deleteId;
+    public $deleteContext;
+
+    // === RULES ===
+    protected $rules = [
+        'nama_hadiah'        => 'required|string|max:255',
+        'reward_category_id' => 'required|exists:reward_categories,id',
+        'stok'               => 'required|integer|min:0',
+        'status_hadiah'      => 'required|in:Aktif,Tidak aktif',
+        'gambar'             => 'nullable|image|max:2048',
+    ];
+
+    // === FITUR TAMBAH KATEGORI ===
+    public function storeCategory()
     {
-        $this->loadRewards();
+        $this->validate([
+            'nama_kategori' => 'required|string|max:255|unique:reward_categories,nama_kategori'
+        ]);
+
+        RewardCategory::create([
+            'nama_kategori' => $this->nama_kategori
+        ]);
+
+        // Reset input khusus kategori
+        $this->nama_kategori = '';
+
+        $this->dispatch('close-modal');
+        session()->flash('message', 'Kategori baru berhasil ditambahkan.');
     }
-    
-    public function loadRewards()
+
+    public function storeReward()
     {
-        $this->rewards = Reward::all();
-    }
-    
-    // open modal
-    public function openModal()
-    {
+        $this->validate();
+
+        $pathGambar = null;
+        if ($this->gambar) {
+            $pathGambar = $this->gambar->store('rewards', 'public');
+        }
+
+        Reward::create([
+            'nama_hadiah'        => $this->nama_hadiah,
+            'reward_category_id' => $this->reward_category_id,
+            'stok'               => $this->stok,
+            'status_hadiah'      => $this->status_hadiah,
+            'gambar'             => $pathGambar,
+        ]);
+
+        $this->dispatch('close-modal');
         $this->resetForm();
-        $this->is_modal_open = true;
+        session()->flash('message', 'Hadiah berhasil ditambahkan.');
     }
 
-    // close modal
-    public function closeModal()
-    {
-        $this->is_modal_open = false;
-        $this->resetErrorBag();
-    }
-
-    protected function resetForm()
-    {
-        $this->reset(['reward_id', 'gambar_lama', 'nama_hadiah', 'kategori_id', 'stok', 'gambar_hadiah']);
-        $this->resetErrorBag();
-    }
-    
-    // Edit
     public function editReward($id)
     {
         $reward = Reward::findOrFail($id);
-        
-        $this->reward_id = $reward->id;
-        $this->nama_hadiah = $reward->nama_hadiah;
-        $this->kategori_id = $reward->reward_category_id;
-        $this->stok = $reward->stok;
-        $this->gambar_lama = $reward->gambar; 
-        
-        $this->is_modal_open = true;
+
+        $this->rewardId           = $reward->id;
+        $this->nama_hadiah        = $reward->nama_hadiah;
+        $this->reward_category_id = $reward->reward_category_id;
+        $this->stok               = $reward->stok;
+        $this->status_hadiah      = $reward->status_hadiah;
+        $this->oldGambar          = $reward->gambar;
+
+        $this->isEditing = true;
     }
 
-
-    // Simpan hadiah (create/update)
-
-    public function saveHadiah()
+    public function updateReward()
     {
-        try {
-             $this->validate([
-                'nama_hadiah'   => 'required|string|max:255',
-                'stok'          => 'required|integer|min:0', 
-                'kategori_id'   => 'required|integer|exists:reward_categories,id', 
-                'gambar_hadiah' => 'nullable|image|max:2048',
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            throw $e; 
-        }
+        $this->validate();
 
-        $path = $this->gambar_lama; 
-        
-        try {
-            if ($this->gambar_hadiah) {
-                if ($this->gambar_lama) {
-                    \Storage::disk('public')->delete($this->gambar_lama);
-                }
-                $filename = Str::slug($this->nama_hadiah) . '-' . time() . '.' . $this->gambar_hadiah->getClientOriginalExtension();
-                $path = $this->gambar_hadiah->storeAs('hadiah', $filename, 'public');
-            }
+        $reward = Reward::findOrFail($this->rewardId);
+        $pathGambar = $reward->gambar;
 
-            $new_status = ($this->stok == 0) ? 'Tidak aktif' : 'Aktif';
-
-            $data = [
-                'nama_hadiah'        => $this->nama_hadiah,
-                'reward_category_id' => $this->kategori_id,
-                'stok'               => $this->stok,
-                'gambar'             => $path,
-                'status_hadiah'      => $new_status,
-            ];
-
-            if ($this->reward_id) {
-                // --- UPDATE MODE ---
-                Reward::find($this->reward_id)->update($data);
-                $message = 'Hadiah berhasil diperbarui.';
-            } else {
-                Reward::create($data);
-                $message = 'Hadiah berhasil ditambahkan.';
-            }
-            
-            $this->loadRewards(); 
-            $this->resetForm();
-            $this->closeModal();
-            $this->dispatch('rewardAdded'); 
-            session()->flash('success_message', $message);
-            
-        } catch (Throwable $e) {
-            report($e);
-            session()->flash('error_message', 'Gagal menyimpan data (DB/Server Error).');
-        }
-    }
-    
-    
-    public function deleteReward($id)
-    {
-        try {
-            $reward = Reward::findOrFail($id);
+        if ($this->gambar) {
             if ($reward->gambar) {
-                \Storage::disk('public')->delete($reward->gambar);
+                Storage::disk('public')->delete($reward->gambar);
             }
-            $reward->delete();
-            $this->loadRewards(); 
-            session()->flash('success_message', 'Hadiah berhasil dihapus.');
-        } catch (Throwable $e) {
-            report($e);
-            session()->flash('error_message', 'Gagal menghapus hadiah.');
+            $pathGambar = $this->gambar->store('rewards', 'public');
         }
+
+        $reward->update([
+            'nama_hadiah'        => $this->nama_hadiah,
+            'reward_category_id' => $this->reward_category_id,
+            'stok'               => $this->stok,
+            'status_hadiah'      => $this->status_hadiah,
+            'gambar'             => $pathGambar,
+        ]);
+
+        $this->dispatch('close-modal');
+        $this->resetForm();
+        session()->flash('message', 'Hadiah berhasil diperbarui.');
     }
 
-    public function rewardAdded($rewardId = null)
+    public function resetForm()
     {
-        $this->loadRewards(); 
+        $this->reset(['nama_hadiah', 'reward_category_id', 'stok', 'status_hadiah', 'gambar', 'oldGambar', 'rewardId', 'isEditing']);
+        $this->status_hadiah = 'Aktif';
+    }
+
+    public function setDeleteCategory($id)
+    {
+        $this->deleteId = $id;
+        $this->deleteContext = 'category';
+    }
+
+    // Setup Hapus Hadiah
+    public function setDeleteReward($id)
+    {
+        $this->deleteId = $id;
+        $this->deleteContext = 'reward';
+    }
+
+    // Eksekusi Hapus
+    public function delete()
+    {
+        if ($this->deleteContext == 'category') {
+            $cat = RewardCategory::find($this->deleteId);
+
+            if ($cat) {
+                // --- VALIDASI RELASI (BARU) ---
+                // Cek apakah kategori ini punya anak (hadiah)?
+                if ($cat->rewards()->exists()) {
+                    // Jika ada, batalkan hapus dan kirim pesan error
+                    $this->dispatch('close-modal');
+                    session()->flash('error', 'Gagal! Kategori ini tidak bisa dihapus karena masih digunakan oleh data Hadiah.');
+                    return; // Stop proses
+                }
+                // -----------------------------
+
+                $cat->delete();
+                session()->flash('message', 'Kategori berhasil dihapus.');
+            }
+        } elseif ($this->deleteContext == 'reward') {
+            $reward = Reward::find($this->deleteId);
+            if ($reward) {
+                if ($reward->gambar) {
+                    Storage::disk('public')->delete($reward->gambar);
+                }
+                $reward->delete();
+                session()->flash('message', 'Hadiah berhasil dihapus.');
+            }
+        }
+
+        $this->deleteId = null;
+        $this->deleteContext = null;
+
+        $this->dispatch('close-modal');
     }
 
     public function render()
     {
-        return view('livewire.admin.reward-config-page');
+        $rewards = Reward::query()
+            ->with('category')
+            ->when($this->searchReward, function ($q) {
+                $q->where('nama_hadiah', 'like', '%' . $this->searchReward . '%');
+            })
+            ->latest()
+            ->paginate(10);
+
+        $categories = RewardCategory::query()
+            ->withCount('rewards')
+            ->when($this->searchCategory ?? null, function ($q) {
+                $q->where('nama_kategori', 'like', '%' . $this->searchCategory . '%');
+            })
+            ->latest()
+            ->paginate(5, pageName: 'cat_page');
+
+        return view('livewire.admin.reward-config-page', [
+            'rewards' => $rewards,
+            'categories' => $categories
+        ]);
     }
 }
