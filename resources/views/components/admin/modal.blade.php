@@ -48,7 +48,7 @@
 
                 <div class="mb-3">
                     <label class="form-label">Stok <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" min="1" wire:model.defer="stok" placeholder="Masukkan jumlah stok...">
+                    <input type="number" class="form-control" min="0" wire:model.defer="stok" placeholder="Masukkan jumlah stok...">
                     @error('stok') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
 

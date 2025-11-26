@@ -4,10 +4,13 @@ namespace App\Livewire\Admin;
 
 use App\Models\Reward; 
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
 use Throwable; 
+
+#[Title('Kategori & Hadiah')] 
 
 class RewardConfigPage extends Component
 {
@@ -16,49 +19,37 @@ class RewardConfigPage extends Component
     // ==================================
     // 1. PROPERTI UNTUK DATA DAN MODAL
     // ==================================
-    public $rewards; // <-- HARUS ADA: Properti untuk menampung data tabel
+    public $rewards; 
     public $is_modal_open = false; 
-    
-    // Properti Form
-    public $reward_id; // Untuk Edit/Update
-    public $gambar_lama; // Untuk Edit/Update
+    public $reward_id;  
+    public $gambar_lama; 
     public $nama_hadiah;
     public $kategori_id;
     public $stok;
-    public $gambar_hadiah;
+    public $gambar_hadiah; 
     
-    // Listener untuk me-refresh data (dipanggil dari saveHadiah)
     protected $listeners = ['rewardAdded' => 'loadRewards']; 
 
     #[Layout('components.layouts.admin')]
 
-    // ==================================
-    // 2. LIFECYCLE HOOKS (PEMUATAN DATA)
-    // ==================================
-
-    // Metode mount() akan dijalankan pertama kali untuk memuat data
     public function mount()
     {
         $this->loadRewards();
     }
     
-    // Metode untuk mengambil data dari database
     public function loadRewards()
     {
-        // Mengambil semua data hadiah dan menyimpannya di properti $rewards
         $this->rewards = Reward::all();
     }
     
-    // ==================================
-    // 3. LOGIKA MODAL DAN FORM
-    // ==================================
-
+    // open modal
     public function openModal()
     {
         $this->resetForm();
         $this->is_modal_open = true;
     }
 
+    // close modal
     public function closeModal()
     {
         $this->is_modal_open = false;
@@ -70,13 +61,30 @@ class RewardConfigPage extends Component
         $this->reset(['reward_id', 'gambar_lama', 'nama_hadiah', 'kategori_id', 'stok', 'gambar_hadiah']);
         $this->resetErrorBag();
     }
+    
+    // Edit
+    public function editReward($id)
+    {
+        $reward = Reward::findOrFail($id);
+        
+        $this->reward_id = $reward->id;
+        $this->nama_hadiah = $reward->nama_hadiah;
+        $this->kategori_id = $reward->reward_category_id;
+        $this->stok = $reward->stok;
+        $this->gambar_lama = $reward->gambar; 
+        
+        $this->is_modal_open = true;
+    }
+
+
+    // Simpan hadiah (create/update)
 
     public function saveHadiah()
     {
         try {
              $this->validate([
                 'nama_hadiah'   => 'required|string|max:255',
-                'stok'          => 'required|integer|min:1',
+                'stok'          => 'required|integer|min:0', 
                 'kategori_id'   => 'required|integer|exists:reward_categories,id', 
                 'gambar_hadiah' => 'nullable|image|max:2048',
             ]);
@@ -85,32 +93,36 @@ class RewardConfigPage extends Component
         }
 
         $path = $this->gambar_lama; 
-
+        
         try {
-            // ... (Logika upload file dan UPDATE/CREATE) ...
+            if ($this->gambar_hadiah) {
+                if ($this->gambar_lama) {
+                    \Storage::disk('public')->delete($this->gambar_lama);
+                }
+                $filename = Str::slug($this->nama_hadiah) . '-' . time() . '.' . $this->gambar_hadiah->getClientOriginalExtension();
+                $path = $this->gambar_hadiah->storeAs('hadiah', $filename, 'public');
+            }
 
-            // Tentukan apakah ini mode CREATE atau UPDATE
+            $new_status = ($this->stok == 0) ? 'Tidak aktif' : 'Aktif';
+
             $data = [
                 'nama_hadiah'        => $this->nama_hadiah,
                 'reward_category_id' => $this->kategori_id,
                 'stok'               => $this->stok,
                 'gambar'             => $path,
+                'status_hadiah'      => $new_status,
             ];
 
             if ($this->reward_id) {
-                // UPDATE
+                // --- UPDATE MODE ---
                 Reward::find($this->reward_id)->update($data);
                 $message = 'Hadiah berhasil diperbarui.';
             } else {
-                // CREATE
-                $data['status_hadiah'] = 'Aktif'; 
                 Reward::create($data);
                 $message = 'Hadiah berhasil ditambahkan.';
             }
-
-            // PENTING: Panggil metode loadRewards untuk update tampilan
-            $this->loadRewards(); 
             
+            $this->loadRewards(); 
             $this->resetForm();
             $this->closeModal();
             $this->dispatch('rewardAdded'); 
@@ -122,16 +134,28 @@ class RewardConfigPage extends Component
         }
     }
     
-    // Metode pendengar (Listener) dipanggil saat event 'rewardAdded' diterima
+    
+    public function deleteReward($id)
+    {
+        try {
+            $reward = Reward::findOrFail($id);
+            if ($reward->gambar) {
+                \Storage::disk('public')->delete($reward->gambar);
+            }
+            $reward->delete();
+            $this->loadRewards(); 
+            session()->flash('success_message', 'Hadiah berhasil dihapus.');
+        } catch (Throwable $e) {
+            report($e);
+            session()->flash('error_message', 'Gagal menghapus hadiah.');
+        }
+    }
+
     public function rewardAdded($rewardId = null)
     {
-        // Memastikan data di-refresh saat event diterima
         $this->loadRewards(); 
     }
 
-    // ==================================
-    // 4. RENDER VIEW
-    // ==================================
     public function render()
     {
         return view('livewire.admin.reward-config-page');
