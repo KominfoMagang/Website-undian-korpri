@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # --- CHECKOUT CODE ---
+      # 1. CHECKOUT
       - uses: actions/checkout@v4
 
-      # --- NODE MODULES CACHE ---
+      # 2. CACHE NODE MODULES
       - name: Cache Node modules
         uses: actions/cache@v4
         with:
@@ -22,32 +22,32 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      # --- INSTALL NODE DEPENDENCIES ---
+      # 3. INSTALL NODE DEPENDENCIES
       - name: Install Node dependencies
         run: npm ci
 
-      # --- BUILD VITE ASSETS ---
+      # 4. BUILD FRONTEND ASSETS (Vite)
       - name: Build frontend assets
         run: npm run build
 
-      # --- UPLOAD BUILD AS ARTIFACT (v4) ---
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build
-          path: public/build
+      # 5. PACK BUILD INTO TAR (prevent nested folders)
+      - name: Create build TAR
+        run: |
+          tar -czf build.tar.gz -C public/build .
 
-      # --- COMPOSER CACHE ---
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
+      # 6. UPLOAD TAR TO SERVER
+      - name: Upload TAR to server
+        uses: appleboy/scp-action@v0.1.3
         with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "build.tar.gz"
+          target: "/app/backend/public"
 
-      # --- DEPLOY CODE TO SERVER VIA SSH ---
-      - name: Deploy code to server
+      # 7. PREPARE CODE BASE & CLEAN SERVER BUILD FOLDER
+      - name: Prepare server for deployment
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -58,34 +58,30 @@ jobs:
           script: |
             cd /app/backend
 
-            echo "🔄 Pulling latest code..."
+            echo "🔄 Updating source code..."
             git fetch --all
             git reset --hard origin/main
             git pull origin main
 
-            echo "🧹 Cleaning old build..."
+            echo "🧹 Cleaning server build folder..."
             rm -rf public/build
             mkdir -p public/build
 
-      # --- DOWNLOAD ARTIFACT (v4) ---
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build
-          path: public/build
-
-      # --- UPLOAD BUILD TO SERVER ---
-      - name: Upload build folder to server
-        uses: appleboy/scp-action@v0.1.3
+      # 8. UNTAR BUILD ON SERVER ✔ NO NESTED FOLDER
+      - name: Extract TAR on server
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "public/build/*"
-          target: "/app/backend/public/build"
+          script: |
+            cd /app/backend/public
+            echo "📦 Extracting build archive..."
+            tar -xzf build.tar.gz -C build
+            rm build.tar.gz
 
-      # --- FINALIZE DEPLOYMENT ---
+      # 9. RESTART & FINALIZE DEPLOY
       - name: Finalize Deployment
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -93,21 +89,20 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          passphrase: ""
           script: |
             cd /app/backend
 
-            echo "🔁 Restarting backend container..."
+            echo "🔁 Restarting PHP container..."
             docker compose stop asnday
             docker compose up -d asnday
 
-            echo "📦 Installing composer dependencies..."
+            echo "📦 Composer install..."
             docker exec asnday composer install --no-interaction --prefer-dist --no-dev
 
             echo "🗄 Running migrations..."
             docker exec asnday php artisan migrate --force
 
-            echo "🚀 Optimizing Laravel..."
+            echo "🚀 Optimizing..."
             docker exec asnday php artisan optimize
 
-            echo "🎉 Deployment completed successfully!"
+            echo "🎉 Deployment SUCCESS!"
