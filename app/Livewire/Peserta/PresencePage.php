@@ -21,12 +21,13 @@ class PresencePage extends Component
     use WithFileUploads;
 
     // diskominfo : -7.31175525292628, 108.19931433695206
-    // Bale kota : -7.316538442400661, 108.19675248829186
-    // rumah : -7.228483513036513, 108.17018006490862
+    // Bale kota : -7.316538442400661, 108.153885
+    // rumah : -7.230234323966636, 108.1545507815288
+    
 
-    protected const CENTER_LAT = -7.228483513036513;
-    protected const CENTER_LNG = 108.17018006490862;
-    protected const RADIUS_METERS = 500;
+    protected const CENTER_LAT = -7.230234323966636;
+    protected const CENTER_LNG = 108.1545507815288;
+    protected const RADIUS_METERS = 10000;
     protected const EARTH_RADIUS = 6371000;
     protected const MAX_UPLOAD_SIZE = 10240;
 
