@@ -66,7 +66,7 @@ class CouponGeneratorService
         $this->drawCenteredText(
             $image,
             $couponNumber,
-            70,
+            90,
             (int) ($height * 0.35),
             $colorGold,
             $fontBold,
@@ -79,7 +79,7 @@ class CouponGeneratorService
         // ---- NAMA PESERTA ----
         imagettftext(
             $image,
-            26,
+            35,
             0,
             $leftMarginX,
             (int) ($height * 0.52),
@@ -91,7 +91,7 @@ class CouponGeneratorService
         // ---- NIP ----
         imagettftext(
             $image,
-            26,
+            35,
             0,
             $leftMarginX,
             (int) ($height * 0.65),
