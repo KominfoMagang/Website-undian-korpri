@@ -5,9 +5,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Dashboard - Doorprize Manager</title>
-    <link href="{{ asset('tabler/dist/css/tabler.min.css?1684106062') }}" rel="stylesheet" />
-    <link href="{{ asset('tabler/dist/css/demo.min.css?1684106062') }}" rel="stylesheet" />
+    <title>{{ $title }}</title>
+    <link href="{{ asset('tabler/dist/css/tabler.min.css') }}" rel="stylesheet" />
+    <link href="{{ asset('tabler/dist/css/demo.min.css') }}" rel="stylesheet" />
 
     <style>
         @import url('https://rsms.me/inter/inter.css');
@@ -86,48 +86,19 @@
 </head>
 
 <body>
-    <script src="{{ asset('tabler/dist/js/demo-theme.min.js?1684106062') }}"></script>
     <div class="page">
         <x-admin.navbar/>
-
+        
         <div class="page-wrapper">
+            
             {{ $slot }}
-
-            <footer class="footer footer-transparent d-print-none">
-                <div class="container-xl">
-                    <div class="row text-center align-items-center flex-row-reverse">
-                        <div class="col-lg-auto ms-lg-auto">
-                            <ul class="list-inline list-inline-dots mb-0">
-                                <li class="list-inline-item"><a href="https://tabler.io/docs" target="_blank"
-                                        class="link-secondary" rel="noopener">Documentation</a></li>
-                                <li class="list-inline-item"><a href="#" class="link-secondary">License</a>
-                                </li>
-                                <li class="list-inline-item"><a href="https://github.com/tabler/tabler" target="_blank"
-                                        class="link-secondary" rel="noopener">Source code</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-12 col-lg-auto mt-3 mt-lg-0">
-                            <ul class="list-inline list-inline-dots mb-0">
-                                <li class="list-inline-item">
-                                    Copyright &copy; 2023
-                                    <a href="." class="link-secondary">Tabler</a>.
-                                    All rights reserved.
-                                </li>
-                                <li class="list-inline-item">
-                                    <a href="#" class="link-secondary" rel="noopener">
-                                        v1.0.0-beta19
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </footer>
+            
+            <x-admin.footer/>
         </div>
     </div>
 
-    <script src="{{ asset('tabler/dist/js/tabler.min.js?1684106062') }}" defer></script>
-    <script src="{{ asset('tabler/dist/js/demo.min.js?1684106062') }}" defer></script>
+    <script src="{{ asset('tabler/dist/js/tabler.js') }}" defer></script>
+    <script src="{{ asset('tabler/dist/js/demo.js') }}" defer></script>
 
     @livewireScripts
 </body>
