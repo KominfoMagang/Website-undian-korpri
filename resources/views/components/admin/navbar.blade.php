@@ -8,6 +8,8 @@
         <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
             <a href="." class="text-decoration-none">
                 <div class="d-flex align-items-center">
+                    <img src="/static/images/bank_bjb.png" alt="Logo Kota Tasikmalaya"
+                        class="navbar-brand-image img-hover-zoom me-3" style="height: 40px; width: auto;">
 
                     <img src="/static/images/logoKorpri.png" alt="Logo Korpri"
                         class="navbar-brand-image img-hover-zoom me-2" style="height: 40px; width: auto;">
@@ -122,9 +124,9 @@
                         <li class="nav-item {{ request()->routeIs('admin.store') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('admin.store') }}" wire:navigate>
                                 <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
-                                        height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                        fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                        stroke-linecap="round" stroke-linejoin="round">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                         <path d="M3 21l18 0" />
                                         <path
@@ -145,8 +147,8 @@
                         <a href="{{ route('slot-machine.undian') }}" target="_blank"
                             class="btn btn-primary d-none d-sm-inline-block">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-dice me-2"
-                                width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                 <rect x="4" y="4" width="16" height="16" rx="2" />
                                 <circle cx="8.5" cy="8.5" r=".5" fill="currentColor" />
@@ -159,8 +161,8 @@
 
                         <button class="btn btn-danger d-flex align-items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-logout me-2"
-                                width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                 <path
                                     d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2">

@@ -16,10 +16,10 @@
 
             {{-- Flash Message --}}
             @if (session('success'))
-                <div class="alert alert-success alert-dismissible" role="alert">
-                    <div>{{ session('success') }}</div>
-                    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
-                </div>
+            <div class="alert alert-success alert-dismissible" role="alert">
+                <div>{{ session('success') }}</div>
+                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div>
             @endif
 
             <div class="row row-cards">
@@ -38,20 +38,17 @@
                                         class="form-control @error('amount') is-invalid @enderror"
                                         placeholder="Contoh: 1000">
                                     @error('amount')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     <small class="form-hint">Maksimal 50.000 sekali proses.</small>
                                 </div>
 
                                 <div class="d-flex justify-content-between">
-                                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
-                                        <!-- Loading State Text -->
-                                        <span wire:loading.remove wire:target="generate">
-                                            Generate
-                                        </span>
-                                        <span wire:loading wire:target="generate">
-                                            Memproses...
-                                        </span>
+                                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled"
+                                        wire:target="generate">
+
+                                        <span wire:loading.remove wire:target="generate">Generate</span>
+                                        <span wire:loading wire:target="generate">Memproses...</span>
                                     </button>
 
                                     <!-- Tombol Reset (Hati-hati) -->
@@ -72,7 +69,7 @@
                             <h3 class="card-title">Daftar Kupon Terbaru</h3>
                             <div class="card-actions">
                                 <!-- Tombol Refresh untuk cek data baru dari Queue -->
-                                <button wire:click="$refresh" class="btn btn-sm btn-secondary">
+                                <button wire:click="$refresh" class="btn btn-success">
                                     Refresh Data
                                 </button>
                             </div>
@@ -92,37 +89,36 @@
                                 </thead>
                                 <tbody>
                                     @forelse($coupons as $index => $coupon)
-                                        <tr wire:key="{{ $coupon->id }}">
-                                            <td><span class="text-muted">{{ $coupons->firstItem() + $index }}</span>
-                                            </td>
-                                            <td>
-                                                <span
-                                                    class="badge bg-blue text-blue-fg fs-3">{{ $coupon->kode_kupon }}</span>
-                                            </td>
-                                            <td>
-                                                @if ($coupon->status_kupon == 'Aktif')
-                                                    <span class="badge bg-green text-green-fg">Aktif</span>
-                                                @else
-                                                    <span
-                                                        class="badge bg-red text-red-fg">{{ $coupon->status_kupon }}</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if ($coupon->participant_id)
-                                                    {{ $coupon->participant_id }}
-                                                @else
-                                                    <span class="text-muted fst-italic">- Belum ada -</span>
-                                                @endif
-                                            </td>
-                                            <td>{{ \Carbon\Carbon::parse($coupon->created_at)->format('d M Y H:i:s') }}
-                                            </td>
-                                        </tr>
+                                    <tr wire:key="{{ $coupon->id }}">
+                                        <td><span class="text-muted">{{ $coupons->firstItem() + $index }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-blue text-blue-fg fs-3">{{ $coupon->kode_kupon
+                                                }}</span>
+                                        </td>
+                                        <td>
+                                            @if ($coupon->status_kupon == 'Aktif')
+                                            <span class="badge bg-green text-green-fg">Aktif</span>
+                                            @else
+                                            <span class="badge bg-red text-red-fg">{{ $coupon->status_kupon }}</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($coupon->participant)
+                                            {{ $coupon->participant->nama }}
+                                            @else
+                                            <span class="text-muted fst-italic">- Belum ada -</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ \Carbon\Carbon::parse($coupon->created_at)->format('d M Y H:i:s') }}
+                                        </td>
+                                    </tr>
                                     @empty
-                                        <tr>
-                                            <td colspan="5" class="text-center py-4">
-                                                <div class="text-muted">Belum ada kupon yang digenerate.</div>
-                                            </td>
-                                        </tr>
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <div class="text-muted">Belum ada kupon yang digenerate.</div>
+                                        </td>
+                                    </tr>
                                     @endforelse
                                 </tbody>
                             </table>
