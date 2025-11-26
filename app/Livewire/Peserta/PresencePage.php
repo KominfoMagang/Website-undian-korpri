@@ -2,14 +2,17 @@
 
 namespace App\Livewire\Peserta;
 
+use App\Models\Coupon;
 use App\Models\Participant;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Exception;
 
 #[Layout('components.layouts.pages-peserta.peserta')]
 #[Title("Halaman Absensi Peserta")]
@@ -21,15 +24,19 @@ class PresencePage extends Component
     protected const CENTER_LNG = 108.19932506578725;
     protected const RADIUS_METERS = 500;
     protected const EARTH_RADIUS = 6371000;
+    protected const MAX_UPLOAD_SIZE = 10240; // 10MB
 
+    // Properties
     public string $nip = '';
     public $photo;
     public bool $agreement = false;
 
+    // UI States
     public bool $showDetails = false;
     public string $errorMessage = '';
     public array $detailData = [];
 
+    // Location States
     public bool $locationGranted = false;
     public string $locationErrorMessage = '';
     public ?float $userLat = null;
@@ -37,7 +44,6 @@ class PresencePage extends Component
 
     public function mount()
     {
-        // Cek apakah user sudah memiliki session NIP (sudah pernah klaim)
         if (session()->has('current_participant_nip')) {
             return redirect()->route('halamanKupon');
         }
@@ -46,9 +52,11 @@ class PresencePage extends Component
     public function updatedNip()
     {
         $this->resetState();
+        // Hanya ambil angka
         $this->nip = preg_replace('/[^0-9]/', '', $this->nip);
 
-        if (strlen($this->nip) >= 5) {
+        // Validasi otomatis jika panjang NIP mencukupi (misal 18 digit)
+        if (strlen($this->nip) >= 18) {
             $this->validateNip();
         }
     }
@@ -69,8 +77,9 @@ class PresencePage extends Component
             return;
         }
 
+        // Pastikan nama relasi di Model Participant adalah 'coupons'
         if ($participant->coupons()->exists()) {
-            $this->errorMessage = 'Peserta dengan NIP ini sudah melakukan presensi dan memiliki kupon!';
+            $this->errorMessage = 'Peserta dengan NIP ini sudah melakukan presensi!';
             return;
         }
 
@@ -96,7 +105,7 @@ class PresencePage extends Component
             $this->dispatch('location-granted');
         } else {
             $this->locationGranted = false;
-            $this->locationErrorMessage = 'Anda berada di luar area acara (' . round($distance) . ' meter). Silakan mendekat ke lokasi.';
+            $this->locationErrorMessage = 'Anda berada di luar area acara (' . round($distance) . ' meter). Silakan mendekat.';
             $this->dispatch('location-radius-error');
         }
     }
@@ -115,95 +124,149 @@ class PresencePage extends Component
 
     public function klaimKupon()
     {
-        $this->validate([
-            'photo' => 'required|image|max:2048',
-        ], [
-            'photo.required' => 'Foto selfie wajib diupload.',
-            'photo.image' => 'File harus berupa gambar.',
-            'photo.max' => 'Ukuran foto maksimal 2MB.'
-        ]);
-
-        if (!$this->locationGranted) {
-            return $this->addError('location', 'Posisi Anda belum terverifikasi di area acara.');
-        }
-
-        if (!$this->agreement) {
-            return $this->addError('agreement', 'Anda harus menyetujui pernyataan kebenaran data.');
-        }
-
-        if (!$this->showDetails || !isset($this->detailData['id'])) {
+        // 1. Rate Limiting
+        if ($this->checkRateLimit()) {
             return;
         }
 
-        DB::beginTransaction();
+        // 2. Validasi Logic & Input
+        if (!$this->validateClaimRequest()) {
+            return;
+        }
+
+        $uploadedPath = null;
 
         try {
-            $participant = Participant::findOrFail($this->detailData['id']);
+            // 3. Upload Foto
+            $uploadedPath = $this->uploadPhoto($this->detailData['nip']);
+
+            // 4. Proses Database
+            $couponCode = $this->processTransaction($uploadedPath);
+
+            // 5. Sukses
+            $this->handleSuccess($couponCode);
+        } catch (Exception $e) {
+            // Jika error, hapus foto dan tampilkan pesan
+            $this->handleFailure($e, $uploadedPath);
+        }
+    }
+
+    private function checkRateLimit()
+    {
+        $throttleKey = 'claim-coupon:' . request()->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 1)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            $this->addError('system', "Mohon tunggu $seconds detik sebelum mencoba lagi.");
+            return true;
+        }
+
+        RateLimiter::hit($throttleKey, 10);
+        return false;
+    }
+
+    private function validateClaimRequest()
+    {
+        $this->validate([
+            'photo' => 'required|image|max:' . self::MAX_UPLOAD_SIZE,
+        ], [
+            'photo.required' => 'Foto selfie wajib diupload.',
+            'photo.image' => 'File harus berupa gambar.',
+            'photo.max' => 'Ukuran foto terlalu besar.',
+        ]);
+
+        if (!$this->locationGranted || is_null($this->userLat) || is_null($this->userLng)) {
+            $this->addError('location', 'Posisi Anda belum terverifikasi di area acara.');
+            return false;
+        }
+
+        if (!$this->agreement) {
+            $this->addError('agreement', 'Anda harus menyetujui pernyataan kebenaran data.');
+            return false;
+        }
+
+        if (!$this->showDetails || !isset($this->detailData['id'])) {
+            $this->addError('system', 'Data peserta tidak valid. Silakan refresh halaman.');
+            return false;
+        }
+
+        return true;
+    }
+
+    private function uploadPhoto($nip)
+    {
+        $filename = 'selfie_' . $nip . '_' . time() . '.jpg';
+        return $this->photo->storeAs('photos', $filename, 'public');
+    }
+
+    /**
+     * Menjalankan transaksi database
+     * @throws Exception
+     */
+    private function processTransaction($uploadedPath)
+    {
+        return DB::transaction(function () use ($uploadedPath) {
+            // A. Lock Peserta
+            $participant = Participant::where('id', $this->detailData['id'])
+                ->lockForUpdate()
+                ->firstOrFail();
 
             if ($participant->coupons()->exists()) {
-                throw new \Exception('NIP ini baru saja melakukan klaim.');
+                throw new Exception('NIP ini sudah memiliki kupon (Gagal Double Claim).');
             }
 
-            $path = $this->uploadPhoto($participant->nip);
+            // B. Lock Kupon Tersedia
+            $availableCoupon = Coupon::whereNull('participant_id')
+                ->lockForUpdate()
+                ->first();
 
+            if (!$availableCoupon) {
+                throw new Exception('Mohon maaf, kupon undian telah habis!');
+            }
+
+            // C. Update Peserta
             $participant->update([
-                'foto'         => basename($path),
+                'foto'         => basename($uploadedPath), // Simpan nama filenya saja
                 'status_hadir' => 'Hadir',
                 'latitude'     => $this->userLat,
                 'longitude'    => $this->userLng,
             ]);
 
-            $kodeKupon = $this->generateUniqueCoupon($participant);
+            // D. Assign Kupon
+            $availableCoupon->update([
+                'participant_id' => $participant->id
+            ]);
 
-            DB::commit();
+            return $availableCoupon->kode_kupon;
+        });
+    }
 
-            session()->flash('success', 'Berhasil! Kode Kupon Anda: ' . $kodeKupon);
-            session(['current_participant_nip' => $participant->nip]);
+    private function handleSuccess($couponCode)
+    {
+        $throttleKey = 'claim-coupon:' . request()->ip();
+        RateLimiter::clear($throttleKey);
 
-            return redirect()->route('halamanKupon');
-        } catch (\Exception $e) {
-            DB::rollBack();
+        session()->flash('success', 'Berhasil! Kode Kupon Anda: ' . $couponCode);
+        session(['current_participant_nip' => $this->detailData['nip']]);
 
-            if (isset($path)) {
-                Storage::disk('public')->delete($path);
-            }
+        return redirect()->route('halamanKupon');
+    }
 
-            $this->addError('system', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+    private function handleFailure(Exception $e, $uploadedPath)
+    {
+        if ($uploadedPath && Storage::disk('public')->exists($uploadedPath)) {
+            Storage::disk('public')->delete($uploadedPath);
         }
-    }
 
-    private function uploadPhoto($nip): string
-    {
-        $filename = 'presensi_' . $nip . '_' . time() . '.' . $this->photo->getClientOriginalExtension();
-        return $this->photo->storeAs('selfies', $filename, 'public');
-    }
+        Log::error("Gagal Klaim Kupon [NIP: {$this->nip}]: " . $e->getMessage());
 
-    // Race condition klaim kupon perlu dicek
-    private function generateUniqueCoupon(Participant $participant)
-    {
-        $attempts = 0;
+        $msg = $e->getMessage();
+        // Sembunyikan pesan teknis database deadlock
+        if (str_contains($msg, 'lock') || str_contains($msg, 'Deadlock') || str_contains($msg, 'Serialization failure')) {
+            $msg = "Sistem sedang sibuk, silakan coba tekan tombol lagi.";
+        }
 
-        do {
-            try {
-                $kode = mt_rand(100000, 999999);
-
-                $participant->coupons()->create([
-                    'kode_kupon'   => $kode,
-                    'status_kupon' => 'Aktif'
-                ]);
-
-                return $kode;
-            } catch (QueryException $e) {
-                if ($e->errorInfo[1] == 1062) {
-                    $attempts++;
-                    if ($attempts >= 5) {
-                        throw new \Exception("Gagal generate kode unik. Silakan coba lagi.");
-                    }
-                    continue;
-                }
-                throw $e;
-            }
-        } while (true);
+        $this->addError('system', $msg);
     }
 
     private function calculateDistance($latUser, $lngUser)

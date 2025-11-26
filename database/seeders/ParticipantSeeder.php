@@ -68,11 +68,11 @@ class ParticipantSeeder extends Seeder
                 'sudah_menang' => false,
             ]);
 
-            Coupon::create([
-                'participant_id' => $participant->id,
-                'kode_kupon' => mt_rand(100000, 999999),
-                'status_kupon' => 'Aktif',
-            ]);
+            // Coupon::create([
+            //     'participant_id' => $participant->id,
+            //     'kode_kupon' => mt_rand(100000, 999999),
+            //     'status_kupon' => 'Aktif',
+            // ]);
         }
     }
 }
