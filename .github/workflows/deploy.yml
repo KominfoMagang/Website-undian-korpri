@@ -10,115 +10,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. CHECKOUT
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
 
-      # 2. CACHE NODE MODULES
-      - name: Cache Node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      # 3. INSTALL NODE DEPENDENCIES
-      - name: Install Node dependencies
-        run: npm ci
-
-      # 4. BUILD FRONTEND ASSETS (Vite)
-      - name: Build frontend assets
-        run: npm run build
-
-      # 5. PACK BUILD INTO TAR (prevent nested folders)
-      - name: Create build TAR
-        run: |
-          tar -czf build.tar.gz -C public/build .
-
-      # 6. UPLOAD TAR TO SERVER
-      - name: Upload TAR to server
-        uses: appleboy/scp-action@v0.1.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "build.tar.gz"
-          target: "/app/backend/public"
-
-      # 7. PREPARE CODE BASE & CLEAN SERVER BUILD FOLDER
-      - name: Prepare server for deployment
+      - name: Deploy Production
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-<<<<<<< HEAD
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             cd /app/backend
 
             # Reset dan pull update
-=======
-          passphrase: ""
-          script: |
-            cd /app/backend
-
-            echo "🔄 Updating source code..."
->>>>>>> cdedb56328f26195927ae8ca88178172237ca46e
             git fetch --all
             git reset --hard origin/main
             git pull origin main
 
-<<<<<<< HEAD
-            # Restart container backend
-            docker compose stop backend
-            docker compose up -d backend
-
-            # Composer dan artisan
-            docker exec backend composer install --no-interaction --prefer-dist --no-dev
-            docker exec backend php artisan migrate --force
-            docker exec backend php artisan optimize
-
-            exit 0
-=======
-      # 8. UNTAR BUILD ON SERVER ✔ NO NESTED FOLDER
-      - name: Extract TAR on server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd /app/backend/public
-            echo "📦 Extracting build archive..."
-            tar -xzf build.tar.gz -C build
-
-      # 9. RESTART & FINALIZE DEPLOY
-      - name: Finalize Deployment
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd /app/backend
-
-            echo "🔁 Restarting PHP container..."
+            # Restart container asnday
             docker compose stop asnday
             docker compose up -d asnday
 
-            echo "📦 Composer install..."
+            # NPM install dan build
+            npm ci
+            npm run build
+
+            # Composer dan artisan
             docker exec asnday composer install --no-interaction --prefer-dist --no-dev
-
-            echo "🗄 Running migrations..."
             docker exec asnday php artisan migrate --force
-
-            echo "🚀 Optimizing..."
             docker exec asnday php artisan optimize
 
-            echo "🎉 Deployment SUCCESS!"
->>>>>>> cdedb56328f26195927ae8ca88178172237ca46e
+            exit 0
