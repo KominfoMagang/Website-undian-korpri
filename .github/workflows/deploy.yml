@@ -28,13 +28,13 @@ jobs:
             git reset --hard origin/main
             git pull origin main
 
-            # Restart container backend
-            docker compose stop backend
-            docker compose up -d backend
+            # Restart container backend-asnday
+            docker compose stop backend-asnday
+            docker compose up -d backend-asnday
 
             # Composer dan artisan
-            docker exec backend composer install --no-interaction --prefer-dist --no-dev
-            docker exec backend php artisan migrate --force
-            docker exec backend php artisan optimize
+            docker exec backend-asnday composer install --no-interaction --prefer-dist --no-dev
+            docker exec backend-asnday php artisan migrate --force
+            docker exec backend-asnday php artisan optimize
 
             exit 0
