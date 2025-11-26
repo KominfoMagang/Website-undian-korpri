@@ -14,17 +14,22 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Exception;
 
-#[Layout('components.layouts.pages-peserta.peserta')]
+#[Layout('components.layouts.Pages-peserta.peserta')]
 #[Title("Halaman Absensi Peserta")]
 class PresencePage extends Component
 {
     use WithFileUploads;
 
-    protected const CENTER_LAT = -7.311787177703361;
-    protected const CENTER_LNG = 108.19932506578725;
-    protected const RADIUS_METERS = 500;
+    // diskominfo : -7.31175525292628, 108.19931433695206
+    // Bale kota : -7.316538442400661, 108.153885
+    // rumah : -7.230234323966636, 108.1545507815288
+    
+
+    protected const CENTER_LAT = -7.230234323966636;
+    protected const CENTER_LNG = 108.1545507815288;
+    protected const RADIUS_METERS = 10000;
     protected const EARTH_RADIUS = 6371000;
-    protected const MAX_UPLOAD_SIZE = 10240; // 10MB
+    protected const MAX_UPLOAD_SIZE = 10240;
 
     // Properties
     public string $nip = '';
@@ -124,12 +129,10 @@ class PresencePage extends Component
 
     public function klaimKupon()
     {
-        // 1. Rate Limiting
+
         if ($this->checkRateLimit()) {
             return;
         }
-
-        // 2. Validasi Logic & Input
         if (!$this->validateClaimRequest()) {
             return;
         }
@@ -137,16 +140,10 @@ class PresencePage extends Component
         $uploadedPath = null;
 
         try {
-            // 3. Upload Foto
             $uploadedPath = $this->uploadPhoto($this->detailData['nip']);
-
-            // 4. Proses Database
             $couponCode = $this->processTransaction($uploadedPath);
-
-            // 5. Sukses
             $this->handleSuccess($couponCode);
         } catch (Exception $e) {
-            // Jika error, hapus foto dan tampilkan pesan
             $this->handleFailure($e, $uploadedPath);
         }
     }
@@ -197,6 +194,9 @@ class PresencePage extends Component
     {
         $filename = 'selfie_' . $nip . '_' . time() . '.jpg';
         return $this->photo->storeAs('photos', $filename, 'public');
+
+        // Upload Bucket Amazon S3
+        // return $this->photo->storeAs('photos', $filename, ['disk' => 's3', 'visibility' => 'public']);
     }
 
     /**
@@ -206,7 +206,6 @@ class PresencePage extends Component
     private function processTransaction($uploadedPath)
     {
         return DB::transaction(function () use ($uploadedPath) {
-            // A. Lock Peserta
             $participant = Participant::where('id', $this->detailData['id'])
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -215,7 +214,7 @@ class PresencePage extends Component
                 throw new Exception('NIP ini sudah memiliki kupon (Gagal Double Claim).');
             }
 
-            // B. Lock Kupon Tersedia
+
             $availableCoupon = Coupon::whereNull('participant_id')
                 ->lockForUpdate()
                 ->first();
@@ -224,15 +223,20 @@ class PresencePage extends Component
                 throw new Exception('Mohon maaf, kupon undian telah habis!');
             }
 
+
+            if (!$availableCoupon) {
+                throw new Exception('Mohon maaf, kupon undian telah habis!');
+            }
+
             // C. Update Peserta
             $participant->update([
-                'foto'         => basename($uploadedPath), // Simpan nama filenya saja
+                'foto'         => basename($uploadedPath),
                 'status_hadir' => 'Hadir',
                 'latitude'     => $this->userLat,
                 'longitude'    => $this->userLng,
             ]);
 
-            // D. Assign Kupon
+
             $availableCoupon->update([
                 'participant_id' => $participant->id
             ]);

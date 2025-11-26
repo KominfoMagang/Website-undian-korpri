@@ -1,11 +1,9 @@
-    <div class="relative mb-6">
-        <!-- Banner Image -->
-        <div class="w-full h-40 bg-gray-200 rounded-lg overflow-hidden">
-            <img src="static/images/bannerTest.svg" alt="Banner Korpri" class="w-full h-full object-cover">
-        </div>
-
-        <!-- Logo  -->
-        <div class="absolute -top-4 left-1/2 -translate-x-1/2 flex gap-4">
-            <x-peserta.logo />
-        </div>
+<div class="flex flex-col items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+    <div class="flex gap-1 w-full justify-center">
+        <x-peserta.logo />
     </div>
+
+    <div class="w-full rounded-lg overflow-hidden shadow-md">
+        <img src="static/images/banner-asn.png" alt="Banner Korpri" class="w-full h-auto object-cover">
+    </div>
+</div>
