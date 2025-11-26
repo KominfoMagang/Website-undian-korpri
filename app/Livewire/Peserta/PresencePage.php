@@ -14,7 +14,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Exception;
 
-#[Layout('components.layouts.pages-peserta.peserta')]
+#[Layout('components.layouts.Pages-peserta.peserta')]
 #[Title("Halaman Absensi Peserta")]
 class PresencePage extends Component
 {
