@@ -40,7 +40,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/app.conf:/etc/nginx/conf.d/default.conf
-      - ./ssl_full/server.pem:/etc/nginx/asnday.pem
+      - /app/backend/ssl_full/server.pem:/etc/nginx/asnday.pem
       - .:/var/www
     networks:
       - app-network
