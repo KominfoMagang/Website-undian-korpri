@@ -1,0 +1,40 @@
+name: deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  cd:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Deploy Production
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            cd /app/backend
+
+            # Reset dan pull update
+            git fetch --all
+            git reset --hard origin/main
+            git pull origin main
+
+            # Restart container backend
+            docker compose stop backend
+            docker compose up -d backend
+
+            # Composer dan artisan
+            docker exec backend composer install --no-interaction --prefer-dist --no-dev
+            docker exec backend php artisan migrate --force
+            docker exec backend php artisan optimize
+
+            exit 0
