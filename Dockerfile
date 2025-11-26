@@ -10,8 +10,9 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
-    locales \
+    libzip-dev \
     zip \
+    locales \
     jpegoptim optipng pngquant gifsicle \
     vim \
     unzip \
@@ -19,10 +20,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     libonig-dev \
     libxml2-dev \
-    default-mysql-client \
-    && docker-php-ext-configure zip \
-    && docker-php-ext-install zip \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
+    default-mysql-client
+
+RUN docker-php-ext-configure zip
+RUN docker-php-ext-install zip pdo pdo_mysql mbstring exif pcntl bcmath gd
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
