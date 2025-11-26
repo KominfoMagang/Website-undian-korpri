@@ -1,59 +1,80 @@
-<div class="modal-overlay" id="modalHadiahOverlay">
-    <div class="modal-content-doorprize">
-        <div class="modal-header"
-            style="padding:20px; border-bottom:1px solid #e9ecef; display:flex; justify-content:space-between; align-items:center;">
+@props(['is_modal_open' => false])
+<style>
+  .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1050;display:flex;justify-content:center;align-items:center;padding:20px;}
+  .modal-content-doorprize{background:#fff;border-radius:8px;width:90%;max-width:600px;box-shadow:0 10px 25px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;}
+  .text-danger{color:#dc3545;font-size:0.875em;}
+</style>
+
+{{-- Alpine + entangle => two-way sinkron dengan Livewire parent --}}
+<div x-data="{ open: @entangle('is_modal_open') }"
+     x-show="open"
+     x-cloak
+     @keydown.escape.window="open = false; $wire.closeModal()"
+     class="modal-overlay"
+     x-bind:style="open ? 'display: flex' : 'display: none'"
+     @click="open = false; $wire.closeModal()"
+     id="modalHadiahOverlay">
+
+    <div class="modal-content-doorprize" @click.stop>
+
+        <div class="modal-header" style="padding:20px;border-bottom:1px solid #e9ecef;display:flex;justify-content:space-between;align-items:center;">
             <h3 style="margin:0;">Tambah Hadiah Baru</h3>
-            <button onclick="closeHadiahModal()"
-                style="background:none; border:none; font-size:28px; cursor:pointer; color:#6c757d; line-height:1;">&times;</button>
+
+            <button type="button" @click="open = false; $wire.closeModal()"
+                    style="background:none;border:none;font-size:28px;cursor:pointer;color:#6c757d;line-height:1;">
+                &times;
+            </button>
         </div>
+
         <div class="modal-body" style="padding:20px;">
-            <div class="mb-3">
-                <label class="form-label">Nama Hadiah <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="namaHadiah" placeholder="Contoh: Jambal Roti">
-            </div>
+            <form wire:submit.prevent="saveHadiah" enctype="multipart/form-data">
 
-            <div class="mb-3">
-                <label class="form-label">Kategori</label>
-                <textarea class="form-control" id="deskripsiHadiah" rows="3"
-                    placeholder="Deskripsi singkat hadiah..."></textarea>
-            </div>
-
-            <div class="mb-3">
-                <label for="inputStok" class="form-label">Stok</label>
-                <input type="number" class="form-control" id="inputStok" name="stok" min="0"
-                    placeholder="Masukkan jumlah stok...">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Gambar Hadiah</label>
-                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-                    <input type="file" id="fileInput" accept="image/*" style="display:none;"
-                        onchange="handleFileSelect(event)">
-                    <div id="uploadPlaceholder">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            style="margin:0 auto 12px; display:block; color:#6c757d;">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15">
-                            </line>
-                        </svg>
-                        <p style="margin:0; color:#6c757d;">Klik untuk upload gambar</p>
-                        <p style="margin:4px 0 0; font-size:12px; color:#9ca3af;">PNG, JPG,
-                            JPEG (Max 2MB)</p>
-                    </div>
-                    <div id="previewArea" style="display:none;">
-                        <img id="previewImage" class="preview-image" alt="Preview">
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removeImage(event)">Hapus
-                            Gambar</button>
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label">Nama Hadiah <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" wire:model.defer="nama_hadiah" placeholder="Contoh: Jambal Roti">
+                    @error('nama_hadiah') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
-            </div>
 
-            <div style="display:flex; gap:12px; margin-top:24px;">
-                <button class="btn btn-secondary flex-fill" onclick="closeHadiahModal()">Batal</button>
-                <button class="btn btn-primary flex-fill" onclick="saveHadiah()">Simpan</button>
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                    <select class="form-control" wire:model.defer="kategori_id">
+                        <option value="">Pilih Kategori</option>
+                        <option value="1">Elektronik</option>
+                        <option value="2">Kendaraan</option>
+                        <option value="3">Peralatan Rumah Tangga</option>
+                    </select>
+                    @error('kategori_id') <span class="text-danger">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Stok <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" min="1" wire:model.defer="stok" placeholder="Masukkan jumlah stok...">
+                    @error('stok') <span class="text-danger">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Gambar Hadiah (Maks 2MB)</label>
+                    <input type="file" class="form-control" wire:model="gambar_hadiah">
+                    <div wire:loading wire:target="gambar_hadiah">Uploading...</div>
+
+                    @if(!empty($gambar_hadiah))
+                        <p class="mt-2">Preview:</p>
+                        <img src="{{ $gambar_hadiah->temporaryUrl() ?? '' }}" style="max-width:150px;height:auto;border-radius:4px;">
+                    @endif
+
+                    @error('gambar_hadiah') <span class="text-danger">{{ $message }}</span> @enderror
+                </div>
+
+                <div style="display:flex;gap:12px;margin-top:24px;">
+                    <button type="button" class="btn btn-secondary flex-fill" @click="open = false; $wire.closeModal()">Batal</button>
+
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <span wire:loading wire:target="saveHadiah">Menyimpan...</span>
+                        <span wire:loading.remove wire:target="saveHadiah">Simpan</span>
+                    </button>
+                </div>
+
+            </form>
         </div>
     </div>
 </div>
