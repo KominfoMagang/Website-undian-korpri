@@ -20,9 +20,11 @@ class PresencePage extends Component
 {
     use WithFileUploads;
 
+    // diskominfo : 7.31175525292628, 108.19931433695206
+
     // Constants
-    protected const CENTER_LAT = -7.316538442400661;
-    protected const CENTER_LNG = 108.19675248829186;
+    protected const CENTER_LAT = -7.31175525292628;
+    protected const CENTER_LNG = 108.19931433695206;
     protected const RADIUS_METERS = 500;
     protected const EARTH_RADIUS = 6371000;
     protected const MAX_UPLOAD_SIZE = 10240; // 10MB
