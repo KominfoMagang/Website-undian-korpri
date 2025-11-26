@@ -45,7 +45,7 @@
                     <div class="mt-2">
                         <p class="text-gray-500">Asal Instansi</p>
                         <p class="text-gray-800 font-semibold text-[14px]">
-                            {{ $detailData['unit_kerja'] ?? '-' }}
+                            {{ Str::words($detailData['unit_kerja'] ?? '-', 20, '....') }}
                         </p>
                     </div>
                 </div>
@@ -55,6 +55,10 @@
                     <div class="absolute -right-6 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full"></div>
                     <div class="border-t-2 border-dashed border-white"></div>
                 </div>
+
+                {{-- Tukarkan kupon belum berfungsi --}}
+                <livewire:peserta.reedem-toko />
+
 
                 <button type="button" wire:click="downloadCoupon"
                     class="w-full bg-[#5065A4] text-white text-sm font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity">
