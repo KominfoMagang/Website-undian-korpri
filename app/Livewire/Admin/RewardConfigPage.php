@@ -16,7 +16,6 @@ class RewardConfigPage extends Component
 {
     use WithFileUploads;
     
-    // ... (Properti lainnya) ...
     public $rewards; 
     public $is_modal_open = false; 
     public $reward_id; 
@@ -30,8 +29,6 @@ class RewardConfigPage extends Component
 
     #[Layout('components.layouts.admin')]
 
-    // Metode mount(), loadRewards(), saveHadiah(), dll. tetap sama.
-    // ... (Semua logika dari respons sebelumnya) ...
     
     public function mount()
     {
@@ -79,7 +76,6 @@ class RewardConfigPage extends Component
         $path = $this->gambar_lama; 
 
         try {
-            // ... (Logika penyimpanan UPDATE/CREATE) ...
 
             $data = [
                 'nama_hadiah'        => $this->nama_hadiah,
