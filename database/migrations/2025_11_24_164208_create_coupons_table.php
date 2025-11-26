@@ -19,7 +19,6 @@ return new class extends Migration
             $table->enum('status_kupon', ['Aktif', 'Kadaluarsa'])
                 ->default('Aktif')
                 ->index();
-            $table->foreignId('store_id')->nullable()->constrained('stores')->nullOnDelete();
             $table->timestamp('redeemed_at')->nullable();
             $table->timestamps();
         });
