@@ -21,21 +21,17 @@ class RewardConfigPage extends Component
     // ==================================
     public $rewards; 
     public $is_modal_open = false; 
-    
-    // Properti Form
-    public $reward_id;   // Kunci untuk mode Edit/Update
-    public $gambar_lama; // Kunci untuk menyimpan path gambar lama
-    
+    public $reward_id;  
+    public $gambar_lama; 
     public $nama_hadiah;
     public $kategori_id;
     public $stok;
-    public $gambar_hadiah; // File object yang diupload
+    public $gambar_hadiah; 
     
     protected $listeners = ['rewardAdded' => 'loadRewards']; 
 
     #[Layout('components.layouts.admin')]
 
-    // Metode mount() dan loadRewards() di sini
     public function mount()
     {
         $this->loadRewards();
@@ -62,12 +58,11 @@ class RewardConfigPage extends Component
 
     protected function resetForm()
     {
-        // PENTING: RESET SEMUA PROPERTI FORM KE KONDISI KOSONG/DEFAULT
         $this->reset(['reward_id', 'gambar_lama', 'nama_hadiah', 'kategori_id', 'stok', 'gambar_hadiah']);
         $this->resetErrorBag();
     }
     
-    // LOGIKA EDIT (Disertakan di sini untuk kelengkapan)
+    // Edit
     public function editReward($id)
     {
         $reward = Reward::findOrFail($id);
@@ -82,16 +77,13 @@ class RewardConfigPage extends Component
     }
 
 
-    // ==================================
-    // 5. LOGIKA SIMPAN/UPDATE
-    // ==================================
+    // Simpan hadiah (create/update)
+
     public function saveHadiah()
     {
-        // 1. Validasi Input
         try {
              $this->validate([
                 'nama_hadiah'   => 'required|string|max:255',
-                // FIX: Ubah min:1 menjadi min:0 agar stok 0 diizinkan
                 'stok'          => 'required|integer|min:0', 
                 'kategori_id'   => 'required|integer|exists:reward_categories,id', 
                 'gambar_hadiah' => 'nullable|image|max:2048',
@@ -103,7 +95,6 @@ class RewardConfigPage extends Component
         $path = $this->gambar_lama; 
         
         try {
-            // 2. Handle Upload File BARU
             if ($this->gambar_hadiah) {
                 if ($this->gambar_lama) {
                     \Storage::disk('public')->delete($this->gambar_lama);
@@ -119,22 +110,18 @@ class RewardConfigPage extends Component
                 'reward_category_id' => $this->kategori_id,
                 'stok'               => $this->stok,
                 'gambar'             => $path,
-                'status_hadiah'      => $new_status, // Terapkan status baru
+                'status_hadiah'      => $new_status,
             ];
 
-            // 4. EKSEKUSI: CREATE atau UPDATE
             if ($this->reward_id) {
                 // --- UPDATE MODE ---
                 Reward::find($this->reward_id)->update($data);
                 $message = 'Hadiah berhasil diperbarui.';
             } else {
-                // --- CREATE MODE ---
-                // Status sudah diset di $data di atas
                 Reward::create($data);
                 $message = 'Hadiah berhasil ditambahkan.';
             }
             
-            // 5. Refresh tampilan dan tutup
             $this->loadRewards(); 
             $this->resetForm();
             $this->closeModal();
@@ -147,7 +134,6 @@ class RewardConfigPage extends Component
         }
     }
     
-    // ... (metode deleteReward, rewardAdded, dan render) ...
     
     public function deleteReward($id)
     {
