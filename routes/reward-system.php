@@ -1,8 +1,8 @@
 <?php
 
-use App\Livewire\SlotMachine\Doorprize;
-use App\Livewire\SlotMachine\Participant;
-use App\Livewire\SlotMachine\Winner;
+use App\Livewire\RewardSystem\Doorprize;
+use App\Livewire\RewardSystem\Participant;
+use App\Livewire\RewardSystem\Winner;
 use Illuminate\Support\Facades\Route;
 
 Route::name('slot-machine.')->group(function(){

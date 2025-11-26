@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\SlotMachine;
+namespace App\Livewire\RewardSystem;
 
 use App\Models\Winner as ModelsWinner;
 use Livewire\Attributes\Layout;
@@ -9,8 +9,8 @@ use Livewire\Component;
 
 class Winner extends Component
 {
-    #[Layout('components.layouts.slot-machine')]
-    #[Title('Daftar Pemenang Undian HUT KORPRI ke-53')]
+    #[Layout('components.layouts.reward-system')]
+    #[Title('Daftar Pemenang Undian HUT KORPRI ke-54')]
 
     public $limit = 6; // Jumlah awal list bawah
 
@@ -38,7 +38,7 @@ class Winner extends Component
         // Cek apakah masih ada sisa data untuk tombol "Load More"
         $hasMore = $allWinners->count() > (3 + $this->limit);
 
-        return view('livewire.slot-machine.winner', [
+        return view('livewire.reward-system.winner', [
             'podium' => $podium,
             'listWinners' => $listWinners,
             'hasMore' => $hasMore,

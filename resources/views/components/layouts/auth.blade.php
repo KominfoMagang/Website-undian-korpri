@@ -7,11 +7,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Sign in - Tabler - Premium and Open Source dashboard template with responsive and high quality UI.</title>
     <!-- CSS files -->
-    <link href="{{ asset('tabler/dist/css/tabler.min.css?1684106062')}}" rel="stylesheet" />
-    <link href="{{ asset('tabler/dist/css/tabler-payments.min.css?1684106062')}}" rel="stylesheet" />
-    <link href="{{ asset('tabler/dist/css/tabler-flags.min.css?1684106062')}}" rel="stylesheet" />
-    <link href="{{ asset('tabler/dist/css/tabler-vendors.min.css?1684106062')}}" rel="stylesheet" />
-    <link href="{{ asset('tabler/dist/css/demo.min.css?1684106062')}}" rel="stylesheet" />
+    <link href="{{ asset('tabler/dist/css/tabler.min.css')}}" rel="stylesheet" />
+    <link href="{{ asset('tabler/dist/css/tabler-payments.min.css')}}" rel="stylesheet" />
+    <link href="{{ asset('tabler/dist/css/tabler-flags.min.css')}}" rel="stylesheet" />
+    <link href="{{ asset('tabler/dist/css/tabler-vendors.min.css')}}" rel="stylesheet" />
+    <link href="{{ asset('tabler/dist/css/demo.min.css')}}" rel="stylesheet" />
     <style>
         @import url('https://rsms.me/inter/inter.css');
 
@@ -26,7 +26,7 @@
 </head>
 
 <body class=" d-flex flex-column">
-    <script src="{{ asset('tabler/dist/js/demo-theme.min.js?1684106062')}}"></script>
+    <script src="{{ asset('tabler/dist/js/demo-theme.min.js')}}"></script>
     <div class="page page-center">
         <div class="container container-tight py-4">
             {{ $slot }}
@@ -34,8 +34,8 @@
     </div>
     <!-- Libs JS -->
     <!-- Tabler Core -->
-    <script src="{{ asset('tabler/dist/js/tabler.min.js?1684106062')}}" defer></script>
-    <script src="{{ asset('tabler/dist/js/demo.min.js?1684106062')}}" defer></script>
+    <script src="{{ asset('tabler/dist/js/tabler.min.js')}}" defer></script>
+    <script src="{{ asset('tabler/dist/js/demo.min.js')}}" defer></script>
 </body>
 
 </html>

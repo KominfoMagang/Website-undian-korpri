@@ -14,7 +14,7 @@
 
 <body class="bg-korpri-event min-h-screen flex flex-col items-center justify-center p-4 pt-24 text-slate-800">
     <div id="mainNavbar" class="w-full fixed top-0 z-50 transition-transform duration-300">
-        <x-slot-machine.navbar />
+        <x-reward-system.navbar />
     </div>
 
     {{ $slot }}

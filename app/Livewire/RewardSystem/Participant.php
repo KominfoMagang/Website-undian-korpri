@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\SlotMachine;
+namespace App\Livewire\RewardSystem;
 
 use App\Models\Participant as ModelsParticipant;
 use Livewire\Attributes\Layout;
@@ -12,8 +12,8 @@ class Participant extends Component
 {
     use WithPagination;
 
-    #[Layout('components.layouts.slot-machine')]
-    #[Title('Daftar Peserta Undian HUT KORPRI ke-53')]
+    #[Layout('components.layouts.reward-system')]
+    #[Title('Daftar Peserta Undian HUT KORPRI ke-54')]
 
     // Property untuk Filter & Search
     public $search = '';
@@ -48,7 +48,7 @@ class Participant extends Component
             ->orderBy('nama', 'asc')
             ->paginate(10); // Tampilkan 10 per halaman
 
-        return view('livewire.slot-machine.participant', [
+        return view('livewire.reward-system.participant', [
             'participants' => $participants,
             'unitKerjaList' => $unitKerjaList,
             'totalPeserta' => ModelsParticipant::count(),
