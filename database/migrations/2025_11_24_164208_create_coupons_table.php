@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('coupons', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('participant_id')->constrained('participants')->cascadeOnDelete();
+            $table->foreignId('participant_id')->nullable()->constrained('participants')->cascadeOnDelete();
             $table->string('kode_kupon')->unique()->index();
             $table->enum('status_kupon', ['Aktif', 'Kadaluarsa'])
                 ->default('Aktif')
