@@ -20,6 +20,8 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     default-mysql-client \
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install zip \
     && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
 
 # Clear cache
