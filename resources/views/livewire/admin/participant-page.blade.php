@@ -54,7 +54,23 @@
                                         <path d="M12 5l0 14" />
                                         <path d="M5 12l14 0" />
                                     </svg>
-                                    Tambah User
+                                    Tambah Peserta
+                                </a>
+                                <a href="#" class="btn btn-success" data-bs-toggle="modal"
+                                    data-bs-target="#modal-import">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        class="icon icon-tabler icon-tabler-file-spreadsheet" width="24" height="24"
+                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                                        <path
+                                            d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                                        <path d="M8 11h8v7h-8z" />
+                                        <path d="M8 15h8" />
+                                        <path d="M11 11v7" />
+                                    </svg>
+                                    Import Excel
                                 </a>
                             </div>
                         </div>
@@ -69,7 +85,6 @@
                                         <th>Unit Kerja/Instansi</th>
                                         <th>Status Kehadiran</th>
                                         <th>Status Menang</th>
-                                        <th>Sudah Klaim Kupon</th>
                                         <th class="text-end">Action</th>
                                     </tr>
                                 </thead>
@@ -81,7 +96,10 @@
 
                                         <td><a href="#" class="text-reset" tabindex="-1">{{ $item->nama }}</a></td>
                                         <td>{{ $item->nip }}</td>
-                                        <td>{{ $item->unit_kerja }}</td>
+                                        <td class="text-truncate" style="max-width: 200px;"
+                                            title="{{ $item->unit_kerja }}">
+                                            {{ $item->unit_kerja }}
+                                        </td>
 
                                         <td>
                                             @if($item->status_hadir == 'Hadir')
@@ -92,27 +110,10 @@
                                         </td>
 
                                         <td>
-                                            @if($item->status_menang && $item->status_menang != '-')
-                                            <span class="badge bg-yellow text-yellow-fg">{{ $item->status_menang
-                                                }}</span>
+                                            @if($item->sudah_menang)
+                                            <span class="badge bg-yellow text-yellow-fg">Menang</span>
                                             @else
-                                            -
-                                            @endif
-                                        </td>
-
-                                        <td>
-                                            @if($item->sudah_klaim)
-                                            <span class="text-success">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="icon icon-tabler icon-tabler-check" width="24" height="24"
-                                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                                    fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                    <path d="M5 12l5 5l10 -10" />
-                                                </svg> Sudah
-                                            </span>
-                                            @else
-                                            <span class="text-muted">Belum</span>
+                                            Belum
                                             @endif
                                         </td>
 
@@ -186,95 +187,107 @@
                 </div>
             </div>
         </div>
-        <div class="modal modal-blur fade" id="modal-create-user" tabindex="-1" role="dialog" aria-hidden="true">
+
+        <div class="modal modal-blur fade" id="modal-create-user" tabindex="-1" role="dialog" aria-hidden="true"
+            wire:ignore.self>
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                <div class="modal-content">
+
+                <form class="modal-content" wire:submit="store">
 
                     <div class="modal-header">
                         <h5 class="modal-title">Tambah User Baru</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                            wire:click="resetForm"></button>
                     </div>
 
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Nama Lengkap</label>
-                                    <input type="text" class="form-control" name="nama"
-                                        placeholder="Masukkan nama lengkap">
+                                    <label class="form-label required">Nama Lengkap</label>
+                                    <input type="text" class="form-control @error('nama') is-invalid @enderror"
+                                        wire:model.blur="nama" placeholder="Masukkan nama lengkap">
+                                    @error('nama') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="mb-3">
-                                    <label class="form-label">NIP</label>
-                                    <input type="text" class="form-control" name="nip"
-                                        placeholder="Contoh: 19850101...">
+                                    <label class="form-label required">NIP</label>
+                                    <input type="text" class="form-control @error('nip') is-invalid @enderror"
+                                        wire:model.blur="nip" placeholder="Contoh: 19850101...">
+                                    @error('nip') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Unit Kerja / Instansi</label>
-                            <select class="form-select">
-                                <option value="" selected disabled>Pilih Unit Kerja</option>
-                                <option value="Dinas Kominfo">Dinas Kominfo</option>
-                                <option value="Bappeda">Bappeda</option>
-                                <option value="Setda">Sekretariat Daerah</option>
-                                <option value="Dinas Pendidikan">Dinas Pendidikan</option>
-                                <option value="Lainnya">Lainnya</option>
-                            </select>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Status Kehadiran</label>
-                                    <select class="form-select" name="status_kehadiran">
-                                        <option value="hadir">Hadir</option>
-                                        <option value="tidak_hadir">Tidak Hadir</option>
-                                        <option value="izin">Izin</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Status Menang</label>
-                                    <select class="form-select" name="status_menang">
-                                        <option value="-">Belum/Tidak Menang</option>
-                                        <option value="juara_1">Juara 1</option>
-                                        <option value="juara_2">Juara 2</option>
-                                        <option value="juara_3">Juara 3</option>
-                                        <option value="harapan">Juara Harapan</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Status Klaim</label>
-                            <label class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" name="sudah_klaim">
-                                <span class="form-check-label">User sudah mengklaim kupon?</span>
-                            </label>
+                            <label class="form-label required">Unit Kerja / Instansi</label>
+                            <input type="text" class="form-control @error('unit_kerja') is-invalid @enderror"
+                                wire:model.blur="unit_kerja" placeholder="Masukkan unit kerja/instansi">
+                            @error('unit_kerja') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                     </div>
 
                     <div class="modal-footer">
-                        <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal" wire:click="resetForm">
                             Batal
                         </a>
-                        <a href="#" class="btn btn-primary ms-auto" data-bs-dismiss="modal">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-                                viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                stroke-linecap="round" stroke-linejoin="round">
+
+                        <button type="submit" class="btn btn-primary ms-auto">
+                            <div wire:loading wire:target="store" class="spinner-border spinner-border-sm me-2"></div>
+
+                            <svg wire:loading.remove wire:target="store" xmlns="http://www.w3.org/2000/svg" class="icon"
+                                width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                 <path d="M12 5l0 14" />
                                 <path d="M5 12l14 0" />
                             </svg>
                             Simpan Data Baru
-                        </a>
+                        </button>
                     </div>
-                </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal modal-blur fade" id="modal-import" tabindex="-1" role="dialog" aria-hidden="true"
+            wire:ignore.self>
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <form class="modal-content" wire:submit="import">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import Data Peserta</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label required">Pilih File Excel</label>
+                            <input type="file" class="form-control @error('file_import') is-invalid @enderror"
+                                wire:model="file_import" accept=".xlsx, .xls, .csv">
+
+                            @error('file_import') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                            <div wire:loading wire:target="file_import" class="text-primary mt-2 small">
+                                Sedang mengunggah file ke server... Tunggu sebentar.
+                            </div>
+
+                            <small class="form-hint mt-2">
+                                Header Excel wajib: <strong>NIP, NAMA, UNIT KERJA</strong>.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success ms-auto" wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="import">Mulai Import</span>
+                            <span wire:loading wire:target="import">
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                Sedang Memproses... Jangan tutup halaman!
+                            </span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -340,10 +353,8 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                         @endif
-
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Tutup</button>
@@ -392,3 +403,21 @@
         </div>
     </div>
 </div>
+
+@script
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('close-modal', (event) => {
+            const modalEl = document.getElementById('modal-create-user');
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modalInstance.hide();
+        });
+    });
+
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('close-modal-import', () => {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-import')).hide();
+        });
+    });
+</script>
+@endscript
