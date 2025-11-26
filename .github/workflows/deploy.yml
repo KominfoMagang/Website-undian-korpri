@@ -63,10 +63,6 @@ jobs:
             git reset --hard origin/main
             git pull origin main
 
-            echo "🧹 Cleaning server build folder..."
-            rm -rf public/build
-            mkdir -p public/build
-
       # 8. UNTAR BUILD ON SERVER ✔ NO NESTED FOLDER
       - name: Extract TAR on server
         uses: appleboy/ssh-action@v1.0.3
@@ -79,7 +75,6 @@ jobs:
             cd /app/backend/public
             echo "📦 Extracting build archive..."
             tar -xzf build.tar.gz -C build
-            rm build.tar.gz
 
       # 9. RESTART & FINALIZE DEPLOY
       - name: Finalize Deployment
