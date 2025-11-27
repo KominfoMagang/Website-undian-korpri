@@ -136,7 +136,7 @@
                         <div class="mb-4">
                             <p
                                 class="text-green-600 font-semibold text-center bg-green-50 p-2 rounded border border-green-200 text-sm flex items-center justify-center gap-2">
-                                NIP kamu Terverifikasi Sebagai Pemenang Doorprize
+                                NIP kamu Terverifikasi Sebagai Peserta Doorprize
                             </p>
                         </div>
 
