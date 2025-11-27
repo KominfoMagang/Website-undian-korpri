@@ -5,6 +5,7 @@ namespace App\Livewire\Peserta;
 use App\Models\Participant;
 use App\services\CouponGeneratorService;
 use Exception;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
@@ -16,36 +17,51 @@ use Livewire\Component;
 
 class RaffleTicketPage extends Component
 {
-    public array $banners = [
-        [
-            'id'    => 1,
-            'image' => 'static/images/flyer-asn.png',
-            'title' => 'flyer hadiah ASN'
-        ],
-        [
-            'id'    => 2,
-            'image' => 'static/images/banner-asn.png',
-            'title' => 'flyer hadiah ASN'
-        ],
-    ];
-
+    public array $banners = [];
     public ?string $couponNumber = null;
     public string $statusCoupon = 'Belum Ada';
     public array $detailData = [];
 
     public function mount()
     {
+        $this->loadDoorprizeBanners();
+        $this->loadParticipantData();
+    }
+
+    private function loadDoorprizeBanners()
+    {
+        $directory = public_path('static/doorprizes');
+        $files = File::files($directory);
+
+        $this->banners = [];
+        $id = 1;
+
+        foreach ($files as $file) {
+            $filename = $file->getFilename();
+
+            $this->banners[] = [
+                'id'    => $id,
+                'image' => 'static/doorprizes/' . $filename,
+                'title' => pathinfo($filename, PATHINFO_FILENAME),
+            ];
+
+            $id++;
+        }
+    }
+
+    private function loadParticipantData()
+    {
         $nip = session('current_participant_nip');
 
         if (!$nip) {
             return $this->redirectRoute('HalamanPresensi');
         }
+
         $participant = cache()->remember(
             'participant_' . $nip,
             10,
             fn() => Participant::with('coupons')->where('nip', $nip)->first()
         );
-
 
         if (!$participant) {
             session()->flash('error', 'Data peserta tidak ditemukan.');
@@ -57,23 +73,26 @@ class RaffleTicketPage extends Component
             'nip'        => $participant->nip,
             'unit_kerja' => $participant->unit_kerja,
             // 'fotoSelfie' => $participant->foto
-            //     ? Storage::disk('s3')->temporaryUrl(
-            //         'photos/' . $participant->foto,
-            //         now()->addMinutes(120)  
-            //     )
+            //     ? asset('storage/photos/' . $participant->foto)
             //     : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
-            'fotoSelfie' => $participant->foto ? asset('storage/photos/' . $participant->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
-
+            'fotoSelfie' => $participant->foto
+                ? Storage::disk('s3')->temporaryUrl(
+                    'photos/' . $participant->foto,
+                    now()->addMinutes(120)  
+                )
+                : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
         ];
-        $userCoupon = $participant->coupons->first();
 
-        if ($userCoupon) {
-            $this->couponNumber = $userCoupon->kode_kupon;
-            $this->statusCoupon = $userCoupon->status_kupon;
+        $coupon = $participant->coupons->first();
+
+        if ($coupon) {
+            $this->couponNumber = $coupon->kode_kupon;
+            $this->statusCoupon = $coupon->status_kupon;
         } else {
             $this->couponNumber = '-';
         }
     }
+
     public function downloadCoupon(CouponGeneratorService $generatorService)
     {
         if ($this->isCouponInvalid()) {
@@ -88,23 +107,24 @@ class RaffleTicketPage extends Component
                 unitKerja: $this->detailData['unit_kerja'],
                 couponNumber: $this->couponNumber
             );
+
             $fileName = sprintf(
                 'kupon-undian-%s-%s.jpg',
                 Str::slug($this->detailData['nama']),
                 $this->couponNumber
             );
+
             return response()->download($filePath, $fileName)->deleteFileAfterSend(true);
         } catch (Exception $e) {
             $this->dispatch('alert', type: 'error', message: 'Gagal mendownload kupon, silakan coba lagi nanti.');
         }
     }
 
-    // Helper method untuk readability
     private function isCouponInvalid(): bool
     {
-        return empty($this->detailData) ||
-            !$this->couponNumber ||
-            $this->couponNumber === '-';
+        return empty($this->detailData)
+            || !$this->couponNumber
+            || $this->couponNumber === '-';
     }
 
     public function render()

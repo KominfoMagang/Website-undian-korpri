@@ -1,30 +1,40 @@
 <div>
     <div class="py-3">
-
-        {{-- KONDISI 1: SUDAH DITUKAR --}}
         @if ($isRedeemed)
-            <div class="mt-3 animate-fade-in-up">
-                {{-- Tombol Lihat Kode --}}
-                <button type="button" wire:click="showRedeemData"
-                    class="w-full bg-[#7686BC] text-white text-sm font-bold py-3 rounded-xl shadow-lg hover:bg-[#3e5085] transition-all flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                        </path>
-                    </svg>
-                    Lihat Voucher Makanan
-                </button>
-            </div>
 
-            {{-- KONDISI 2: BELUM DITUKAR (FORM INPUT) --}}
+            {{-- 1) SUDAH DITUKAR & SUDAH DIKLAIM TOKO --}}
+            @if ($isClaimedByStore)
+                <div class="mt-3 animate-fade-in-up">
+                    <button type="button" style="cursor:not-allowed" disabled
+                        class="w-full bg-[#FF383C] text-white text-sm font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2">
+                        Voucher Sudah Diklaim
+                    </button>
+                </div>
+
+                {{-- 2) SUDAH DITUKAR & BELUM DIKLAIM TOKO --}}
+            @else
+                <div class="mt-3 animate-fade-in-up">
+                    <button type="button" wire:click="showRedeemData"
+                        class="w-full bg-[#7686BC] text-white text-sm font-bold py-3 rounded-xl shadow-lg hover:bg-[#3e5085] transition-all flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                            </path>
+                        </svg>
+                        Lihat Voucher Makanan
+                    </button>
+                </div>
+            @endif
+
+            {{-- KONDISI 3: BELUM DITUKAR (FORM INPUT) --}}
         @else
             <div class="text-gray-900 text-sm font-semibold">Tukarkan Voucher Makanan & Minuman</div>
             <div class="flex gap-2 mt-3">
                 <div class="w-40">
                     <input type="text" inputmode="numeric" pattern="[0-9]{18}"
-                        wire:model.live.debounce.250ms="kodeToko" maxlength="3" placeholder="Kode toko"
+                        wire:model.live.debounce.250ms="kodeToko" maxlength="6" placeholder="Kode toko"
                         class="w-full bg-white rounded-lg p-3 text-sm font-semibold border border-transparent focus:border-blue-500 focus:outline-none transition-colors shadow-sm @error('kodeToko') @enderror">
 
                     @error('kodeToko')
@@ -39,6 +49,7 @@
                 </button>
             </div>
         @endif
+
     </div>
 
     {{-- ================== MODAL DETAIL / SUKSES ================== --}}
@@ -82,14 +93,15 @@
 
                 {{-- Btn di klik oleh penjual --}}
 
-                <button type="button" wire:click="reedemKuponToko" wire:loading.attr="disabled"
+                <button type="button" wire:click="claimVoucherUmkm" wire:loading.attr="disabled"
+                    wire:target="claimVoucherUmkm"
                     class="w-full bg-[#243672] text-white text-sm font-semibold py-4 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm flex justify-center items-center gap-2">
 
-                    <span wire:loading.remove wire:target="reedemKuponToko">
+                    <span wire:loading.remove wire:target="claimVoucherUmkm">
                         Klaim Voucher Oleh Toko
                     </span>
 
-                    <div wire:loading wire:target="reedemKuponToko" class="flex items-center">
+                    <div wire:loading wire:target="claimVoucherUmkm" class="flex items-center">
                         <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
@@ -99,9 +111,7 @@
                             </path>
                         </svg>
                     </div>
-
                 </button>
-
             </div>
         </div>
     @endif

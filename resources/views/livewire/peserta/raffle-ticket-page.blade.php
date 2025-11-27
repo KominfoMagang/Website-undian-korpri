@@ -78,6 +78,7 @@
             @endforeach
         </div>
 
+        <p class="text-sm text-gray-400 text-center mb-2">*Gambar Doorprize Hanya Ilustrasi</p>
         {{-- Dot indicators --}}
         <div id="bannerDots" style="display:flex; justify-content:center; gap:4px; margin-bottom:16px;">
             @foreach ($banners as $banner)

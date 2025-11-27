@@ -193,8 +193,8 @@ class PresencePage extends Component
     private function uploadPhoto($nip)
     {
         $filename = 'selfie_' . $nip . '_' . time() . '.jpg';
-        return $this->photo->storeAs('photos', $filename, 'public');
-        // return $this->photo->storeAs('photos', $filename, 's3');
+        // return $this->photo->storeAs('photos', $filename, 'public');
+        return $this->photo->storeAs('photos', $filename, 's3');
     }
 
     /**
