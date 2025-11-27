@@ -1,4 +1,5 @@
-@props(['is_modal_open' => false])
+@props(['is_modal_open' => false, 'categories' => null])
+
 <style>
   .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1050;display:flex;justify-content:center;align-items:center;padding:20px;}
   .modal-content-doorprize{background:#fff;border-radius:8px;width:90%;max-width:600px;box-shadow:0 10px 25px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;}
@@ -35,16 +36,26 @@
                     @error('nama_hadiah') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
 
+                <!-- === UBAH INI: select kategori dinamis === -->
                 <div class="mb-3">
                     <label class="form-label">Kategori <span class="text-danger">*</span></label>
                     <select class="form-control" wire:model.defer="kategori_id">
                         <option value="">Pilih Kategori</option>
-                        <option value="1">Elektronik</option>
-                        <option value="2">Kendaraan</option>
-                        <option value="3">Peralatan Rumah Tangga</option>
+
+                        {{-- jika prop categories ada, pakai itu --}}
+                        @if(!empty($categories) && $categories->count())
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->nama_kategori }}</option>
+                            @endforeach
+
+                        {{-- fallback: kalau tidak ada prop, tampilkan pesan --}}
+                        @else
+                            <option value="" disabled>-- belum ada kategori --</option>
+                        @endif
                     </select>
                     @error('kategori_id') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
+                <!-- === SELESAI UBAHAN === -->
 
                 <div class="mb-3">
                     <label class="form-label">Stok <span class="text-danger">*</span></label>

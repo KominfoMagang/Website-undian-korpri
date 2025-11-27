@@ -6,6 +6,7 @@ use App\Livewire\Admin\ParticipantPage;
 use App\Livewire\Admin\RewardConfigPage;
 use App\Livewire\Admin\StorePage;
 use App\Livewire\Auth\LoginPage;
+use App\Livewire\Admin\RewardCategoryPage;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', LoginPage::class)->name('auth.login');
@@ -16,4 +17,5 @@ Route::prefix('admin')->name('admin.')->group(function() {
     Route::get('peserta', ParticipantPage::class)->name('participant');
     Route::get('kategori-dan-hadiah', RewardConfigPage::class)->name('reward-config');
     Route::get('toko', StorePage::class)->name('store');
+    Route::get('manajemen-kategori', RewardCategoryPage::class)->name('category-config');
 });

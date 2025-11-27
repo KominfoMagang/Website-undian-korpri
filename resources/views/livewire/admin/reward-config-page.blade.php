@@ -82,5 +82,6 @@
     </div>
 
     <!-- PANGGIL MODAL -->
-    <x-admin.modal />
+   <x-admin.modal :is-modal-open="$is_modal_open" :categories="$categories" />
+
 </div>

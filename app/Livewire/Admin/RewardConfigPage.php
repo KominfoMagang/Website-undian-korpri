@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Reward; 
+use App\Models\RewardCategory; 
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -20,13 +21,14 @@ class RewardConfigPage extends Component
     // 1. PROPERTI UNTUK DATA DAN MODAL
     // ==================================
     public $rewards; 
+    public $categories; 
     public $is_modal_open = false; 
-    public $reward_id;  
+    public $reward_id; 
     public $gambar_lama; 
     public $nama_hadiah;
     public $kategori_id;
     public $stok;
-    public $gambar_hadiah; 
+    public $gambar_hadiah;
     
     protected $listeners = ['rewardAdded' => 'loadRewards']; 
 
@@ -35,21 +37,28 @@ class RewardConfigPage extends Component
     public function mount()
     {
         $this->loadRewards();
+        $this->loadCategories();
     }
     
+    // FIX: Tambahkan orderBy('id', 'asc') untuk mengurutkan berdasarkan ID terkecil ke terbesar
     public function loadRewards()
     {
-        $this->rewards = Reward::all();
+        $this->rewards = Reward::orderBy('id', 'asc')->get(); // <--- PERUBAHAN KRITIS
     }
     
-    // open modal
+    public function loadCategories()
+    {
+        $this->categories = RewardCategory::all();
+    }
+    
+    // ... (Logika openModal, closeModal, resetForm di sini) ...
+
     public function openModal()
     {
         $this->resetForm();
         $this->is_modal_open = true;
     }
 
-    // close modal
     public function closeModal()
     {
         $this->is_modal_open = false;
