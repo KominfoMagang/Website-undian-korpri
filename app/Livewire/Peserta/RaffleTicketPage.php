@@ -3,7 +3,7 @@
 namespace App\Livewire\Peserta;
 
 use App\Models\Participant;
-use App\Services\CouponGeneratorService;
+use App\services\CouponGeneratorService;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -59,7 +59,7 @@ class RaffleTicketPage extends Component
             'fotoSelfie' => $participant->foto
                 ? Storage::disk('s3')->temporaryUrl(
                     'photos/' . $participant->foto,
-                    now()->addMinutes(120)  
+                    now()->addMinutes(120)
                 )
                 : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
             // 'fotoSelfie' => $participant->foto ? asset('storage/photos/' . $participant->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
