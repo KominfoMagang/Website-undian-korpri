@@ -116,7 +116,6 @@
 
                                         <td class="text-end">
                                             <div class="btn-list flex-nowrap justify-content-end">
-                                                @if($item->status_hadir == 'Hadir')
                                                 <a href="#" class="btn btn-white btn-icon text-primary"
                                                     data-bs-toggle="modal" data-bs-target="#modal-detail"
                                                     wire:click="showDetail({{ $item->id }})" title="Lihat Detail">
@@ -130,7 +129,6 @@
                                                             d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
                                                     </svg>
                                                 </a>
-                                                @else
                                                 <a href="#" class="btn btn-white btn-icon text-danger"
                                                     data-bs-toggle="modal" data-bs-target="#modal-danger"
                                                     wire:click="setDeleteId({{ $item->id }})">
@@ -148,7 +146,6 @@
                                                         <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
                                                     </svg>
                                                 </a>
-                                                @endif
                                             </div>
                                         </td>
                                     </tr>
