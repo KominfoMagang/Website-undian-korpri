@@ -2,17 +2,19 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Coupon;
+use App\Imports\StoreImport;
 use App\Models\Store;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
-use Livewire\Attributes\Validate;
+use Maatwebsite\Excel\Facades\Excel;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 class StorePage extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     #[Layout('components.layouts.admin')]
     #[Title('Daftar Toko')]
@@ -20,15 +22,17 @@ class StorePage extends Component
     protected $paginationTheme = 'bootstrap';
     public $search = '';
     public $deleteId = null;
+    public $storeId;
+    public $isEditing = false;
     public $storeCoupons;
     public $selectedStore;
     public $selectedStoreId;
+    public $file_import;
 
-    #[Validate('required|min:3')]
     public $nama_toko;
-
-    #[Validate('required|numeric|digits_between:5,6|unique:stores,kode_toko')]
     public $kode_toko;
+    public $jenis_produk;
+    public $stok;
 
     public function generateKodeToko()
     {
@@ -43,16 +47,22 @@ class StorePage extends Component
 
     public function store()
     {
-        $this->validate();
-
-        Store::create([
-            'nama_toko' => $this->nama_toko,
-            'kode_toko' => $this->kode_toko,
+        $this->validate([
+            'nama_toko'    => 'required|string|max:255',
+            'kode_toko'    => 'required|unique:stores,kode_toko|numeric|digits_between:5,6',
+            'jenis_produk' => 'required|string|max:255',
+            'stok'         => 'required|integer|min:0',
         ]);
 
-        $this->reset(['nama_toko', 'kode_toko']);
-        $this->dispatch('close-modal');
+        Store::create([
+            'nama_toko'    => $this->nama_toko,
+            'kode_toko'    => $this->kode_toko,
+            'jenis_produk' => $this->jenis_produk,
+            'stok'         => $this->stok,
+        ]);
 
+        $this->dispatch('close-modal');
+        $this->resetForm();
         session()->flash('message', 'Toko berhasil ditambahkan.');
     }
 
@@ -82,6 +92,63 @@ class StorePage extends Component
         $this->selectedStoreId = $id;
 
         $this->resetPage(pageName: 'coupon_page');
+    }
+
+    public function editStore($id)
+    {
+        $store = Store::findOrFail($id);
+
+        $this->storeId      = $store->id;
+        $this->nama_toko    = $store->nama_toko;
+        $this->kode_toko    = $store->kode_toko;
+        $this->jenis_produk = $store->jenis_produk;
+        $this->stok         = $store->stok;
+
+        $this->isEditing = true;
+    }
+
+    public function updateStore()
+    {
+        $this->validate([
+            'nama_toko'    => 'required|string|max:255',
+            'kode_toko'    => ['required', 'numeric', 'digits_between:5,6', Rule::unique('stores', 'kode_toko')->ignore($this->storeId)],
+            'jenis_produk' => 'required|string|max:255',
+            'stok'         => 'required|integer|min:0',
+        ]);
+
+        $store = Store::findOrFail($this->storeId);
+        $store->update([
+            'nama_toko'    => $this->nama_toko,
+            'kode_toko'    => $this->kode_toko,
+            'jenis_produk' => $this->jenis_produk,
+            'stok'         => $this->stok,
+        ]);
+
+        $this->dispatch('close-modal');
+        $this->resetForm();
+        session()->flash('message', 'Data Toko berhasil diperbarui.');
+    }
+
+    public function resetForm()
+    {
+        $this->reset(['nama_toko', 'kode_toko', 'jenis_produk', 'stok', 'storeId', 'isEditing']);
+    }
+
+    public function import()
+    {
+        $this->validate([
+            'file_import' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        try {
+            Excel::import(new StoreImport, $this->file_import);
+
+            $this->reset('file_import');
+            $this->dispatch('close-modal');
+            session()->flash('message', 'Data Toko berhasil diimport!');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Gagal import: ' . $e->getMessage());
+        }
     }
 
     public function render()
