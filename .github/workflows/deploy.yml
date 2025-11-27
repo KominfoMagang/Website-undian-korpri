@@ -37,6 +37,8 @@ jobs:
             npm run build
 
             # Composer dan artisan
+            docker exec asnday chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
             docker exec asnday composer install --no-interaction --prefer-dist --no-dev
             docker exec asnday php artisan migrate --force
             docker exec asnday php artisan optimize
