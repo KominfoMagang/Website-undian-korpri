@@ -5,6 +5,7 @@ namespace App\Livewire\Peserta;
 use App\Models\Participant;
 use App\Services\CouponGeneratorService;
 use Exception;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -52,12 +53,10 @@ class RaffleTicketPage extends Component
             'nama'       => $participant->nama,
             'nip'        => $participant->nip,
             'unit_kerja' => $participant->unit_kerja,
-            'fotoSelfie' => $participant->foto ? asset('storage/photos/' . $participant->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
-
-            // Tampilkan foto dari amazon S3
-            // 'fotoSelfie' => $participant->foto
-            //     ? Storage::disk('s3')->url($participant->foto)
-            //     : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
+            'fotoSelfie' => $participant->foto
+                ? Storage::disk('s3')->temporaryUrl('photos/' . $participant->foto)
+                : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
+            // 'fotoSelfie' => $participant->foto ? asset('storage/photos/' . $participant->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
 
         ];
         $userCoupon = $participant->coupons->first();
