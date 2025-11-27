@@ -38,7 +38,10 @@ class CouponPage extends Component
 
     public function render()
     {
-        $coupons = Coupon::orderBy('id', 'desc')->paginate(20);
+        $coupons = Coupon::with('participant')
+        ->orderBy('id', 'desc')
+        ->paginate(10);
+        
         return view('livewire.admin.coupon-page', [
             'coupons' => $coupons
         ]);
