@@ -16,13 +16,8 @@ class RaffleTicketPage extends Component
     public array $banners = [
         [
             'id'    => 1,
-            'image' => 'https://cdn.pixabay.com/photo/2022/10/28/03/48/hajj-7552281_960_720.jpg',
-            'title' => 'Hadiah Utama: Paket Umroh'
-        ],
-        [
-            'id'    => 2,
-            'image' => 'https://cdn.pixabay.com/photo/2017/01/25/18/07/mobil-car-2008574_1280.jpg',
-            'title' => 'Grand Prize: Mobil Keluarga'
+            'image' => 'static/images/flyer-asn.png',
+            'title' => 'flyer hadiah ASN'
         ],
     ];
 
@@ -54,7 +49,10 @@ class RaffleTicketPage extends Component
             'nip'        => $participant->nip,
             'unit_kerja' => $participant->unit_kerja,
             'fotoSelfie' => $participant->foto
-                ? Storage::disk('s3')->temporaryUrl('photos/' . $participant->foto)
+                ? Storage::disk('s3')->temporaryUrl(
+                    'photos/' . $participant->foto,
+                    now()->addMinutes(120)  
+                )
                 : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
             // 'fotoSelfie' => $participant->foto ? asset('storage/photos/' . $participant->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
 
