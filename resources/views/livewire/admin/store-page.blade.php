@@ -54,7 +54,22 @@
                                     </svg>
                                     Tambah Toko
                                 </a>
-
+                                <a href="#" class="btn btn-success" data-bs-toggle="modal"
+                                    data-bs-target="#modal-import">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        class="icon icon-tabler icon-tabler-file-spreadsheet" width="24" height="24"
+                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                                        <path
+                                            d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                                        <path d="M8 11h8v7h-8z" />
+                                        <path d="M8 15h8" />
+                                        <path d="M11 11v7" />
+                                    </svg>
+                                    Import Excel
+                                </a>
                             </div>
                         </div>
 
@@ -112,6 +127,20 @@
                                                             d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
                                                     </svg>
                                                 </a>
+                                                <a href="#" class="btn btn-white btn-icon text-green"
+                                                    data-bs-toggle="modal" data-bs-target="#modal-create-store"
+                                                    wire:click="editStore({{ $item->id }})">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        class="icon icon-tabler icon-tabler-pencil" width="24"
+                                                        height="24" viewBox="0 0 24 24" stroke-width="2"
+                                                        stroke="currentColor" fill="none" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                        <path
+                                                            d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                                                        <path d="M13.5 6.5l4 4" />
+                                                    </svg>
+                                                </a>
                                                 <a href="#" class="btn btn-white btn-icon text-danger"
                                                     data-bs-toggle="modal" data-bs-target="#modal-danger"
                                                     wire:click="setDeleteId({{ $item->id }})">
@@ -133,7 +162,7 @@
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="5" class="text-center py-4">
+                                        <td colspan="7" class="text-center py-4">
                                             <div class="empty">
                                                 <div class="empty-title">Data tidak ditemukan</div>
                                                 <p class="empty-subtitle text-muted">
@@ -165,53 +194,79 @@
 
             <div wire:ignore.self class="modal modal-blur fade" id="modal-create-store" tabindex="-1" role="dialog"
                 aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                     <div class="modal-content">
+
                         <div class="modal-header">
-                            <h5 class="modal-title">Tambah Toko Baru</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title">
+                                {{ $isEditing ? 'Edit Data Toko' : 'Tambah Toko Baru' }}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                                wire:click="resetForm"></button>
                         </div>
 
-                        <form wire:submit.prevent="store">
+                        <form wire:submit.prevent="{{ $isEditing ? 'updateStore' : 'store' }}">
                             <div class="modal-body">
+                                <div class="row">
 
-                                <div class="mb-3">
-                                    <label class="form-label required">Nama Toko</label>
-                                    <input type="text" class="form-control @error('nama_toko') is-invalid @enderror"
-                                        wire:model="nama_toko" placeholder="Masukkan nama toko">
-                                    @error('nama_toko') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label required">Kode Toko (3 Digit)</label>
-                                    <div class="input-group">
-                                        <input type="number"
-                                            class="form-control @error('kode_toko') is-invalid @enderror"
-                                            wire:model="kode_toko" placeholder="Contoh: 123">
-
-                                        <button class="btn" type="button" wire:click="generateKodeToko"
-                                            wire:loading.attr="disabled">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-                                                viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
-                                                <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
-                                            </svg>
-                                            Generate
-                                        </button>
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label class="form-label required">Nama Toko</label>
+                                            <input type="text"
+                                                class="form-control @error('nama_toko') is-invalid @enderror"
+                                                wire:model="nama_toko" placeholder="Masukkan nama toko">
+                                            @error('nama_toko') <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
                                     </div>
-                                    @error('kode_toko')
-                                    <div class="text-danger small mt-1">{{ $message }}</div>
-                                    @enderror
-                                    <div class="form-text text-muted">Klik tombol generate untuk membuat kode acak.
-                                    </div>
-                                </div>
 
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label class="form-label required">Kode Toko (5-6 Digit)</label>
+                                            <div class="input-group">
+                                                <input type="number"
+                                                    class="form-control @error('kode_toko') is-invalid @enderror"
+                                                    wire:model="kode_toko" placeholder="Contoh: 12345">
+
+                                                @if(!$isEditing)
+                                                <button class="btn" type="button" wire:click="generateKodeToko"
+                                                    wire:loading.attr="disabled">
+                                                    Generate
+                                                </button>
+                                                @endif
+                                            </div>
+                                            @error('kode_toko') <div class="text-danger small mt-1">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label class="form-label required">Jenis Produk</label>
+                                            <input type="text"
+                                                class="form-control @error('jenis_produk') is-invalid @enderror"
+                                                wire:model="jenis_produk" placeholder="Contoh: Kelontong, Makanan, dll">
+                                            @error('jenis_produk') <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label class="form-label required">Stok Awal</label>
+                                            <input type="number"
+                                                class="form-control @error('stok') is-invalid @enderror"
+                                                wire:model="stok" placeholder="0">
+                                            @error('stok') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        </div>
+                                    </div>
+
+                                </div>
                             </div>
 
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                                <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal"
+                                    wire:click="resetForm">
                                     Batal
                                 </button>
                                 <button type="submit" class="btn btn-primary ms-auto" wire:loading.attr="disabled">
@@ -222,7 +277,8 @@
                                         <path d="M12 5l0 14" />
                                         <path d="M5 12l14 0" />
                                     </svg>
-                                    Simpan Data
+
+                                    {{ $isEditing ? 'Simpan Perubahan' : 'Simpan Data' }}
                                 </button>
                             </div>
                         </form>
@@ -369,6 +425,47 @@
                     </div>
                 </div>
             </div>
+
+            <div class="modal modal-blur fade" id="modal-import" tabindex="-1" role="dialog" aria-hidden="true"
+                wire:ignore.self>
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" wire:submit="import">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">Import Data Toko</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label required">Pilih File Excel</label>
+                                <input type="file" class="form-control @error('file_import') is-invalid @enderror"
+                                    wire:model="file_import" accept=".xlsx, .xls, .csv">
+
+                                @error('file_import') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                                <div wire:loading wire:target="file_import" class="text-primary mt-2 small">
+                                    Sedang mengunggah file ke server... Tunggu sebentar.
+                                </div>
+
+                                <small class="form-hint mt-2">
+                                    Header Excel wajib: <strong>Kode toko, Nama toko, Jenis produk, dan Stok</strong>.
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success ms-auto" wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="import">Mulai Import</span>
+                                <span wire:loading wire:target="import">
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                    Sedang Memproses... Jangan tutup halaman!
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -377,9 +474,16 @@
 <script>
     document.addEventListener('livewire:initialized', () => {
         Livewire.on('close-modal', (event) => {
-            const modalEl = document.getElementById('modal-create-store');
-            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-            modalInstance.hide();
+            // Daftar semua modal yang mungkin perlu ditutup otomatis
+            const modalIds = ['modal-create-store', 'modal-danger', 'modal-import'];
+
+            modalIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(el);
+                    modalInstance.hide();
+                }
+            });
         });
     });
 </script>
