@@ -1,0 +1,46 @@
+name: deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  cd:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Deploy Production
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            cd /app/backend
+
+            # Reset dan pull update
+            git fetch --all
+            git reset --hard origin/main
+            git pull origin main
+
+            # Restart container asnday
+            docker compose stop asnday
+            docker compose up -d asnday
+
+            # NPM install dan build
+            npm ci
+            npm run build
+
+            # Composer dan artisan
+            docker exec asnday chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+            docker exec asnday composer install --no-interaction --prefer-dist --no-dev
+            docker exec asnday php artisan migrate --force
+            docker exec asnday php artisan optimize
+
+            exit 0

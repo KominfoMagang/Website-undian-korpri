@@ -2,6 +2,10 @@
     class="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-4 bg-blue-950/60 backdrop-blur-md border-b border-white/10 transition-all duration-300">
 
     <div class="flex items-center gap-4">
+        <img src="/static/images/bank_bjb.png"
+            alt="Logo Bank BJB"
+            class="h-10 w-auto drop-shadow-md hover:scale-110 transition-transform duration-200">
+
         <img src="/static/images/logoKorpri.png" alt="Logo Korpri"
             class="h-10 w-auto drop-shadow-md hover:scale-110 transition-transform duration-200">
 
@@ -10,7 +14,7 @@
             class="h-10 w-auto drop-shadow-md hover:scale-110 transition-transform duration-200">
 
         <div class="hidden sm:flex flex-col leading-tight">
-            <span class="font-bold text-yellow-400 text-xs tracking-widest uppercase">HUT KORPRI KE-53</span>
+            <span class="font-bold text-yellow-400 text-xs tracking-widest uppercase">HUT KORPRI KE-54</span>
             <span class="font-black text-white text-sm tracking-wider">KOTA TASIKMALAYA</span>
         </div>
     </div>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\SlotMachine;
+namespace App\Livewire\RewardSystem;
 
 use App\Models\Participant;
 use App\Models\Reward;
@@ -11,8 +11,8 @@ use Livewire\Component;
 
 class Doorprize extends Component
 {
-    #[Layout('components.layouts.slot-machine')]
-    #[Title('Gebyar Undian HUT KORPRI ke-53')]
+    #[Layout('components.layouts.reward-system')]
+    #[Title('Gebyar Undian HUT KORPRI ke-54')]
 
     public function pickWinner()
     {
@@ -80,7 +80,7 @@ class Doorprize extends Component
                 ]];
             });
 
-        return view('livewire.slot-machine.doorprize', [
+        return view('livewire.reward-system.doorprize', [
             'jsRewards' => $rewards
         ]);
     }

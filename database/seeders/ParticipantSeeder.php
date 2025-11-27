@@ -57,30 +57,31 @@ class ParticipantSeeder extends Seeder
                 'sudah_menang' => false,
             ]);
         }
-        // foreach (range(1, 5) as $i) {
-        //     $participant = Participant::create([
-        //         'nama' => $faker->name,
-        //         'nip' => $faker->unique()->numerify('19##########1#####'),
-        //         'unit_kerja' => $faker->randomElement($units),
-        //         'foto' => null,
-        //         'status_hadir' => 'Hadir',
-        //         'latitude' => '-7.230316356025819',
-        //         'longitude' => '108.1546012707976',
-        //         'sudah_menang' => false,
-        //     ]);
 
-        //     // Coupon::create([
-        //     //     'participant_id' => $participant->id,
-        //     //     'kode_kupon' => mt_rand(100000, 999999),
-        //     //     'status_kupon' => 'Aktif',
-        //     // ]);
-        // }
+        foreach (range(1, 5) as $i) {
+            $participant = Participant::create([
+                'nama' => $faker->name,
+                'nip' => $faker->unique()->numerify('19##########1#####'),
+                'unit_kerja' => $faker->randomElement($units),
+                'foto' => null,
+                'status_hadir' => 'Hadir',
+                'latitude' => '-7.230316356025819',
+                'longitude' => '108.1546012707976',
+                'sudah_menang' => false,
+            ]);
 
-        foreach(range(1,5) as $i){
-            Store::create([
-                'nama_toko'=> $faker->company,
-                'kode_toko'=> str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT)
+            Coupon::create([
+                'participant_id' => $participant->id,
+                'kode_kupon' => mt_rand(100000, 999999),
+                'status_kupon' => 'Aktif',
             ]);
         }
+
+        // foreach(range(1,5) as $i){
+        //     Store::create([
+        //         'nama_toko'=> $faker->company,
+        //         'kode_toko'=> str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT)
+        //     ]);
+        // }
     }
 }
