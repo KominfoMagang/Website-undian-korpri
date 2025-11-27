@@ -37,7 +37,7 @@
                     <span class="avatar avatar-sm"
                         style="background-image: url({{ asset('static/images/unknown_profile.png') }})"></span>
                     <div class="d-none d-xl-block ps-2">
-                        <div>Gojo Satoru</div>
+                        <div>{{ auth()->user()->username }}</div>
                         <div class="mt-1 small text-muted">Admin</div>
                     </div>
                 </a>
@@ -144,7 +144,7 @@
 
                     <div class="d-flex align-items-center gap-2 ms-auto d-print-none">
 
-                        <a href="{{ route('slot-machine.undian') }}" target="_blank"
+                        <a href="{{ route('reward-system.undian') }}" target="_blank"
                             class="btn btn-primary d-none d-sm-inline-block">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-dice me-2"
                                 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
@@ -159,7 +159,13 @@
                             Mulai Pengundian
                         </a>
 
-                        <button class="btn btn-danger d-flex align-items-center">
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            @csrf
+                        </form>
+
+                        <button class="btn btn-danger d-flex align-items-center"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-logout me-2"
                                 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
                                 fill="none" stroke-linecap="round" stroke-linejoin="round">
