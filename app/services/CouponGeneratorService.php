@@ -13,7 +13,7 @@ class CouponGeneratorService
     private const FONT_BOLD     = 'fonts/Inter_28pt-SemiBold.ttf';
     private const FONT_REGULAR  = 'fonts/Inter_18pt-Regular.ttf';
 
-    public function generate(string $name, string $nip, string $unitKerja, string $couponNumber)
+    public function generate(string $name, string $nip, string $couponNumber)
     {
         $this->validateAssets();
 
@@ -30,12 +30,12 @@ class CouponGeneratorService
             throw new Exception('Gagal memuat template gambar.');
         }
 
-        $this->applyTextToImage($image, $name, $nip, $unitKerja, $couponNumber);
+        $this->applyTextToImage($image, $name, $nip, $couponNumber);
 
         $filePath = $this->saveImage($image);
         
         // Bersihkan memory image utama
-        imagedestroy($image);
+        unset($image);
 
         return $filePath;
     }
@@ -54,91 +54,62 @@ class CouponGeneratorService
         }
     }
 
-    private function applyTextToImage(GdImage $image, string $name, string $nip, string $unitKerja, string $couponNumber)
-    {
-        // Colors
-        $colorWhite = imagecolorallocate($image, 255, 255, 255);
-        $colorGold  = imagecolorallocate($image, 225, 178, 55);
+    private function applyTextToImage(GdImage $image, string $name, string $nip, string $couponNumber)
+{
+    // Colors
+    $colorWhite = imagecolorallocate($image, 255, 255, 255);
+    $colorGold  = imagecolorallocate($image, 225, 178, 55);
 
-        // Dimensions
-        $width  = imagesx($image);
-        $height = imagesy($image);
+    // Dimensions
+    $width  = imagesx($image);
+    $height = imagesy($image);
 
-        // Fonts
-        $fontBold    = public_path(self::FONT_BOLD);
-        $fontRegular = file_exists(public_path(self::FONT_REGULAR))
-            ? public_path(self::FONT_REGULAR)
-            : $fontBold;
+    // Fonts
+    $fontBold    = public_path(self::FONT_BOLD);
+    $fontRegular = file_exists(public_path(self::FONT_REGULAR))
+        ? public_path(self::FONT_REGULAR)
+        : $fontBold;
 
-        // ---- KODE KUPON (center) ----
-        $this->drawCenteredText(
-            $image,
-            $couponNumber,
-            90,
-            (int) ($height * 0.35),
-            $colorGold,
-            $fontBold,
-            $width
-        );
+    // ---- KODE KUPON (tanpa drawCenteredText) ----
+    imagettftext(
+        $image,
+        90,                    // ukuran besar
+        0,                     // tanpa rotasi
+        (int)($width * 0.30),  // posisi kiri sama dengan nama/nip
+        (int)($height * 0.35), // sedikit di atas nama
+        $colorGold,
+        $fontBold,
+        $couponNumber
+    );
 
-        // Margin kiri untuk nama & NIP
-        $leftMarginX = (int) ($width * 0.30);
+    // Margin kiri untuk nama & NIP
+    $leftMarginX = (int) ($width * 0.30);
 
-        // ---- NAMA PESERTA ----
-        imagettftext(
-            $image,
-            35,
-            0,
-            $leftMarginX,
-            (int) ($height * 0.52),
-            $colorWhite,
-            $fontBold,
-            strtoupper($name)
-        );
+    // ---- NAMA PESERTA ----
+    imagettftext(
+        $image,
+        35,
+        0,
+        $leftMarginX,
+        (int) ($height * 0.52),
+        $colorWhite,
+        $fontBold,
+        strtoupper($name)
+    );
 
-        // ---- NIP ----
-        imagettftext(
-            $image,
-            35,
-            0,
-            $leftMarginX,
-            (int) ($height * 0.65),
-            $colorWhite,
-            $fontBold,
-            $nip
-        );
-    }
+    // ---- NIP ----
+    imagettftext(
+        $image,
+        35,
+        0,
+        $leftMarginX,
+        (int) ($height * 0.65),
+        $colorWhite,
+        $fontBold,
+        $nip
+    );
+}
 
-    private function drawCenteredText(
-        GdImage $image,
-        string $text,
-        int $fontSize,
-        int $y,
-        int $color,
-        string $fontPath,
-        int $imageWidth
-    ): void {
-        $dummyImage = imagecreatetruecolor(1, 1);
-        $dummyColor = imagecolorallocate($dummyImage, 0, 0, 0);
-        $bbox = imagettftext($dummyImage, $fontSize, 0, 0, 0, $dummyColor, $fontPath, $text);
-        unset($dummyImage);
-
-        if ($bbox === false) {
-            return;
-        }
-        $textWidth = abs($bbox[2] - $bbox[0]);
-        $x = (int) (($imageWidth - $textWidth) / 1.6);
-        imagettftext(
-            $image,
-            $fontSize,
-            0,
-            $x,
-            $y,
-            $color,
-            $fontPath,
-            $text
-        );
-    }
 
     private function saveImage(GdImage $image): string
     {
