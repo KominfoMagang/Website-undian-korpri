@@ -49,7 +49,7 @@ class StorePage extends Component
     {
         $this->validate([
             'nama_toko'    => 'required|string|max:255',
-            'kode_toko'    => 'required|unique:stores,kode_toko|numeric|min:1|max:3',
+            'kode_toko'    => 'required|unique:stores,kode_toko|numeric|digits_between:2,3',
             'jenis_produk' => 'required|string|max:255',
             'stok'         => 'required|integer|min:0',
         ]);
