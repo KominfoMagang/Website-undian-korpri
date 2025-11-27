@@ -6,13 +6,12 @@ FROM php:8.3-fpm AS php_app
 # Set working directory
 WORKDIR /var/www
 
-# Install system dependencies
+# Install system dependencies (FREETYPE HARUS DIINSTALL DULU)
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
-    libfreetype-dev \
     libzip-dev \
     zip unzip git curl \
     libonig-dev \
@@ -23,21 +22,18 @@ RUN apt-get update && apt-get install -y \
     default-mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure GD with FreeType support (PENTING!)
-RUN docker-php-ext-configure gd \
-    --enable-gd \
-    --with-freetype \
-    --with-jpeg
+# Configure dan install GD extension dengan FreeType
+RUN docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) gd
 
-# Install PHP extensions
+# Install PHP extensions lainnya
 RUN docker-php-ext-install -j$(nproc) \
     zip \
     pdo_mysql \
     mbstring \
     exif \
     pcntl \
-    bcmath \
-    gd
+    bcmath
 
 ##############################################
 # Install Composer from official image
