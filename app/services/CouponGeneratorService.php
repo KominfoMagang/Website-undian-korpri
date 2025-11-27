@@ -1,6 +1,6 @@
 <?php
 
-namespace App\services;
+namespace App\Services;
 
 use Exception;
 use GdImage;
@@ -18,6 +18,12 @@ class CouponGeneratorService
         $this->validateAssets();
 
         $imagePath = public_path(self::TEMPLATE_PATH);
+        
+        // Validasi apakah file gambar valid sebelum dimuat
+        if (!file_exists($imagePath)) {
+             throw new Exception('File template tidak ditemukan di path: ' . $imagePath);
+        }
+
         $image = imagecreatefrompng($imagePath);
 
         if (!$image instanceof GdImage) {
@@ -27,7 +33,9 @@ class CouponGeneratorService
         $this->applyTextToImage($image, $name, $nip, $unitKerja, $couponNumber);
 
         $filePath = $this->saveImage($image);
-        unset($image);
+        
+        // Bersihkan memory image utama
+        imagedestroy($image);
 
         return $filePath;
     }
@@ -110,16 +118,16 @@ class CouponGeneratorService
         string $fontPath,
         int $imageWidth
     ): void {
-        $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
+        $dummyImage = imagecreatetruecolor(1, 1);
+        $dummyColor = imagecolorallocate($dummyImage, 0, 0, 0);
+        $bbox = imagettftext($dummyImage, $fontSize, 0, 0, 0, $dummyColor, $fontPath, $text);
+        unset($dummyImage);
+
         if ($bbox === false) {
             return;
         }
-
         $textWidth = abs($bbox[2] - $bbox[0]);
-
-        // Center horizontal
         $x = (int) (($imageWidth - $textWidth) / 1.6);
-
         imagettftext(
             $image,
             $fontSize,
@@ -143,6 +151,7 @@ class CouponGeneratorService
         $filename = 'kupon-' . uniqid() . '.jpg';
         $path = $tempDir . '/' . $filename;
 
+        // Simpan kualitas 100
         if (!imagejpeg($image, $path, 100)) {
             throw new Exception('Gagal menyimpan file gambar.');
         }
