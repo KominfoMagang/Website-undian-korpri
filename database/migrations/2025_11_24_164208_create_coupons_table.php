@@ -20,6 +20,7 @@ return new class extends Migration
                 ->default('Aktif')
                 ->index();
             $table->timestamp('redeemed_at')->nullable();
+            $table->boolean('is_umkm_reedem')->default(false);
             $table->timestamps();
         });
     }

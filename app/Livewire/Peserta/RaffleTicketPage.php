@@ -56,13 +56,13 @@ class RaffleTicketPage extends Component
             'nama'       => $participant->nama,
             'nip'        => $participant->nip,
             'unit_kerja' => $participant->unit_kerja,
-            'fotoSelfie' => $participant->foto
-                ? Storage::disk('s3')->temporaryUrl(
-                    'photos/' . $participant->foto,
-                    now()->addMinutes(120)  
-                )
-                : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
-            // 'fotoSelfie' => $participant->foto ? asset('storage/photos/' . $participant->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
+            // 'fotoSelfie' => $participant->foto
+            //     ? Storage::disk('s3')->temporaryUrl(
+            //         'photos/' . $participant->foto,
+            //         now()->addMinutes(120)  
+            //     )
+            //     : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
+            'fotoSelfie' => $participant->foto ? asset('storage/photos/' . $participant->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
 
         ];
         $userCoupon = $participant->coupons->first();

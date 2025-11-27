@@ -62,7 +62,7 @@
 
                 <button type="button" wire:click="downloadCoupon"
                     class="w-full bg-[#5065A4] text-white text-sm font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity">
-                    Download kupon
+                    Download Doorprize
                 </button>
 
             </div>
