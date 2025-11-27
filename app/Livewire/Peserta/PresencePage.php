@@ -21,13 +21,13 @@ class PresencePage extends Component
     use WithFileUploads;
 
     // diskominfo : -7.31175525292628, 108.19931433695206
-    // Bale kota : -7.316538442400661, 108.153885
+    // Bale kota : -7.316546993522394, 108.19674640365119
     // rumah : -7.230234323966636, 108.1545507815288
     
 
-    protected const CENTER_LAT = -7.230234323966636;
-    protected const CENTER_LNG = 108.1545507815288;
-    protected const RADIUS_METERS = 10000;
+    protected const CENTER_LAT = -7.316546993522394;
+    protected const CENTER_LNG = 108.19674640365119;
+    protected const RADIUS_METERS = 500;
     protected const EARTH_RADIUS = 6371000;
     protected const MAX_UPLOAD_SIZE = 10240;
 
@@ -193,10 +193,8 @@ class PresencePage extends Component
     private function uploadPhoto($nip)
     {
         $filename = 'selfie_' . $nip . '_' . time() . '.jpg';
-        return $this->photo->storeAs('photos', $filename, 'public');
-
-        // Upload Bucket Amazon S3
-        // return $this->photo->storeAs('photos', $filename, ['disk' => 's3', 'visibility' => 'public']);
+        // return $this->photo->storeAs('photos', $filename, 'public');
+        return $this->photo->storeAs('photos', $filename, 's3');
     }
 
     /**
