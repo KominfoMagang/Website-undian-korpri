@@ -8,9 +8,12 @@ use Exception;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Layout('components.layouts.pages-peserta.kupon-undian')]
+#[Layout('components.layouts.Pages-peserta.kupon-undian')]
+#[Title("Halaman Kupon")]
+
 class RaffleTicketPage extends Component
 {
     public array $banners = [
