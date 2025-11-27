@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nama_toko')->index();
             $table->string('kode_toko')->unique()->index();
+            $table->string('jenis_produk');
+            $table->integer('stok')->default(0);
             $table->timestamps();
         });
     }

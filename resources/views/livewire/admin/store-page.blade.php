@@ -65,6 +65,8 @@
                                         <th class="w-1">No.</th>
                                         <th>Kode Toko</th>
                                         <th>Nama Toko</th>
+                                        <th>Jenis Produk</th>
+                                        <th>Stok</th>
                                         <th>Jumlah Diklaim Peserta</th>
                                         <th class="text-end">Action</th>
                                     </tr>
@@ -84,11 +86,32 @@
                                         </td>
 
                                         <td>
+                                            {{ $item->jenis_produk }}
+                                        </td>
+
+                                        <td>
+                                            {{ $item->stok }}
+                                        </td>
+
+                                        <td>
                                             {{ $item->coupons_count }} Kupon
                                         </td>
 
                                         <td class="text-end">
                                             <div class="btn-list flex-nowrap justify-content-end">
+                                                <a href="#" class="btn btn-white btn-icon text-primary"
+                                                    data-bs-toggle="modal" data-bs-target="#modal-store-coupons"
+                                                    wire:click="showStoreCoupons({{ $item->id }})">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        class="icon icon-tabler icon-tabler-eye" width="24" height="24"
+                                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                                        fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                        <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                                                        <path
+                                                            d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+                                                    </svg>
+                                                </a>
                                                 <a href="#" class="btn btn-white btn-icon text-danger"
                                                     data-bs-toggle="modal" data-bs-target="#modal-danger"
                                                     wire:click="setDeleteId({{ $item->id }})">
@@ -241,6 +264,107 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal modal-blur fade" id="modal-store-coupons" tabindex="-1" role="dialog" aria-hidden="true"
+                wire:ignore.self>
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                @if($selectedStore)
+                                List Kupon - {{ $selectedStore->nama_toko }}
+                                <span class="badge bg-blue-lt ms-2">{{ $selectedStore->coupons->count() }} Item</span>
+                                @else
+                                Detail Kupon
+                                @endif
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div wire:loading wire:target="showStoreCoupons" class="w-100 text-center py-4">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <div class="mt-2 text-muted">Sedang mengambil data...</div>
+                            </div>
+
+                            <div wire:loading.remove wire:target="showStoreCoupons">
+                                @if($selectedStore)
+                                @if($selectedStore->coupons->count() > 0)
+                                <div class="table-responsive">
+                                    <table class="table table-vcenter card-table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th class="w-1">No.</th>
+                                                <th>Kode Kupon</th>
+                                                <th>Pemilik (Peserta)</th>
+                                                <th>Status</th>
+                                                <th>Tanggal Dibuat</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($selectedStore->coupons as $index => $kupon)
+                                            <tr wire:key="modal-cpn-{{ $kupon->id }}">
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>
+                                                    <span class="font-mono font-bold">{{ $kupon->kode_kupon }}</span>
+                                                </td>
+                                                <td>
+                                                    @if($kupon->participant)
+                                                    <div class="font-weight-medium">{{ $kupon->participant->nama }}
+                                                    </div>
+                                                    <div class="text-muted small" style="font-size: 0.8rem;">
+                                                        {{ $kupon->participant->unit_kerja }}
+                                                    </div>
+                                                    @else
+                                                    <span class="text-muted fst-italic">- Belum Diklaim -</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($kupon->status_kupon == 'Aktif')
+                                                    <span class="badge bg-success me-1"></span> Aktif
+                                                    @else
+                                                    <span class="badge bg-secondary me-1"></span> {{
+                                                    $kupon->status_kupon }}
+                                                    @endif
+                                                </td>
+                                                <td class="text-muted">
+                                                    {{ $kupon->created_at->format('d/m/Y H:i') }}
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                                @else
+                                <div class="empty">
+                                    <div class="empty-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                            viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <circle cx="12" cy="12" r="9" />
+                                            <line x1="9" y1="10" x2="9.01" y2="10" />
+                                            <line x1="15" y1="10" x2="15.01" y2="10" />
+                                            <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
+                                        </svg>
+                                    </div>
+                                    <p class="empty-title">Belum ada data</p>
+                                    <p class="empty-subtitle text-muted">
+                                        Toko ini belum memiliki kupon yang terhubung.
+                                    </p>
+                                </div>
+                                @endif
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Tutup</button>
                         </div>
                     </div>
                 </div>

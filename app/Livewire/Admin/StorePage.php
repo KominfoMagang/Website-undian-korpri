@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Coupon;
 use App\Models\Store;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -19,6 +20,9 @@ class StorePage extends Component
     protected $paginationTheme = 'bootstrap';
     public $search = '';
     public $deleteId = null;
+    public $storeCoupons;
+    public $selectedStore;
+    public $selectedStoreId;
 
     #[Validate('required|min:3')]
     public $nama_toko;
@@ -72,6 +76,14 @@ class StorePage extends Component
         }
     }
 
+    public function showStoreCoupons($id)
+    {
+        $this->selectedStore = Store::find($id);
+        $this->selectedStoreId = $id;
+
+        $this->resetPage(pageName: 'coupon_page');
+    }
+
     public function render()
     {
         $stores = Store::query()
@@ -83,8 +95,18 @@ class StorePage extends Component
             ->orderBy('nama_toko', 'asc')
             ->paginate(10);
 
+        $couponsInModal = null;
+        if ($this->selectedStoreId) {
+            $couponsInModal = \App\Models\Coupon::with('participant')
+                ->where('store_id', $this->selectedStoreId)
+                ->latest()
+                // PENTING: Kasih nama halaman beda ('coupon_page')
+                ->paginate(5, pageName: 'coupon_page');
+        }
+
         return view('livewire.admin.store-page', [
-            'stores' => $stores
+            'stores' => $stores,
+            'modalCoupons' => $couponsInModal
         ]);
     }
 }
