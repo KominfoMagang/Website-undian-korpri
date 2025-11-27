@@ -10,7 +10,8 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('components.layouts.admin')]
-#[Title('Generate kupon undian  ')]
+#[Title('Generate kupon undian')]
+
 class CouponPage extends Component
 {
     use WithPagination;
