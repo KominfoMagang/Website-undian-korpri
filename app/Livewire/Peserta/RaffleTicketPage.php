@@ -19,6 +19,11 @@ class RaffleTicketPage extends Component
             'image' => 'static/images/flyer-asn.png',
             'title' => 'flyer hadiah ASN'
         ],
+        [
+            'id'    => 2,
+            'image' => 'static/images/banner-asn.png',
+            'title' => 'flyer hadiah ASN'
+        ],
     ];
 
     public ?string $couponNumber = null;
