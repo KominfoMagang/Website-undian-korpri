@@ -3,7 +3,7 @@
 namespace App\Livewire\Peserta;
 
 use App\Models\Participant;
-use App\Services\CouponGeneratorService;
+use App\services\CouponGeneratorService;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;

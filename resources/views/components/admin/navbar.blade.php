@@ -19,7 +19,7 @@
 
                     <div class="d-none d-sm-block text-start lh-1">
                         <div class="text-uppercase fw-bold text-warning" style="font-size: 10px; letter-spacing: 2px;">
-                            HUT KORPRI KE-54
+                            ASN DAY TAHUN 2025
                         </div>
 
                         <div class="fw-bolder text-reset text-uppercase" style="font-size: 14px; letter-spacing: 1px;">
