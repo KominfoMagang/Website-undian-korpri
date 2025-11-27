@@ -1,5 +1,5 @@
 <div class="flex flex-col items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-    <div class="flex gap-1 w-full justify-center">
+    <div class="flex gap-1.5 w-full justify-center">
         <x-peserta.logo />
     </div>
 

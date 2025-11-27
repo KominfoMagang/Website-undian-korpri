@@ -62,7 +62,7 @@
 
                 <button type="button" wire:click="downloadCoupon"
                     class="w-full bg-[#5065A4] text-white text-sm font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity">
-                    Download kupon
+                    Download Doorprize
                 </button>
 
             </div>
@@ -78,6 +78,7 @@
             @endforeach
         </div>
 
+        <p class="text-sm text-gray-400 text-center mb-2">*Gambar Doorprize Hanya Ilustrasi</p>
         {{-- Dot indicators --}}
         <div id="bannerDots" style="display:flex; justify-content:center; gap:4px; margin-bottom:16px;">
             @foreach ($banners as $banner)
