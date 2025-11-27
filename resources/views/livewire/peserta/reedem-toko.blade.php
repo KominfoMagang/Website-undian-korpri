@@ -34,7 +34,7 @@
             <div class="flex gap-2 mt-3">
                 <div class="w-40">
                     <input type="text" inputmode="numeric" pattern="[0-9]{18}"
-                        wire:model.live.debounce.250ms="kodeToko" maxlength="6" placeholder="Kode toko"
+                        wire:model.live.debounce.250ms="kodeToko" maxlength="3" placeholder="Kode toko"
                         class="w-full bg-white rounded-lg p-3 text-sm font-semibold border border-transparent focus:border-blue-500 focus:outline-none transition-colors shadow-sm @error('kodeToko') @enderror">
 
                     @error('kodeToko')
