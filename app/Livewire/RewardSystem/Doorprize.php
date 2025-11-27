@@ -5,6 +5,7 @@ namespace App\Livewire\RewardSystem;
 use App\Models\Participant;
 use App\Models\Reward;
 use App\Models\Winner;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -16,30 +17,35 @@ class Doorprize extends Component
 
     public function pickWinner()
     {
-        $calon = Participant::where('sudah_menang', false)
-            ->whereHas('coupons', function ($q) {
-                $q->where('status_kupon', 'Aktif');
-            })
-            ->with(['coupons' => function ($q) {
-                $q->where('status_kupon', 'Aktif');
-            }])
-            ->inRandomOrder()
-            ->first();
+        return DB::transaction(function () {
 
-        if (!$calon) {
-            return null;
-        }
+            // 1. Ambil Kandidat secara Acak
+            $calon = Participant::query()
+                ->where('sudah_menang', false)
+                ->where('status_hadir', 'Hadir') // Pastikan hanya yang hadir
+                ->whereHas('coupons', function ($q) {
+                    $q->where('status_kupon', 'Aktif');
+                })
+                ->inRandomOrder()
+                // lockForUpdate mencegah data ini diambil proses lain di detik yang sama
+                ->lockForUpdate()
+                ->first();
 
-        $kuponObj = $calon->coupons->first();
-        $kodeKupon = $kuponObj ? $kuponObj->kode_kupon : 'ERR-NO-COUPON';
+            if (!$calon) {
+                return null;
+            }
 
-        return [
-            'id' => $calon->id,
-            'kode_kupon' => $kodeKupon,
-            'nama' => $calon->nama,
-            'unit_kerja' => $calon->unit_kerja,
-            'foto' => $calon->foto ? asset('storage/' . $calon->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($calon->nama),
-        ];
+            // Simpan hanya saat tombol "Tetapkan Pemenang" di modal diklik.
+            // Tapi setidaknya query di atas sudah menjamin pengacakan yang adil.
+
+            return [
+                'id' => $calon->id,
+                'kode_kupon' => $calon->coupons->first()->kode_kupon ?? '-',
+                'nama' => $calon->nama,
+                'unit_kerja' => $calon->unit_kerja,
+                'foto' => $calon->foto ? asset('storage/' . $calon->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($calon->nama),
+            ];
+        });
     }
 
     public function saveWinner($participantId, $rewardId)
@@ -76,7 +82,8 @@ class Doorprize extends Component
                     'id' => $item->id,
                     'nama_hadiah' => $item->nama_hadiah,
                     'gambar' => $item->gambar ? asset('storage/reward/' . $item->gambar) : 'https://placehold.co/300x300/png?text=No+Image',
-                    'stok' => $item->stok
+                    'stok' => $item->stok,
+                    'kategori' => $item->category->nama_kategori ?? 'Umum',
                 ]];
             });
 

@@ -15,7 +15,10 @@
             <select id="prizeSelect" onchange="changePrize()"
                 class="mb-4 w-full rounded-xl border-2 border-blue-200 bg-white px-4 py-3 font-bold text-blue-900 focus:border-yellow-400 focus:ring-yellow-400 cursor-pointer shadow-sm">
                 @foreach ($jsRewards as $id => $data)
-                <option value="{{ $id }}">{{ $data['nama_hadiah'] }}</option>
+                {{-- Tampilkan Kategori di dalam kurung siku biar tegas --}}
+                <option value="{{ $id }}">
+                    [Hadiah {{ $data['kategori'] }}] - {{ $data['nama_hadiah'] }}
+                </option>
                 @endforeach
             </select>
 
@@ -49,7 +52,7 @@
             class="w-full md:w-2/3 bg-gradient-to-br from-blue-600 to-blue-800 p-8 flex flex-col items-center justify-center relative">
 
             <div class="text-center mb-10 z-10">
-                <span class="text-blue-200 font-semibold tracking-[0.5em] uppercase text-sm">Nomor Pemenang</span>
+                <span class="text-blue-200 font-semibold tracking-[0.5em] uppercase text-sm">Nomor Kupon Pemenang</span>
                 <div class="w-16 h-1 bg-yellow-400 mx-auto mt-2 rounded-full"></div>
             </div>
 

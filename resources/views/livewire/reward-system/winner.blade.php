@@ -1,5 +1,4 @@
 <div class="w-full py-24 pb-40 px-4">
-
     {{-- CEK: Jika belum ada pemenang sama sekali --}}
     @if($totalPemenang == 0)
     <div class="flex flex-col items-center justify-center min-h-[70vh] w-full">
@@ -7,167 +6,97 @@
             <div class="absolute -inset-4 bg-yellow-400/20 rounded-full blur-xl animate-pulse"></div>
             <div class="text-8xl mb-6 relative z-10 animate-bounce">⏳</div>
         </div>
-
         <h3 class="text-white text-3xl md:text-5xl font-black drop-shadow-lg uppercase tracking-wider text-center">
             Belum Ada Pemenang
         </h3>
-
         <div class="mt-4 px-6 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-            <p class="text-blue-100 text-lg font-medium tracking-wide">
-                Sistem siap melakukan pengundian
-            </p>
+            <p class="text-blue-100 text-lg font-medium tracking-wide">Sistem siap melakukan pengundian</p>
         </div>
     </div>
     @else
 
-    {{-- BAGIAN PODIUM (TOP 3) --}}
-    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-end justify-center gap-6 md:gap-8 mb-16">
-
-        {{-- JUARA 2 (POSISI KIRI) - Ambil Index 1 --}}
-        <div class="order-2 md:order-1 w-full md:w-1/3 flex flex-col items-center animate-float delay-1">
-            @if($podium->has(1))
-            @php $juara2 = $podium->get(1); @endphp
-            <div
-                class="relative glass-card w-full rounded-2xl p-6 text-center shadow-2xl border-t-8 border-slate-400 transform hover:-translate-y-2 transition-transform duration-300">
-                <div
-                    class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-slate-400 text-white font-black text-xl w-10 h-10 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
-                    2
-                </div>
-                <div class="relative w-24 h-24 mx-auto mb-4 mt-2">
-                    <div class="absolute inset-0 rounded-full border-4 border-slate-300 shadow-md"></div>
-                    <img src="{{ $juara2->participant->foto ? asset('storage/'.$juara2->participant->foto) : 'https://ui-avatars.com/api/?name='.urlencode($juara2->participant->nama) }}"
-                        class="w-full h-full rounded-full object-cover p-1">
-                </div>
-                <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">{{ $juara2->participant->nama }}</h3>
-                <p class="text-sm font-semibold text-slate-500 mb-3">Kode kupon : {{ $juara2->coupon->kode_kupon }}</p>
-                <div
-                    class="inline-block bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">
-                    {{ $juara2->participant->unit_kerja }}
-                </div>
-                <div class="mt-4 pt-3 border-t border-slate-200">
-                    <p class="text-xs text-slate-400 uppercase tracking-widest">Hadiah</p>
-                    <p class="text-slate-700 font-bold">{{ $juara2->reward->nama_hadiah }}</p>
-                </div>
-            </div>
-            <div
-                class="w-full h-24 bg-gradient-to-b from-slate-400 to-slate-600 opacity-80 rounded-b-lg mt-1 hidden md:block shadow-lg">
-            </div>
-            @else
-            {{-- Placeholder jika belum ada Juara 2 --}}
-            <div
-                class="w-full h-48 flex items-center justify-center border-2 border-dashed border-slate-500/30 rounded-2xl">
-                <span class="text-slate-400 font-bold">Menunggu Juara 2...</span>
-            </div>
-            @endif
+    {{-- BAGIAN PODIUM (KHUSUS KATEGORI UTAMA) --}}
+    @if($podiumWinners->count() > 0)
+    <div class="max-w-5xl mx-auto mb-16">
+        <div class="text-center mb-14">
+            <h2 class="text-yellow-400 font-black text-3xl uppercase tracking-widest drop-shadow-md">🏆 PEMENANG UTAMA
+                🏆</h2>
         </div>
 
-        {{-- JUARA 1 (POSISI TENGAH) - Ambil Index 0 --}}
-        <div class="order-1 md:order-2 w-full md:w-1/3 flex flex-col items-center animate-float z-10">
-            <div class="text-5xl mb-2 filter drop-shadow-lg">👑</div>
-
-            @if($podium->has(0))
-            @php $juara1 = $podium->get(0); @endphp
-            <div
-                class="relative glass-card w-full rounded-2xl p-8 text-center shadow-[0_20px_50px_rgba(251,191,36,0.3)] border-t-8 border-yellow-400 transform md:scale-105 hover:-translate-y-2 transition-transform duration-300">
+        {{-- Loop Pemenang Utama (Jika ada lebih dari 1, ditampilkan grid) --}}
+        <div class="flex flex-wrap justify-center gap-8">
+            @foreach($podiumWinners as $juara)
+            <div class="flex flex-col items-center animate-float z-10 w-full">
                 <div
-                    class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-yellow-900 font-black text-2xl w-12 h-12 rounded-full flex items-center justify-center shadow-lg border-4 border-white">
-                    1
-                </div>
-                <div class="relative w-32 h-32 mx-auto mb-5 mt-2">
-                    <div class="absolute -inset-1 bg-yellow-400 rounded-full blur opacity-50 animate-pulse"></div>
-                    <div class="relative w-full h-full rounded-full border-4 border-yellow-400 shadow-xl bg-white">
-                        <img src="{{ $juara1->participant->foto ? asset('storage/'.$juara1->participant->foto) : 'https://ui-avatars.com/api/?name='.urlencode($juara1->participant->nama) }}"
-                            class="w-full h-full rounded-full object-cover p-1">
+                    class="relative glass-card w-full rounded-2xl p-8 text-center shadow-[0_20px_50px_rgba(251,191,36,0.3)] border-t-8 border-yellow-400 transform md:scale-105 hover:-translate-y-2 transition-transform duration-300">
+
+                    {{-- Mahkota Icon --}}
+                    <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 text-6xl filter drop-shadow-lg">
+                        👑
+                    </div>
+
+                    <div class="relative w-40 h-40 mx-auto mb-5 mt-4">
+                        <div class="absolute -inset-1 bg-yellow-400 rounded-full blur opacity-50 animate-pulse"></div>
+                        <div class="relative w-full h-full rounded-full border-4 border-yellow-400 shadow-xl bg-white">
+                            <img src="{{ $juara->participant->foto ? asset('storage/'.$juara->participant->foto) : 'https://ui-avatars.com/api/?name='.urlencode($juara->participant->nama) }}"
+                                class="w-full h-full rounded-full object-cover p-1">
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-black text-blue-900 leading-tight mb-1">{{ $juara->participant->nama }}
+                    </h3>
+                    <p class="text-sm font-semibold text-slate-500 mb-4">Kode kupon : {{ $juara->coupon->kode_kupon }}
+                    </p>
+
+                    <div
+                        class="inline-block bg-yellow-50 text-yellow-800 px-4 py-1.5 rounded-full text-sm font-bold border border-yellow-200 mb-4">
+                        {{ $juara->participant->unit_kerja }}
+                    </div>
+
+                    <div
+                        class="pt-4 border-t border-yellow-100 bg-gradient-to-b from-transparent to-yellow-50/50 rounded-b-xl -mx-8 -mb-8 pb-8 px-4">
+                        <p class="text-xs text-yellow-600 uppercase tracking-widest font-bold">Mendapatkan Hadiah</p>
+                        <p class="text-xl text-blue-900 font-black mt-1">{{ $juara->reward->nama_hadiah }}</p>
                     </div>
                 </div>
-                <h3 class="text-2xl font-black text-blue-900 leading-tight mb-1">{{ $juara1->participant->nama }}</h3>
-                <p class="text-sm font-semibold text-slate-500 mb-4">Kode kupon : {{ $juara1->coupon->kode_kupon }}</p>
-                <div
-                    class="inline-block bg-yellow-50 text-yellow-800 px-4 py-1.5 rounded-full text-sm font-bold border border-yellow-200 mb-4">
-                    {{ $juara1->participant->unit_kerja }}
-                </div>
-                <div
-                    class="pt-4 border-t border-yellow-100 bg-gradient-to-b from-transparent to-yellow-50/50 rounded-b-xl -mx-8 -mb-8 pb-8 px-4">
-                    <p class="text-xs text-yellow-600 uppercase tracking-widest font-bold">Hadiah Utama</p>
-                    <p class="text-xl text-blue-900 font-black mt-1">{{ $juara1->reward->nama_hadiah }}</p>
-                </div>
             </div>
-            <div
-                class="w-full h-32 bg-gradient-to-b from-yellow-400 to-yellow-600 opacity-90 rounded-b-lg mt-1 hidden md:block shadow-xl relative overflow-hidden">
-                <div
-                    class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diamond-upholstery.png')] opacity-20">
-                </div>
-                <div class="flex items-center justify-center h-full text-yellow-900/30 text-6xl font-black">1</div>
-            </div>
-            @endif
-        </div>
-
-        {{-- JUARA 3 (POSISI KANAN) - Ambil Index 2 --}}
-        <div class="order-3 md:order-3 w-full md:w-1/3 flex flex-col items-center animate-float delay-2">
-            @if($podium->has(2))
-            @php $juara3 = $podium->get(2); @endphp
-            <div
-                class="relative glass-card w-full rounded-2xl p-6 text-center shadow-2xl border-t-8 border-orange-700 transform hover:-translate-y-2 transition-transform duration-300">
-                <div
-                    class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-orange-700 text-white font-black text-xl w-10 h-10 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
-                    3
-                </div>
-                <div class="relative w-24 h-24 mx-auto mb-4 mt-2">
-                    <div class="absolute inset-0 rounded-full border-4 border-orange-700/50 shadow-md"></div>
-                    <img src="{{ $juara3->participant->foto ? asset('storage/'.$juara3->participant->foto) : 'https://ui-avatars.com/api/?name='.urlencode($juara3->participant->nama) }}"
-                        class="w-full h-full rounded-full object-cover p-1">
-                </div>
-                <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">{{ $juara3->participant->nama }}</h3>
-                <p class="text-sm font-semibold text-slate-500 mb-3">Kode kupon : {{ $juara3->coupon->kode_kupon }}</p>
-                <div
-                    class="inline-block bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">
-                    {{ $juara3->participant->unit_kerja }}
-                </div>
-                <div class="mt-4 pt-3 border-t border-slate-200">
-                    <p class="text-xs text-slate-400 uppercase tracking-widest">Hadiah</p>
-                    <p class="text-slate-700 font-bold">{{ $juara3->reward->nama_hadiah }}</p>
-                </div>
-            </div>
-            <div
-                class="w-full h-16 bg-gradient-to-b from-orange-600 to-orange-800 opacity-80 rounded-b-lg mt-1 hidden md:block shadow-lg">
-            </div>
-            @else
-            {{-- Placeholder jika belum ada Juara 3 --}}
-            <div
-                class="w-full h-48 flex items-center justify-center border-2 border-dashed border-slate-500/30 rounded-2xl">
-                <span class="text-slate-400 font-bold">Menunggu Juara 3...</span>
-            </div>
-            @endif
+            @endforeach
         </div>
     </div>
+    @endif
 
-    {{-- BAGIAN LIST HADIAH HIBURAN (GRID BAWAH) --}}
+    {{-- BAGIAN LIST HADIAH UMUM (GRID BAWAH) --}}
     @if($listWinners->count() > 0)
-    <div class="max-w-4xl mx-auto mt-16">
-        <div class="flex items-center gap-4 mb-6">
-            <div class="h-1 flex-1 bg-gradient-to-r from-transparent to-blue-400/30"></div>
-            <h2 class="text-white font-bold text-xl uppercase tracking-wider">Pemenang Lainnya</h2>
-            <div class="h-1 flex-1 bg-gradient-to-l from-transparent to-blue-400/30"></div>
+    <div class="max-w-5xl mx-auto mt-12">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="h-1 flex-1 bg-gradient-to-r from-transparent to-white/50"></div>
+            <h2 class="text-white font-bold text-2xl uppercase tracking-wider drop-shadow-md">Pemenang Hadiah Umum</h2>
+            <div class="h-1 flex-1 bg-gradient-to-l from-transparent to-white/50"></div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @foreach($listWinners as $winner)
             <div
-                class="bg-white/90 backdrop-blur-sm rounded-xl p-4 flex items-center gap-4 shadow-lg border-l-4 border-blue-500 hover:bg-white transition group hover:-translate-y-1">
-                <img src="{{ $winner->participant->foto ? asset('storage/'.$winner->participant->foto) : 'https://ui-avatars.com/api/?name='.urlencode($winner->participant->nama) }}"
-                    class="w-16 h-16 rounded-full object-cover border-2 border-slate-200">
+                class="bg-white/95 backdrop-blur-sm rounded-xl p-4 flex items-center gap-4 shadow-lg border-l-4 border-blue-500 hover:bg-white transition group hover:-translate-y-1">
+                <div class="flex-shrink-0">
+                    <img src="{{ $winner->participant->foto ? asset('storage/'.$winner->participant->foto) : 'https://ui-avatars.com/api/?name='.urlencode($winner->participant->nama) }}"
+                        class="w-14 h-14 rounded-full object-cover border-2 border-slate-200 shadow-sm">
+                </div>
                 <div class="flex-1 min-w-0">
-                    <h4 class="text-blue-900 font-bold truncate group-hover:text-blue-600 transition-colors">
+                    <h4 class="text-blue-900 font-bold text-sm truncate group-hover:text-blue-600 transition-colors">
                         {{ $winner->participant->nama }}
                     </h4>
-                    <p class="text-xs text-slate-500 font-mono mb-1">Kode kupon : {{ $winner->coupon->kode_kupon }}</p>
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs text-slate-500 font-mono bg-slate-100 px-1.5 rounded">{{
+                            $winner->coupon->kode_kupon }}</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
                         <span
-                            class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded truncate max-w-[200px]">
+                            class="text-[10px] font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded truncate w-fit max-w-full">
                             {{ $winner->participant->unit_kerja }}
                         </span>
-                        <span class="text-sm font-bold text-yellow-600 text-right truncate ml-2">
-                            {{ $winner->reward->nama_hadiah }}
+                        <span class="text-xs font-bold text-yellow-600 truncate">
+                            🎁 {{ $winner->reward->nama_hadiah }}
                         </span>
                     </div>
                 </div>
@@ -179,7 +108,7 @@
         @if($hasMore)
         <div class="mt-8 text-center">
             <button wire:click="loadMore" wire:loading.attr="disabled"
-                class="bg-white/10 hover:bg-white/20 text-white font-semibold py-2 px-6 rounded-full border border-white/30 transition text-sm cursor-pointer">
+                class="bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-8 rounded-full border border-white/40 transition text-sm cursor-pointer backdrop-blur-md shadow-lg">
                 <span wire:loading.remove>Muat Lebih Banyak</span>
                 <span wire:loading>Memuat... ⏳</span>
             </button>
@@ -190,7 +119,7 @@
 
     @endif
 
-    {{-- Script JS (Tetap Copy Paste Bagian Ini Agar Fullscreen jalan di Halaman Pemenang juga) --}}
+    {{-- Script JS --}}
     @script
     <script>
         window.toggleFullScreen = function() {
