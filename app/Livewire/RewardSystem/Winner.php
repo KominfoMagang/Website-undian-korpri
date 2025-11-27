@@ -21,25 +21,28 @@ class Winner extends Component
 
     public function render()
     {
-        // 1. Ambil SEMUA pemenang diurutkan dari yang PERTAMA kali menang
-        // Eager load relasi 'participant' dan 'reward' biar query ringan
         $allWinners = ModelsWinner::with([
             'participant.coupons',
-            'reward'
-        ])->orderBy('created_at', 'asc')->get();
+            'reward.category' // Pastikan relasi ke kategori diload
+        ])->orderBy('created_at', 'desc')->get();
 
-        // 2. Ambil 3 orang pertama untuk Podium
-        // Index 0 = Juara 1, Index 1 = Juara 2, Index 2 = Juara 3
-        $podium = $allWinners->take(3);
+        // 1. Filter Pemenang Kategori UTAMA (Masuk Podium)
+        $podiumWinners = $allWinners->filter(function ($winner) {
+            // Sesuaikan string 'Utama' dengan nama di database Anda (case-sensitive biasanya)
+            return $winner->reward->category->nama_kategori === 'Utama';
+        });
 
-        // 3. Ambil sisanya (mulai dari index 3) untuk List Bawah
-        $listWinners = $allWinners->slice(3)->take($this->limit);
+        // 2. Filter Pemenang Kategori UMUM/LAINNYA (Masuk List Bawah)
+        $otherWinners = $allWinners->filter(function ($winner) {
+            return $winner->reward->category->nama_kategori !== 'Utama';
+        });
 
-        // Cek apakah masih ada sisa data untuk tombol "Load More"
-        $hasMore = $allWinners->count() > (3 + $this->limit);
+        // Pagination Manual untuk List Bawah
+        $listWinners = $otherWinners->take($this->limit);
+        $hasMore = $otherWinners->count() > $this->limit;
 
         return view('livewire.reward-system.winner', [
-            'podium' => $podium,
+            'podiumWinners' => $podiumWinners, // Kirim collection, bukan cuma 1 orang
             'listWinners' => $listWinners,
             'hasMore' => $hasMore,
             'totalPemenang' => $allWinners->count()

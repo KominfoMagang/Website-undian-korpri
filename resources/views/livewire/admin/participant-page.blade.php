@@ -313,15 +313,9 @@
 
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Foto Selfie</label>
-                                        @if($selectedParticipant->foto)
-                                        <img src="{{ asset('storage/' . $selectedParticipant->foto) }}"
+                                        <img src="{{ $selectedParticipant->foto_url }}"
                                             class="img-fluid rounded border shadow-sm w-100 object-cover"
                                             style="max-height: 300px;" alt="Foto Peserta">
-                                        @else
-                                        <div class="text-muted fst-italic border p-3 rounded text-center bg-light">
-                                            Tidak ada foto
-                                        </div>
-                                        @endif
                                     </div>
                                 </div>
 

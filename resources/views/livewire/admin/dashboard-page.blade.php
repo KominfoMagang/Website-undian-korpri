@@ -13,8 +13,9 @@
                         </h2>
                     </div>
                     <div class="col-2">
-                        <button wire:click="exportExcel" wire:loading.attr="disabled"
+                        <button wire:click="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel"
                             class="btn btn-success d-none d-sm-inline-block">
+
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 class="icon icon-tabler icon-tabler-file-spreadsheet me-2" width="24" height="24"
                                 viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
@@ -26,8 +27,10 @@
                                 <path d="M8 15h8"></path>
                                 <path d="M11 11v7"></path>
                             </svg>
-                            <span wire:loading.remove target="exportExcel">Export Data Pemenang</span>
-                            <span wire:loading target="exportExcel">Downloading...</span>
+
+                            <span wire:loading.remove wire:target="exportExcel">Export Data Pemenang</span>
+
+                            <span wire:loading wire:target="exportExcel">Downloading...</span>
                         </button>
                     </div>
                 </div>
@@ -52,8 +55,8 @@
                                         <span class="text-primary">
                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                 class="icon icon-tabler icon-tabler-users" width="48" height="48"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"
+                                                stroke-linecap="round" stroke-linejoin="round">
                                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                                 <circle cx="9" cy="7" r="4"></circle>
                                                 <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
@@ -81,10 +84,9 @@
                                     <div class="subheader text-muted">Kupon Undian Aktif</div>
                                     <div class="ms-auto lh-1">
                                         <span class="text-primary">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
-                                                height="24" viewBox="0 0 24 24" stroke-width="2"
-                                                stroke="currentColor" fill="none" stroke-linecap="round"
-                                                stroke-linejoin="round">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                                viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                                stroke-linecap="round" stroke-linejoin="round">
                                                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                                 <path d="M15 5l0 2" />
                                                 <path d="M15 11l0 2" />
