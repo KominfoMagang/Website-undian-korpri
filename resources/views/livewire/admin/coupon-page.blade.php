@@ -83,7 +83,7 @@
                                         <th class="w-1">No</th>
                                         <th>Kode Kupon</th>
                                         <th>Status</th>
-                                        <th>Participant ID</th>
+                                        <th>Nama Peserta</th>
                                         <th>Dibuat Pada</th>
                                     </tr>
                                 </thead>
