@@ -19,14 +19,39 @@ class CouponPage extends Component
 
     public function generate()
     {
+        // 1. Validasi Input
         $this->validate([
-            'amount'=> 'required|integer|min:1|max:50000'
+            'amount' => 'required|integer|min:1|max:50000'
         ]);
+        set_time_limit(300);
 
-        GenerateCouponsJob::dispatch($this->amount);
+        $quantityNeeded = $this->amount;
+        $generatedCount = 0;
+        $batchSize = 1000; // Jumlah insert per batch
+        $dataToInsert = [];
+        $now = now();
+        
+        while ($generatedCount < $quantityNeeded) {
 
-        session()->flash('success', "Permintaan generate {$this->amount} kupon sedang diproses di latar belakang.");
+            $code = str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            $dataToInsert[$code] = [
+                'kode_kupon' => $code,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
 
+            $remainingNeeded = $quantityNeeded - $generatedCount;
+            if (count($dataToInsert) >= $batchSize || count($dataToInsert) >= $remainingNeeded) {
+                $inserted = Coupon::insertOrIgnore(array_values($dataToInsert));
+                $generatedCount += $inserted;
+                $dataToInsert = [];
+            }
+        }
+
+        // 4. Feedback ke User
+        session()->flash('success', "Berhasil membuat {$generatedCount} kupon secara instan.");
+
+        // 5. Reset Form
         $this->amount = 100;
     }
 
@@ -39,9 +64,9 @@ class CouponPage extends Component
     public function render()
     {
         $coupons = Coupon::with('participant')
-        ->orderBy('id', 'desc')
-        ->paginate(10);
-        
+            ->orderBy('id', 'desc')
+            ->paginate(10);
+
         return view('livewire.admin.coupon-page', [
             'coupons' => $coupons
         ]);
