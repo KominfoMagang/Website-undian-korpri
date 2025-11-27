@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
+    libfreetype-dev \
     libzip-dev \
     zip unzip git curl \
     libonig-dev \
@@ -22,29 +23,36 @@ RUN apt-get update && apt-get install -y \
     default-mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-configure zip \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install zip pdo_mysql mbstring exif pcntl bcmath gd
+# Configure GD with FreeType support (PENTING!)
+RUN docker-php-ext-configure gd \
+    --enable-gd \
+    --with-freetype \
+    --with-jpeg
+
+# Install PHP extensions
+RUN docker-php-ext-install -j$(nproc) \
+    zip \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd
 
 ##############################################
 # Install Composer from official image
 ##############################################
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-
-
 ##############################################
 # Copy source code
 ##############################################
 COPY . /var/www
 
-
 ##############################################
 # Composer install (Production)
 ##############################################
 RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-
 
 ##############################################
 # Set correct permissions
@@ -52,8 +60,6 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 RUN chown -R www-data:www-data \
         /var/www/storage \
         /var/www/bootstrap/cache
-
-
 
 ##############################################
 # FPM
