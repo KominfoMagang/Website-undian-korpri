@@ -43,7 +43,7 @@ class Doorprize extends Component
                 'kode_kupon' => $calon->coupons->first()->kode_kupon ?? '-',
                 'nama' => $calon->nama,
                 'unit_kerja' => $calon->unit_kerja,
-                'foto' => $calon->foto ? asset('storage/' . $calon->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($calon->nama),
+                'foto' => $calon->foto_url,
             ];
         });
     }
@@ -81,7 +81,7 @@ class Doorprize extends Component
                 return [$item->id => [
                     'id' => $item->id,
                     'nama_hadiah' => $item->nama_hadiah,
-                    'gambar' => $item->gambar ? asset('storage/reward/' . $item->gambar) : 'https://placehold.co/300x300/png?text=No+Image',
+                    'gambar' => $item->gambar ? asset('static/doorprizes/' . $item->gambar) : 'https://placehold.co/300x300/png?text=No+Image',
                     'stok' => $item->stok,
                     'kategori' => $item->category->nama_kategori ?? 'Umum',
                 ]];

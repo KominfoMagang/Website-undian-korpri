@@ -38,7 +38,7 @@
                     <div class="relative w-40 h-40 mx-auto mb-5 mt-4">
                         <div class="absolute -inset-1 bg-yellow-400 rounded-full blur opacity-50 animate-pulse"></div>
                         <div class="relative w-full h-full rounded-full border-4 border-yellow-400 shadow-xl bg-white">
-                            <img src="{{ $juara->participant->foto ? asset('storage/'.$juara->participant->foto) : 'https://ui-avatars.com/api/?name='.urlencode($juara->participant->nama) }}"
+                            <img src="{{ $juara->participant->foto_url }}"
                                 class="w-full h-full rounded-full object-cover p-1">
                         </div>
                     </div>
@@ -79,7 +79,7 @@
             <div
                 class="bg-white/95 backdrop-blur-sm rounded-xl p-4 flex items-center gap-4 shadow-lg border-l-4 border-blue-500 hover:bg-white transition group hover:-translate-y-1">
                 <div class="flex-shrink-0">
-                    <img src="{{ $winner->participant->foto ? asset('storage/'.$winner->participant->foto) : 'https://ui-avatars.com/api/?name='.urlencode($winner->participant->nama) }}"
+                    <img src="{{ $winner->participant->foto_url }}"
                         class="w-14 h-14 rounded-full object-cover border-2 border-slate-200 shadow-sm">
                 </div>
                 <div class="flex-1 min-w-0">

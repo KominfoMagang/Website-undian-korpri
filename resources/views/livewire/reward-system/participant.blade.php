@@ -68,7 +68,7 @@
                             <div class="flex items-center gap-4">
                                 {{-- Avatar / Foto --}}
                                 <img class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md"
-                                    src="{{ $p->foto ? asset('storage/'.$p->foto) : 'https://ui-avatars.com/api/?name='.urlencode($p->nama).'&background=random' }}"
+                                    src="{{ $p->foto_url }}"
                                     alt="{{ $p->nama }}">
                                 <div>
                                     <div class="font-bold text-slate-800 text-base group-hover:text-blue-700">{{

@@ -183,7 +183,7 @@
                                         <td>
                                             @if($item->gambar)
                                             <span class="avatar"
-                                                style="background-image: url('{{ asset('storage/'.$item->gambar) }}')"></span>
+                                                style="background-image: url('{{ asset('static/doorprizes/' . $item->gambar) }}')"></span>
                                             @else
                                             <span class="avatar bg-blue-lt">
                                                 {{ substr($item->nama_hadiah, 0, 1) }}
@@ -356,7 +356,7 @@
                                             style="background-image: url('{{ $gambar->temporaryUrl() }}')"></span>
                                         @elseif($oldGambar)
                                         <span class="avatar avatar-xl"
-                                            style="background-image: url('{{ asset('storage/'.$oldGambar) }}')"></span>
+                                            style="background-image: url('{{ asset('static/doorprizes/'.$oldGambar) }}')"></span>
                                         @else
                                         <span class="avatar avatar-xl bg-secondary-lt">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"

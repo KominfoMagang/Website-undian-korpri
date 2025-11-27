@@ -58,24 +58,24 @@ class ParticipantSeeder extends Seeder
             ]);
         }
 
-        foreach (range(1, 20) as $i) {
-            $participant = Participant::create([
-                'nama' => $faker->name,
-                'nip' => $faker->unique()->numerify('19##########1#####'),
-                'unit_kerja' => $faker->randomElement($units),
-                'foto' => null,
-                'status_hadir' => 'Hadir',
-                'latitude' => '-7.230316356025819',
-                'longitude' => '108.1546012707976',
-                'sudah_menang' => false,
-            ]);
+        // foreach (range(1, 20) as $i) {
+        //     $participant = Participant::create([
+        //         'nama' => $faker->name,
+        //         'nip' => $faker->unique()->numerify('19##########1#####'),
+        //         'unit_kerja' => $faker->randomElement($units),
+        //         'foto' => null,
+        //         'status_hadir' => 'Hadir',
+        //         'latitude' => '-7.230316356025819',
+        //         'longitude' => '108.1546012707976',
+        //         'sudah_menang' => false,
+        //     ]);
 
-            Coupon::create([
-                'participant_id' => $participant->id,
-                'kode_kupon' => mt_rand(100000, 999999),
-                'status_kupon' => 'Aktif',
-            ]);
-        }
+        //     Coupon::create([
+        //         'participant_id' => $participant->id,
+        //         'kode_kupon' => mt_rand(100000, 999999),
+        //         'status_kupon' => 'Aktif',
+        //     ]);
+        // }
 
         // foreach(range(1,5) as $i){
         //     Store::create([

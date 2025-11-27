@@ -526,7 +526,7 @@
             const dataHadiah = prizes[prizeVal];
 
             // Isi data modal dari currentWinner (Server)
-            document.getElementById('winnerPhoto').src = currentWinner.photo;
+            document.getElementById('winnerPhoto').src = currentWinner.foto;
             document.getElementById('winnerName').innerText = currentWinner.nama;
             document.getElementById('winnerCoupon').innerText = "Kupon: " + currentWinner.kode_kupon;
             document.getElementById('winnerAgency').innerText = currentWinner.unit_kerja;
