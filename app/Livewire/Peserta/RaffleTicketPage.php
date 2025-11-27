@@ -104,7 +104,6 @@ class RaffleTicketPage extends Component
             $filePath = $generatorService->generate(
                 name: $this->detailData['nama'],
                 nip: $this->detailData['nip'],
-                unitKerja: $this->detailData['unit_kerja'],
                 couponNumber: $this->couponNumber
             );
 
