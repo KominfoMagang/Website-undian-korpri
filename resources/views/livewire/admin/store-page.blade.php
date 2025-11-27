@@ -183,11 +183,11 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label required">Kode Toko (5-6 Digit)</label>
+                                    <label class="form-label required">Kode Toko (3 Digit)</label>
                                     <div class="input-group">
                                         <input type="number"
                                             class="form-control @error('kode_toko') is-invalid @enderror"
-                                            wire:model="kode_toko" placeholder="Contoh: 12345">
+                                            wire:model="kode_toko" placeholder="Contoh: 123">
 
                                         <button class="btn" type="button" wire:click="generateKodeToko"
                                             wire:loading.attr="disabled">
