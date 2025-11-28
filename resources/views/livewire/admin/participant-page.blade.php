@@ -207,7 +207,7 @@
                             <div class="col-lg-6">
                                 <div class="mb-3">
                                     <label class="form-label required">NIP</label>
-                                    <input type="text" class="form-control @error('nip') is-invalid @enderror"
+                                    <input type="text" maxlength="18" class="form-control @error('nip') is-invalid @enderror"
                                         wire:model.blur="nip" placeholder="Contoh: 19850101...">
                                     @error('nip') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
