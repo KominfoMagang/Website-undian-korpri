@@ -31,7 +31,7 @@
             {{-- KONDISI 3: BELUM DITUKAR (FORM INPUT) --}}
         @else
             <div class="text-gray-900 text-sm font-semibold">Tukarkan Voucher Makanan & Minuman</div>
-            <div class="flex gap-2 mt-3">
+            <div class="flex gap-2 mt-3 mb-2">
                 <div class="w-40">
                     <input type="text" inputmode="numeric" pattern="[0-9]{18}"
                         wire:model.live.debounce.250ms="kodeToko" maxlength="3" placeholder="Kode toko"
@@ -43,11 +43,19 @@
                 </div>
 
                 <button type="button" wire:click="reedemKuponToko" wire:loading.attr="disabled"
-                    class="w-60 bg-[#7686BC] text-white text-sm font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm">
-                    <span wire:loading.remove>Tukar Voucher</span>
+                    @disabled($isStokHabis)
+                    class="w-60 bg-[#7686BC] text-white text-sm font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                    <span wire:loading.remove>
+                        {{ $isStokHabis ? 'Stok Habis' : 'Tukar Voucher' }}
+                    </span>
                     <span wire:loading>...</span>
                 </button>
             </div>
+            @if ($isStokHabis)
+                <p class="text-red-500 text-sm mt-2 font-medium">
+                    Stok kupon toko ini sudah habis. Silakan pilih toko lain.
+                </p>
+            @endif
         @endif
 
     </div>

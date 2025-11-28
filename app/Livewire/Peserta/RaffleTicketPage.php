@@ -75,7 +75,7 @@ class RaffleTicketPage extends Component
             'fotoSelfie' => $participant->foto
                 ? Storage::disk('s3')->temporaryUrl(
                     'photos/' . $participant->foto,
-                    now()->addMinutes(120)
+                    now()->addDays(2)
                 )
                 : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
             // 'fotoSelfie' => $participant->foto

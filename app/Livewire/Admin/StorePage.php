@@ -111,7 +111,7 @@ class StorePage extends Component
     {
         $this->validate([
             'nama_toko'    => 'required|string|max:255',
-            'kode_toko'    => ['required', 'numeric', 'digits_between:5,6', Rule::unique('stores', 'kode_toko')->ignore($this->storeId)],
+            'kode_toko'    => ['required', 'numeric', 'digits_between:2,3', Rule::unique('stores', 'kode_toko')->ignore($this->storeId)],
             'jenis_produk' => 'required|string|max:255',
             'stok'         => 'required|integer|min:0',
         ]);
