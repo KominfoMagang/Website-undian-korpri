@@ -16,31 +16,31 @@ class StoreSeeder extends Seeder
         $data = [
             [
                 'nama_toko' => 'Toko Sinar Jaya',
-                'kode_toko' => '10542', // 5 digit
+                'kode_toko' => '123', // 5 digit
                 'jenis_produk' => 'Bakso',
                 'stok' => 50,
             ],
             [
                 'nama_toko' => 'Toko Berkah Abadi',
-                'kode_toko' => '220451', // 6 digit
+                'kode_toko' => '567', // 6 digit
                 'jenis_produk' => 'Mie Ayam',
                 'stok' => 50,
             ],
             [
                 'nama_toko' => 'Toko Maju Mundur',
-                'kode_toko' => '55901', // 5 digit
+                'kode_toko' => '241', // 5 digit
                 'jenis_produk' => 'Batagor',
                 'stok' => 50,
             ],
             [
                 'nama_toko' => 'Toko Sumber Rejeki',
-                'kode_toko' => '881023', // 6 digit
+                'kode_toko' => '578', // 6 digit
                 'jenis_produk' => 'Bakso Ikan',
                 'stok' => 50,
             ],
             [
                 'nama_toko' => 'Toko Serba Ada',
-                'kode_toko' => '90124', // 5 digit
+                'kode_toko' => '983', // 5 digit
                 'jenis_produk' => 'Cilok',
                 'stok' => 50,
             ],

@@ -11,7 +11,6 @@ class CouponGeneratorService
 {
     private const TEMPLATE_PATH = 'static/images/Template-coupon.png';
     private const FONT_BOLD     = 'fonts/Inter_28pt-SemiBold.ttf';
-    private const FONT_REGULAR  = 'fonts/Inter_18pt-Regular.ttf';
 
     public function generate(string $name, string $nip, string $couponNumber)
     {
@@ -43,9 +42,9 @@ class CouponGeneratorService
         $height = $image->height();
 
         // Kode Kupon (Gold)
-        $image->text($couponNumber, (int)($width * 0.30), (int)($height * 0.35), function($font) use ($fontBold) {
+        $image->text($couponNumber, (int)($width * 0.50), (int)($height * 0.29), function($font) use ($fontBold) {
             $font->file($fontBold);
-            $font->size(90);
+            $font->size(130);
             $font->color('#E1B237');
             $font->align('left');
             $font->valign('top');
@@ -54,18 +53,18 @@ class CouponGeneratorService
         $leftMarginX = (int)($width * 0.30);
 
         // Nama Peserta (White)
-        $image->text(strtoupper($name), $leftMarginX, (int)($height * 0.52), function($font) use ($fontBold) {
+        $image->text(strtoupper($name), $leftMarginX, (int)($height * 0.49), function($font) use ($fontBold) {
             $font->file($fontBold);
-            $font->size(35);
+            $font->size(50);
             $font->color('#FFFFFF');
             $font->align('left');
             $font->valign('top');
         });
 
         // NIP (White)
-        $image->text($nip, $leftMarginX, (int)($height * 0.65), function($font) use ($fontBold) {
+        $image->text($nip, $leftMarginX, (int)($height * 0.63), function($font) use ($fontBold) {
             $font->file($fontBold);
-            $font->size(35);
+            $font->size(50);
             $font->color('#FFFFFF');
             $font->align('left');
             $font->valign('top');

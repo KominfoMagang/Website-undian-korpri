@@ -89,56 +89,56 @@
         <x-peserta.banner />
 
         <!--==================BAGIAN FORM INPUT NIP==================-->
-            {{-- Header Input --}}
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-gray-600 text-sm font-semibold">Cek NIP</span>
-                <span class="text-sm font-medium {{ strlen($nip) === 18 ? 'text-green-600' : 'text-gray-500' }}">
-                    {{ strlen($nip) }}/18
-                </span>
+        {{-- Header Input --}}
+        <div class="flex justify-between items-center mb-4">
+            <span class="text-gray-600 text-sm font-semibold">Cek NIP</span>
+            <span class="text-sm font-medium {{ strlen($nip) === 18 ? 'text-green-600' : 'text-gray-500' }}">
+                {{ strlen($nip) }}/18
+            </span>
+        </div>
+
+        {{-- Input Field --}}
+        <div class="mb-4">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" wire:model.live.debounce.250ms="nip"
+                maxlength="18" placeholder="Masukkan NIP kamu"
+                class="w-full border-2 border-gray-300 rounded-lg p-3 text-sm font-semibold focus:border-blue-500 focus:outline-none transition-colors @error('nip') @enderror">
+
+            @if ($errorMessage)
+                <p class="text-red-500 text-sm mt-2 text-center font-bold bg-red-50 p-2 rounded">
+                    {{ $errorMessage }}
+                </p>
+            @endif
+        </div>
+
+        <!-- ================== LOADING STATE ================== -->
+        <div wire:loading wire:target="nip" class="w-full mb-4">
+            <div class="text-blue-600 font-semibold text-center animate-pulse flex justify-center items-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                        stroke-width="4">
+                    </circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                Memverifikasi NIP...
             </div>
+        </div>
 
-            {{-- Input Field --}}
-            <div class="mb-4">
-                <input type="text" inputmode="numeric" pattern="[0-9]*" wire:model.live.debounce.250ms="nip"
-                    maxlength="18" placeholder="Masukkan NIP kamu"
-                    class="w-full border-2 border-gray-300 rounded-lg p-3 text-sm font-semibold focus:border-blue-500 focus:outline-none transition-colors @error('nip') @enderror">
+        <!-- ================== HASIL VERIFIKASI (DETAIL & UPLOAD) ================== -->
+        <div wire:loading.remove wire:target="nip">
+            @if ($showDetails)
+                <div class="animate-fade-in-up">
 
-                @if ($errorMessage)
-                    <p class="text-red-500 text-sm mt-2 text-center font-bold bg-red-50 p-2 rounded">
-                        {{ $errorMessage }}
-                    </p>
-                @endif
-            </div>
-
-            <!-- ================== LOADING STATE ================== -->
-            <div wire:loading wire:target="nip" class="w-full mb-4">
-                <div
-                    class="text-blue-600 font-semibold text-center animate-pulse flex justify-center items-center gap-2">
-                    <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                            stroke-width="4">
-                        </circle>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                        </path>
-                    </svg>
-                    Memverifikasi NIP...
-                </div>
-            </div>
-
-            <!-- ================== HASIL VERIFIKASI (DETAIL & UPLOAD) ================== -->
-            <div wire:loading.remove wire:target="nip">
-                @if ($showDetails)
-                    <div class="animate-fade-in-up">
-
-                        {{-- 1. Pesan Sukses --}}
+                    @if (!$isAlreadyRegistered)
                         <div class="mb-4">
                             <p
                                 class="text-green-600 font-semibold text-center bg-green-50 p-2 rounded border border-green-200 text-sm flex items-center justify-center gap-2">
                                 NIP kamu Terverifikasi Sebagai Peserta Doorprize
                             </p>
                         </div>
+                        {{-- 1. Pesan Sukses --}}
 
                         {{-- 2. Detail Data Section --}}
                         <div class="relative bg-blue-50 rounded-lg p-4 mb-4 overflow-hidden border border-blue-100">
@@ -156,7 +156,7 @@
                                 <div class="flex justify-start gap-2">
                                     <span class="text-gray-600 text-sm min-w-[70px]">NIP:</span>
                                     <span
-                                        class="text-gray-800 text-sm font-medium font-mono bg-white/50 px-1 rounded">{{ $detailData['nip'] }}</span>
+                                        class="text-gray-800 text-sm font-medium  rounded">{{ $detailData['nip'] }}</span>
                                 </div>
                                 <div class="flex justify-start gap-2">
                                     <span class="text-gray-600 text-sm min-w-[70px]">Unit Kerja:</span>
@@ -213,11 +213,13 @@
                                 <p class="text-red-500 text-sm mt-2 text-center font-semibold">{{ $message }}</p>
                             @enderror
                         </div>
+                    @endif
 
-                    </div>
-                @endif
-            </div>
+                </div>
+            @endif
+        </div>
 
+        @if (!$isAlreadyRegistered)
             <!-- Checkbox Agreement -->
             <div class="mb-4">
                 <label class="flex items-start gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
@@ -234,14 +236,56 @@
                     <span class="text-red-500 text-xs ml-6">{{ $message }}</span>
                 @enderror
             </div>
+        @endif
 
-            <!-- Button -->
+        @if ($isAlreadyRegistered)
+            <!-- TAMPILAN JIKA SUDAH TERDAFTAR (TOMBOL LOGIN) -->
+            <div class="space-y-4 animate-fade-in">
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+                    <div class="bg-blue-100 p-1.5 rounded-full shrink-0">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-blue-800 text-sm">NIP Sudah Terdaftar</h4>
+                        <p class="text-xs text-blue-600 mt-1 leading-relaxed">
+                            Anda sudah melakukan presensi sebelumnya. Silakan masuk untuk melihat kupon undian Anda.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Tombol Login -->
+                <button wire:click="login" wire:loading.attr="disabled" wire:loading.class="opacity-75 cursor-wait"
+                    class="w-full bg-[#5065A4] text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform transition-all flex items-center justify-center gap-2">
+
+                    <span wire:loading.remove wire:target="login">
+                        Masuk & Lihat Kupon
+                    </span>
+
+                    <!-- Loading State untuk Login -->
+                    <span wire:loading wire:target="login" class="flex items-center gap-1">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        @else
+            <!-- TAMPILAN JIKA BELUM TERDAFTAR (TOMBOL KLAIM - ORIGINAL) -->
             <button wire:click="klaimKupon" wire:loading.attr="disabled" wire:loading.class="opacity-75 cursor-wait"
                 @if (!$showDetails || !$agreement || !$photo) disabled @endif
                 class="w-full bg-[#5065A4] text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center gap-2">
 
                 <span wire:loading.remove wire:target="klaimKupon">Klaim Kupon</span>
 
+                <!-- Loading State untuk Klaim -->
                 <span wire:loading wire:target="klaimKupon" class="flex items-center gap-1">
                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24">
@@ -251,18 +295,18 @@
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                         </path>
                     </svg>
-                    Memproses...
                 </span>
             </button>
+        @endif
 
-            <!-- Success Message -->
-            @if (session()->has('success'))
-                <div
-                    class="mt-6 bg-green-50 border border-green-200 text-green-800 px-4 py-4 rounded-xl text-center shadow-sm animate-bounce">
-                    <h4 class="font-bold text-lg mb-1">🎉 Berhasil!</h4>
-                    <p>{{ session('success') }}</p>
-                </div>
-            @endif
+        <!-- Success Message -->
+        @if (session()->has('success'))
+            <div
+                class="mt-6 bg-green-50 border border-green-200 text-green-800 px-4 py-4 rounded-xl text-center shadow-sm animate-bounce">
+                <h4 class="font-bold text-lg mb-1">🎉 Berhasil!</h4>
+                <p>{{ session('success') }}</p>
+            </div>
+        @endif
 
     @endif
 
