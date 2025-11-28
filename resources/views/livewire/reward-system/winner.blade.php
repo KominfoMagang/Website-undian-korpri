@@ -30,6 +30,16 @@
                 <div
                     class="relative glass-card w-full rounded-2xl p-8 text-center shadow-[0_20px_50px_rgba(251,191,36,0.3)] border-t-8 border-yellow-400 transform md:scale-105 hover:-translate-y-2 transition-transform duration-300">
 
+                    <button wire:click="cancelWinner({{ $juara->id }})"
+                        wire:confirm="Yakin ingin membatalkan kemenangan {{ $juara->participant->nama }}?"
+                        class="absolute top-4 right-4 text-white/50 hover:text-red-500 hover:scale-110 transition z-20"
+                        title="Batalkan Pemenang">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
                     {{-- Mahkota Icon --}}
                     <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 text-6xl filter drop-shadow-lg">
                         👑
@@ -78,6 +88,14 @@
             @foreach($listWinners as $winner)
             <div
                 class="bg-white/95 backdrop-blur-sm rounded-xl p-4 flex items-center gap-4 shadow-lg border-l-4 border-blue-500 hover:bg-white transition group hover:-translate-y-1">
+                <button wire:click="cancelWinner({{ $winner->id }})"
+                    wire:confirm="Batalkan kemenangan {{ $winner->participant->nama }}?"
+                    class="absolute top-2 right-2 text-slate-300 hover:text-red-500 transition p-1" title="Hapus">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
                 <div class="flex-shrink-0">
                     <img src="{{ $winner->participant->foto_url }}"
                         class="w-14 h-14 rounded-full object-cover border-2 border-slate-200 shadow-sm">
