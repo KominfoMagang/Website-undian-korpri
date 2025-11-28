@@ -31,7 +31,7 @@ class RewardSeeder extends Seeder
             'nama_hadiah'        => 'Paket Umroh',
             'stok'               => 1,
             'status_hadiah'      => 'Aktif',
-            'gambar'             => null,
+            'gambar'             => 'umroh.png',
         ]);
 
         // 4. HADIAH UMUM (Sesuai List Gambar)
