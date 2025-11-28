@@ -73,6 +73,14 @@ class Doorprize extends Component
         }
     }
 
+    public function markAsAbsent($participantId)
+    {
+        $participant = Participant::find($participantId);
+        if ($participant) {
+            $participant->update(['status_hadir' => 'Tidak hadir']);
+        }
+    }
+
     public function render()
     {
         $rewards = Reward::where('status_hadiah', 'Aktif')
