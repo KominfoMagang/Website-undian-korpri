@@ -127,15 +127,15 @@ class RaffleTicketPage extends Component
             || $this->couponNumber === '-';
     }
 
-    public function logout()
-    {
-        session()->forget('current_participant_nip');
-        if (isset($this->detailData['nip'])) {
-            cache()->forget('participant_' . $this->detailData['nip']);
-        }
+    // public function logout()
+    // {
+    //     session()->forget('current_participant_nip');
+    //     if (isset($this->detailData['nip'])) {
+    //         cache()->forget('participant_' . $this->detailData['nip']);
+    //     }
 
-        return $this->redirectRoute('HalamanPresensi');
-    }
+    //     return $this->redirectRoute('HalamanPresensi');
+    // }
 
     public function render()
     {

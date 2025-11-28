@@ -75,17 +75,34 @@ class RewardConfigPage extends Component
         if ($this->gambar) {
             $namaFile = $this->gambar->hashName();
 
-            // Tentukan folder tujuan
+            // Path Tujuan (Public)
             $folderTujuan = public_path('static/doorprizes');
 
-            // 1. Pastikan folder ada (pakai recursive true)
+            // Path Sumber (Temporary Livewire)
+            $sourcePath = $this->gambar->getRealPath();
+
+            // 1. Pastikan folder tujuan ada
             if (!File::exists($folderTujuan)) {
-                File::makeDirectory($folderTujuan, 0777, true, true);
+                // Pakai 0775 (standar Linux) bukan 0777
+                File::makeDirectory($folderTujuan, 0775, true, true);
             }
 
-            // 2. JURUS ANTI ERROR: Pakai 'copy' bukan 'move'
-            // Kita copy file dari folder temp Livewire ke folder public kita
-            File::copy($this->gambar->getRealPath(), $folderTujuan . '/' . $namaFile);
+            // 2. Cek apakah file sumber benar-benar ada?
+            if (File::exists($sourcePath)) {
+                // Gunakan COPY atau MOVE (Coba move dulu di Linux, lebih clean)
+                // Kalau move gagal, baru copy.
+                try {
+                    // Di Linux, move() biasanya lebih disukai karena tidak meninggalkan sampah
+                    $this->gambar->move($folderTujuan, $namaFile);
+                } catch (\Exception $e) {
+                    // Fallback ke copy jika move gagal
+                    File::copy($sourcePath, $folderTujuan . '/' . $namaFile);
+                }
+            } else {
+                // Error Handling jika file temp hilang (biasanya karena upload gagal/timeout)
+                $this->addError('gambar', 'Gagal upload. File sementara tidak ditemukan. Cek permission storage.');
+                return;
+            }
         }
 
         Reward::create([
@@ -120,10 +137,10 @@ class RewardConfigPage extends Component
         $this->validate();
 
         $reward = Reward::findOrFail($this->rewardId);
-        $namaFile = $reward->gambar;
+        $namaFile = $reward->gambar; // Default: pakai nama file lama
 
         if ($this->gambar) {
-            // Hapus gambar lama (Cek dulu biar gak error)
+            // 1. Hapus gambar lama jika ada (Tetap dipertahankan)
             if ($reward->gambar) {
                 $pathLama = public_path('static/doorprizes/' . $reward->gambar);
                 if (File::exists($pathLama)) {
@@ -131,16 +148,33 @@ class RewardConfigPage extends Component
                 }
             }
 
+            // 2. PROSES UPLOAD BARU (Logic "Anti-Badai")
             $namaFile = $this->gambar->hashName();
             $folderTujuan = public_path('static/doorprizes');
+            $sourcePath = $this->gambar->getRealPath();
 
-            // Buat folder jika belum ada
+            // A. Pastikan folder tujuan ada & writable
             if (!File::exists($folderTujuan)) {
-                File::makeDirectory($folderTujuan, 0777, true, true);
+                // Gunakan 0775 buat Linux Production
+                try {
+                    File::makeDirectory($folderTujuan, 0775, true, true);
+                } catch (\Exception $e) { /* Ignore if exists */
+                }
             }
 
-            // Pakai COPY
-            File::copy($this->gambar->getRealPath(), $folderTujuan . '/' . $namaFile);
+            // B. Cek File Sumber & Eksekusi Pindah
+            if (File::exists($sourcePath)) {
+                try {
+                    // Prioritas 1: MOVE (Lebih bersih di Linux)
+                    $this->gambar->move($folderTujuan, $namaFile);
+                } catch (\Exception $e) {
+                    // Prioritas 2: COPY (Fallback jika Move gagal/Windows)
+                    File::copy($sourcePath, $folderTujuan . '/' . $namaFile);
+                }
+            } else {
+                $this->addError('gambar', 'Gagal upload. File sementara hilang.');
+                return;
+            }
         }
 
         $reward->update([

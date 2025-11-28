@@ -99,7 +99,8 @@
             @endforeach
         </div>
 
-        <button type="button" wire:click="logout" wire:loading.attr="disabled"
+        {{-- Fitur logout --}}
+        {{-- <button type="button" wire:click="logout" wire:loading.attr="disabled"
             wire:loading.class="opacity-75 cursor wait"
             class="w-full border-2 border-red-600 text-red-600 font-bold py-3.5 rounded-xl shadow-lg hover:bg-red-600 hover:text-white hover:shadow-xl hover:-translate-y-0.5 transform transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center mb-4">
 
@@ -125,7 +126,7 @@
                     </path>
                 </svg>
             </span>
-        </button>
+        </button> --}}
 
         {{-- Logo Footer --}}
         <div class="mt-4 flex justify-center gap-6 items-center">

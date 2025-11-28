@@ -52,7 +52,7 @@ class RewardSeeder extends Seeder
                 'nama_hadiah'        => $item['nama'],
                 'stok'               => $item['stok'],
                 'status_hadiah'      => 'Aktif',
-                'gambar'             => null,
+                'gambar'             => $item['gambar'],
             ]);
         }
     }

@@ -35,12 +35,31 @@ class StoreSeeder extends Seeder
             ['kode_toko' => '154', 'nama_toko' => 'Es Teler 38', 'jenis_produk' => 'Es Teller', 'stok' => 50],
             ['kode_toko' => '643', 'nama_toko' => 'Dapur Kurnia', 'jenis_produk' => 'Es Teler / Dimsum Ayam', 'stok' => 50],
             ['kode_toko' => '361', 'nama_toko' => 'Zsazsa Cake', 'jenis_produk' => 'Es Cendol', 'stok' => 50],
+            ['kode_toko' => '508', 'nama_toko' => 'Cica Food', 'jenis_produk' => 'Dimsum', 'stok' => 50],
+            ['kode_toko' => '685', 'nama_toko' => 'Nasi Kuning Mang Ade', 'jenis_produk' => 'Nasi Kuning', 'stok' => 50],
+            ['kode_toko' => '701', 'nama_toko' => 'Jasmin', 'jenis_produk' => 'Corn Cheese tart', 'stok' => 50],
+            ['kode_toko' => '208', 'nama_toko' => 'Sangkuriang', 'jenis_produk' => 'Teh Lemon Madu/Youghart', 'stok' => 50],
+            ['kode_toko' => '762', 'nama_toko' => 'Dua Putri', 'jenis_produk' => 'Lengko Ayam', 'stok' => 50],
+            ['kode_toko' => '505', 'nama_toko' => 'Lakaku', 'jenis_produk' => 'Jus Honje dan Markisa', 'stok' => 50],
+            ['kode_toko' => '375', 'nama_toko' => 'RR', 'jenis_produk' => 'Rice Bowl', 'stok' => 50],
+            ['kode_toko' => '786', 'nama_toko' => 'Sari Tebu Hijau Kekey', 'jenis_produk' => 'Sari Tebu Asli', 'stok' => 50],
+            ['kode_toko' => '824', 'nama_toko' => 'Dapur Mee', 'jenis_produk' => 'Yoghurt', 'stok' => 50],
+            ['kode_toko' => '639', 'nama_toko' => 'Baso Oboy', 'jenis_produk' => 'Baso Aci', 'stok' => 50],
+            ['kode_toko' => '866', 'nama_toko' => 'Vitasari', 'jenis_produk' => 'Baso Tahu', 'stok' => 50],
+            ['kode_toko' => '640', 'nama_toko' => 'd\'cookies', 'jenis_produk' => 'Aneka Kue Basah', 'stok' => 50],
+            ['kode_toko' => '534', 'nama_toko' => 'Andika', 'jenis_produk' => 'Rujak Serut', 'stok' => 50],
+            ['kode_toko' => '746', 'nama_toko' => 'Corner Farida', 'jenis_produk' => 'Es Teh dan Kentang', 'stok' => 50],
+            ['kode_toko' => '972', 'nama_toko' => 'Es Campur Dera', 'jenis_produk' => 'Es Campur', 'stok' => 50],
+            ['kode_toko' => '310', 'nama_toko' => 'Arrogifah', 'jenis_produk' => 'Seafood Asam Manis', 'stok' => 50],
+            ['kode_toko' => '636', 'nama_toko' => 'Bazandi', 'jenis_produk' => 'Ayam Paleko dan minuman', 'stok' => 50],
+            ['kode_toko' => '665', 'nama_toko' => 'Mbak Ning', 'jenis_produk' => 'Fresh Healty', 'stok' => 50],
+            ['kode_toko' => '239', 'nama_toko' => 'Nasi Pepes Bu Erna', 'jenis_produk' => 'Nasi Pepes', 'stok' => 50],
         ];
 
         foreach ($stores as $storeData) {
             Store::updateOrCreate(
                 ['kode_toko' => $storeData['kode_toko']],
-                $storeData 
+                $storeData
             );
         }
     }

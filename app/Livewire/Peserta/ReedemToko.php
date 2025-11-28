@@ -4,6 +4,7 @@ namespace App\Livewire\Peserta;
 
 use App\Models\Coupon;
 use App\Models\Participant;
+use App\Models\Setting;
 use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -18,10 +19,12 @@ class ReedemToko extends Component
     public $isRedeemed = false;
     public $isClaimedByStore = false;
     public $isStokHabis = false;
+    public $IslimitVoucher = false;
 
     public function mount()
     {
         $userNip = session('current_participant_nip');
+
         if (!$userNip) return;
 
         $participant = Participant::where('nip', $userNip)->first();
@@ -30,7 +33,22 @@ class ReedemToko extends Component
         $coupon = Coupon::with('store')->where('participant_id', $participant->id)->first();
         if (!$coupon) return;
 
+        // --- Limit voucher
+        $settingLimit = Setting::where('key', 'limit_voucher')->first();
+        $limitValue = (int) ($settingLimit->value ?? 0);
+
+        $totalClaimed = Coupon::whereNotNull('store_id')->count();
+        if ($totalClaimed >= $limitValue) {
+            $this->IslimitVoucher = true;
+        }
+        if ($limitValue === 0) {
+            $this->IslimitVoucher = true;
+        }
+
+
+        // Logika Display Kupon User
         if ($coupon->store_id) {
+            $this->IslimitVoucher = false;
             $this->isRedeemed = true;
             $this->isClaimedByStore = (bool) $coupon->is_umkm_reedem;
             $this->nama_toko = $coupon->store->nama_toko ?? '';

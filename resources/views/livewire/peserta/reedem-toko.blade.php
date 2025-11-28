@@ -30,31 +30,45 @@
 
             {{-- KONDISI 3: BELUM DITUKAR (FORM INPUT) --}}
         @else
-            <div class="text-gray-900 text-sm font-semibold">Tukarkan Voucher Makanan & Minuman</div>
-            <div class="flex gap-2 mt-3 mb-2">
-                <div class="w-40">
-                    <input type="text" inputmode="numeric" pattern="[0-9]{18}"
-                        wire:model.live.debounce.250ms="kodeToko" maxlength="3" placeholder="Kode toko"
-                        class="w-full bg-white rounded-lg p-3 text-sm font-semibold border border-transparent focus:border-blue-500 focus:outline-none transition-colors shadow-sm @error('kodeToko') @enderror">
+            @if (!$IslimitVoucher)
+                <div class="text-gray-900 text-sm font-semibold">Tukarkan Voucher Makanan & Minuman</div>
+                <div class="flex gap-2 mt-3 mb-2">
+                    <div class="w-40">
+                        <input type="text" inputmode="numeric" pattern="[0-9]{18}"
+                            wire:model.live.debounce.250ms="kodeToko" maxlength="3" placeholder="Kode toko"
+                            class="w-full bg-white rounded-lg p-3 text-sm font-semibold border border-transparent focus:border-blue-500 focus:outline-none transition-colors shadow-sm @error('kodeToko') @enderror">
 
-                    @error('kodeToko')
-                        <span class="text-red-500 text-xs mt-1 block ml-1">{{ $message }}</span>
-                    @enderror
+                        @error('kodeToko')
+                            <span class="text-red-500 text-xs mt-1 block ml-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <button type="button" wire:click="reedemKuponToko" wire:loading.attr="disabled"
+                        @disabled($isStokHabis)
+                        class="w-60 bg-[#7686BC] text-white text-sm font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                        <span wire:loading.remove>
+                            {{ $isStokHabis ? 'Stok Habis' : 'Tukar Voucher' }}
+                        </span>
+                        <span wire:loading>...</span>
+                    </button>
                 </div>
-
-                <button type="button" wire:click="reedemKuponToko" wire:loading.attr="disabled"
-                    @disabled($isStokHabis)
-                    class="w-60 bg-[#7686BC] text-white text-sm font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
-                    <span wire:loading.remove>
-                        {{ $isStokHabis ? 'Stok Habis' : 'Tukar Voucher' }}
-                    </span>
-                    <span wire:loading>...</span>
-                </button>
-            </div>
-            @if ($isStokHabis)
-                <p class="text-red-500 text-sm mt-2 font-medium">
-                    Stok kupon toko ini sudah habis. Silakan pilih toko lain.
-                </p>
+                @if ($isStokHabis)
+                    <p class="text-red-500 text-sm mt-2 font-medium">
+                        Stok kupon toko ini sudah habis. Silakan pilih toko lain.
+                    </p>
+                @endif
+            @else
+                <div class="flex items-center justify-center p-4 mb-4 text-sm text-red-800 rounded-xl bg-red-50 border border-red-200 shadow-sm"
+                    role="alert">
+                    <svg class="shrink-0 inline w-5 h-5 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                    </svg>
+                    <div>
+                        <span class="font-bold">Mohon Maaf!</span> stok voucher makanan & minuman sudah mencapai batas 2000.
+                    </div>
+                </div>
             @endif
         @endif
 
