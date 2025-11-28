@@ -6,7 +6,7 @@
         </button>
 
         <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href="." class="text-decoration-none">
+            <a href="{{ route('admin.dashboard') }}" class="text-decoration-none">
                 <div class="d-flex align-items-center">
                     <img src="/static/images/bank_bjb.png" alt="Logo Kota Tasikmalaya"
                         class="navbar-brand-image img-hover-zoom me-3" style="height: 40px; width: auto;">
