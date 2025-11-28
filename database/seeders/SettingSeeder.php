@@ -17,5 +17,10 @@ class SettingSeeder extends Seeder
             'key' => 'status_absensi',
             'value' => 'tutup'
         ]);
+
+        Setting::create([
+            'key' => 'limit_voucher',
+            'value' => '1'
+        ]);
     }
 }
