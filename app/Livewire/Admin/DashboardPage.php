@@ -101,17 +101,34 @@ class DashboardPage extends Component
 
     public function render()
     {
+        // 1. Query Settings (Biarkan seperti sebelumnya)
         $settings = Setting::query()
             ->when($this->search, function ($q) {
                 $q->where('key', 'like', '%' . $this->search . '%')
                     ->orWhere('value', 'like', '%' . $this->search . '%');
             })
-            ->latest() // Atau ->orderBy('key', 'asc')
+            ->latest()
             ->paginate(10);
+
+        // --- LOGIC BARU DISINI ---
+
+        // A. Hitung Kupon yang Sudah Direedem (Punya Store)
+        $redeemedCount = Coupon::whereNotNull('store_id')->count();
+
+        // B. Ambil Limit dari Setting (Default 0 jika belum diset)
+        $limitVoucher = Setting::where('key', 'limit_voucher')->value('value') ?? 0;
+
+        // C. Format String "100 / 2000"
+        $usageString = $redeemedCount . ' / ' . $limitVoucher;
+
+        // -------------------------
 
         $stats = [
             'total' => Participant::count(),
-            'activeCoupon' => Coupon::where('status_kupon', 'Aktif')->count()
+            'activeCoupon' => Coupon::where('status_kupon', 'Aktif')->count(),
+
+            // Masukkan ke array stats biar bisa dipanggil di View
+            'voucherUsage' => $usageString
         ];
 
         return view('livewire.admin.dashboard-page', [

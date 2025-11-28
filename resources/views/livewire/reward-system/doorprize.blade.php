@@ -558,6 +558,7 @@
         }
 
         window.cancelWinner = function() {
+            $wire.markAsAbsent(currentWinner.id);
             window.closeModal();
         }
 
