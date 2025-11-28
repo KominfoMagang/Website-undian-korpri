@@ -22,26 +22,26 @@
     <div
         class="absolute left-1/2 transform -translate-x-1/2 flex gap-1 bg-black/20 p-1.5 rounded-full backdrop-blur-md border border-white/10 shadow-lg">
 
-        <a href="{{ route('slot-machine.undian') }}" wire:navigate
+        <a href="{{ route('reward-system.undian') }}" wire:navigate
             @class([ 'px-6 py-2 rounded-full text-sm font-medium transition-all duration-200'
-            , 'bg-white text-blue-900 shadow-md font-bold'=> request()->routeIs('slot-machine.undian'),
-            'text-blue-100 hover:bg-white/10' => !request()->routeIs('slot-machine.undian'),
+            , 'bg-white text-blue-900 shadow-md font-bold'=> request()->routeIs('reward-system.undian'),
+            'text-blue-100 hover:bg-white/10' => !request()->routeIs('reward-system.undian'),
             ])>
             Undian
         </a>
 
-        <a href="{{ route('slot-machine.pemenang') }}" wire:navigate
+        <a href="{{ route('reward-system.pemenang') }}" wire:navigate
             @class([ 'px-6 py-2 rounded-full text-sm font-medium transition-all duration-200'
-            , 'bg-white text-blue-900 shadow-md font-bold'=> request()->routeIs('slot-machine.pemenang'),
-            'text-blue-100 hover:bg-white/10' => !request()->routeIs('slot-machine.pemenang'),
+            , 'bg-white text-blue-900 shadow-md font-bold'=> request()->routeIs('reward-system.pemenang'),
+            'text-blue-100 hover:bg-white/10' => !request()->routeIs('reward-system.pemenang'),
             ])>
             List Pemenang
         </a>
 
-        <a href="{{ route('slot-machine.peserta') }}" wire:navigate
+        <a href="{{ route('reward-system.peserta') }}" wire:navigate
             @class([ 'px-6 py-2 rounded-full text-sm font-medium transition-all duration-200'
-            , 'bg-white text-blue-900 shadow-md font-bold'=> request()->routeIs('slot-machine.peserta'),
-            'text-blue-100 hover:bg-white/10' => !request()->routeIs('slot-machine.peserta'),
+            , 'bg-white text-blue-900 shadow-md font-bold'=> request()->routeIs('reward-system.peserta'),
+            'text-blue-100 hover:bg-white/10' => !request()->routeIs('reward-system.peserta'),
             ])>
             Peserta
         </a>

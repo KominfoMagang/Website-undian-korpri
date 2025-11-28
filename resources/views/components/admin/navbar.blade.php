@@ -37,7 +37,7 @@
                     <span class="avatar avatar-sm"
                         style="background-image: url({{ asset('static/images/unknown_profile.png') }})"></span>
                     <div class="d-none d-xl-block ps-2">
-                        <div>Gojo Satoru</div>
+                        <div>{{ auth()->user()->nama }}</div>
                         <div class="mt-1 small text-muted">Admin</div>
                     </div>
                 </a>
@@ -140,12 +140,35 @@
                             </a>
                         </li>
 
+                        <li class="nav-item {{ request()->routeIs('admin.admin') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.admin') }}" wire:navigate>
+                                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        class="icon icon-tabler icon-tabler-user-cog" width="24" height="24"
+                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"></path>
+                                        <path d="M6 21v-2a4 4 0 0 1 4 -4h2.5"></path>
+                                        <path d="M19.001 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                                        <path d="M19.001 15.5v1.5"></path>
+                                        <path d="M19.001 21v1.5"></path>
+                                        <path d="M22.032 17.25l-1.299 .75"></path>
+                                        <path d="M17.27 20l-1.3 .75"></path>
+                                        <path d="M15.97 17.25l1.3 .75"></path>
+                                        <path d="M20.733 20l1.3 .75"></path>
+                                    </svg>
+                                </span>
+                                <span class="nav-link-title ms-1">Admin</span>
+                            </a>
+                        </li>
+
                     </ul>
 
                     <div class="d-flex align-items-center gap-2 ms-auto d-print-none">
 
-                        <a href="{{ route('slot-machine.undian') }}" target="_blank"
-                            class="btn btn-primary d-none d-sm-inline-block">
+                        <a href="#" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal"
+                            data-bs-target="#modal-konfirmasi-undian">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-dice me-2"
                                 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
                                 fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -159,7 +182,13 @@
                             Mulai Pengundian
                         </a>
 
-                        <button class="btn btn-danger d-flex align-items-center">
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            @csrf
+                        </form>
+
+                        <button class="btn btn-danger d-flex align-items-center"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-logout me-2"
                                 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
                                 fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -179,3 +208,49 @@
         </div>
     </div>
 </header>
+
+<div class="modal modal-blur fade" id="modal-konfirmasi-undian" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-status bg-warning"></div>
+
+            <div class="modal-body text-center py-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-warning icon-lg" width="24" height="24"
+                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M12 9v2m0 4v.01" />
+                    <path
+                        d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" />
+                </svg>
+                <h3>Persiapan Undian</h3>
+                <div class="text-muted">Apakah Anda ingin <strong>MENUTUP PRESENSI</strong> secara otomatis sebelum
+                    masuk ke halaman undian?</div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="w-100">
+                    <div class="row">
+                        <div class="col">
+                            <a href="{{ route('reward-system.undian') }}" target="_blank" class="btn btn-white w-100"
+                                onclick="bootstrap.Modal.getInstance(document.getElementById('modal-konfirmasi-undian')).hide()">
+                                Jangan Dulu
+                            </a>
+                        </div>
+
+                        <div class="col">
+                            <form action="{{ route('admin.close-attendance') }}" method="POST" target="_blank">
+                                @csrf
+                                <button type="submit" class="btn btn-warning w-100"
+                                    onclick="bootstrap.Modal.getInstance(document.getElementById('modal-konfirmasi-undian')).hide()">
+                                    Tutup Presensi
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Reward;
 use App\Models\RewardCategory;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -69,9 +70,22 @@ class RewardConfigPage extends Component
     {
         $this->validate();
 
-        $pathGambar = null;
+        $namaFile = null;
+
         if ($this->gambar) {
-            $pathGambar = $this->gambar->store('rewards', 'public');
+            $namaFile = $this->gambar->hashName();
+
+            // Tentukan folder tujuan
+            $folderTujuan = public_path('static/doorprizes');
+
+            // 1. Pastikan folder ada (pakai recursive true)
+            if (!File::exists($folderTujuan)) {
+                File::makeDirectory($folderTujuan, 0777, true, true);
+            }
+
+            // 2. JURUS ANTI ERROR: Pakai 'copy' bukan 'move'
+            // Kita copy file dari folder temp Livewire ke folder public kita
+            File::copy($this->gambar->getRealPath(), $folderTujuan . '/' . $namaFile);
         }
 
         Reward::create([
@@ -79,7 +93,7 @@ class RewardConfigPage extends Component
             'reward_category_id' => $this->reward_category_id,
             'stok'               => $this->stok,
             'status_hadiah'      => $this->status_hadiah,
-            'gambar'             => $pathGambar,
+            'gambar'             => $namaFile,
         ]);
 
         $this->dispatch('close-modal');
@@ -106,13 +120,27 @@ class RewardConfigPage extends Component
         $this->validate();
 
         $reward = Reward::findOrFail($this->rewardId);
-        $pathGambar = $reward->gambar;
+        $namaFile = $reward->gambar;
 
         if ($this->gambar) {
+            // Hapus gambar lama (Cek dulu biar gak error)
             if ($reward->gambar) {
-                Storage::disk('public')->delete($reward->gambar);
+                $pathLama = public_path('static/doorprizes/' . $reward->gambar);
+                if (File::exists($pathLama)) {
+                    File::delete($pathLama);
+                }
             }
-            $pathGambar = $this->gambar->store('rewards', 'public');
+
+            $namaFile = $this->gambar->hashName();
+            $folderTujuan = public_path('static/doorprizes');
+
+            // Buat folder jika belum ada
+            if (!File::exists($folderTujuan)) {
+                File::makeDirectory($folderTujuan, 0777, true, true);
+            }
+
+            // Pakai COPY
+            File::copy($this->gambar->getRealPath(), $folderTujuan . '/' . $namaFile);
         }
 
         $reward->update([
@@ -120,7 +148,7 @@ class RewardConfigPage extends Component
             'reward_category_id' => $this->reward_category_id,
             'stok'               => $this->stok,
             'status_hadiah'      => $this->status_hadiah,
-            'gambar'             => $pathGambar,
+            'gambar'             => $namaFile,
         ]);
 
         $this->dispatch('close-modal');
@@ -154,25 +182,32 @@ class RewardConfigPage extends Component
             $cat = RewardCategory::find($this->deleteId);
 
             if ($cat) {
-                // --- VALIDASI RELASI (BARU) ---
-                // Cek apakah kategori ini punya anak (hadiah)?
+                // Validasi Relasi
                 if ($cat->rewards()->exists()) {
-                    // Jika ada, batalkan hapus dan kirim pesan error
                     $this->dispatch('close-modal');
                     session()->flash('error', 'Gagal! Kategori ini tidak bisa dihapus karena masih digunakan oleh data Hadiah.');
-                    return; // Stop proses
+                    return;
                 }
-                // -----------------------------
 
                 $cat->delete();
                 session()->flash('message', 'Kategori berhasil dihapus.');
             }
         } elseif ($this->deleteContext == 'reward') {
             $reward = Reward::find($this->deleteId);
+
             if ($reward) {
+                // --- UPDATE LOGIC HAPUS GAMBAR ---
                 if ($reward->gambar) {
-                    Storage::disk('public')->delete($reward->gambar);
+                    // Arahkan ke folder public/static/doorprizes
+                    $pathGambar = public_path('static/doorprizes/' . $reward->gambar);
+
+                    // Cek file ada gak? Kalau ada, hapus.
+                    if (File::exists($pathGambar)) {
+                        File::delete($pathGambar);
+                    }
                 }
+                // ---------------------------------
+
                 $reward->delete();
                 session()->flash('message', 'Hadiah berhasil dihapus.');
             }

@@ -58,7 +58,7 @@ class ParticipantSeeder extends Seeder
             ]);
         }
 
-        // foreach (range(1, 5) as $i) {
+        // foreach (range(1, 20) as $i) {
         //     $participant = Participant::create([
         //         'nama' => $faker->name,
         //         'nip' => $faker->unique()->numerify('19##########1#####'),

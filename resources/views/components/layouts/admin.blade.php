@@ -8,6 +8,7 @@
     <title>{{ $title }}</title>
     <link href="{{ asset('tabler/dist/css/tabler.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('tabler/dist/css/demo.min.css') }}" rel="stylesheet" />
+    <link rel="shortcut icon" href="{{ asset('static/images/logoKotaTasik.png') }}" type="image/x-icon">
 
     <style>
         @import url('https://rsms.me/inter/inter.css');

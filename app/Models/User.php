@@ -19,6 +19,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'nama',
+        'username',
         'email',
         'password',
     ];
@@ -44,5 +45,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function isOnline()
+    {
+        return \Illuminate\Support\Facades\DB::table('sessions')
+            ->where('user_id', $this->id)
+            ->where('last_activity', '>=', now()->subMinutes(5)->getTimestamp())
+            ->exists();
     }
 }
