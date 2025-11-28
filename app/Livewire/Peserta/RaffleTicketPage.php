@@ -72,15 +72,16 @@ class RaffleTicketPage extends Component
             'nama'       => $participant->nama,
             'nip'        => $participant->nip,
             'unit_kerja' => $participant->unit_kerja,
-            // 'fotoSelfie' => $participant->foto
-            //     ? asset('storage/photos/' . $participant->foto)
-            //     : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
             'fotoSelfie' => $participant->foto
                 ? Storage::disk('s3')->temporaryUrl(
                     'photos/' . $participant->foto,
-                    now()->addMinutes(120)  
+                    now()->addMinutes(120)
                 )
                 : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
+            // 'fotoSelfie' => $participant->foto
+            //     ? asset('storage/photos/' . $participant->foto)
+            //     : 'https://ui-avatars.com/api/?name=' . urlencode($participant->nama),
+
         ];
 
         $coupon = $participant->coupons->first();
@@ -124,6 +125,16 @@ class RaffleTicketPage extends Component
         return empty($this->detailData)
             || !$this->couponNumber
             || $this->couponNumber === '-';
+    }
+
+    public function logout()
+    {
+        session()->forget('current_participant_nip');
+        if (isset($this->detailData['nip'])) {
+            cache()->forget('participant_' . $this->detailData['nip']);
+        }
+
+        return $this->redirectRoute('HalamanPresensi');
     }
 
     public function render()

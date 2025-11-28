@@ -4,6 +4,7 @@ namespace App\Livewire\Peserta;
 
 use App\Models\Coupon;
 use App\Models\Participant;
+use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -19,11 +20,6 @@ use Exception;
 class PresencePage extends Component
 {
     use WithFileUploads;
-
-    // diskominfo : -7.31175525292628, 108.19931433695206
-    // Bale kota : -7.316546993522394, 108.19674640365119
-    // rumah : -7.230234323966636, 108.1545507815288
-    
 
     protected const CENTER_LAT = -7.316546993522394;
     protected const CENTER_LNG = 108.19674640365119;
@@ -41,6 +37,10 @@ class PresencePage extends Component
     public string $errorMessage = '';
     public array $detailData = [];
 
+    // State Baru: Menandakan user sudah punya kupon
+    public bool $isAlreadyRegistered = false;
+    public bool $isClosedPresence = false;
+
     // Location States
     public bool $locationGranted = false;
     public string $locationErrorMessage = '';
@@ -49,15 +49,19 @@ class PresencePage extends Component
 
     public function mount()
     {
+        $settings = Setting::where('key', 'status_absensi')->first();
         if (session()->has('current_participant_nip')) {
             return redirect()->route('halamanKupon');
+        }
+        
+        if ($settings->value == 'tutup') {
+            $this->isClosedPresence = true;
         }
     }
 
     public function updatedNip()
     {
         $this->resetState();
-        // Hanya ambil angka
         $this->nip = preg_replace('/[^0-9]/', '', $this->nip);
 
         // Validasi otomatis jika panjang NIP mencukupi (misal 18 digit)
@@ -71,6 +75,7 @@ class PresencePage extends Component
         $this->showDetails = false;
         $this->errorMessage = '';
         $this->detailData = [];
+        $this->isAlreadyRegistered = false;
     }
 
     public function validateNip()
@@ -82,10 +87,12 @@ class PresencePage extends Component
             return;
         }
 
-        // Pastikan nama relasi di Model Participant adalah 'coupons'
+        // Cek apakah sudah punya kupon
         if ($participant->coupons()->exists()) {
-            $this->errorMessage = 'Peserta dengan NIP ini sudah melakukan presensi!';
-            return;
+            $this->isAlreadyRegistered = true;
+            $this->errorMessage = 'Anda sudah terdaftar, silakan login.';
+        } else {
+            $this->isAlreadyRegistered = false;
         }
 
         $this->showDetails = true;
@@ -95,6 +102,19 @@ class PresencePage extends Component
             'nip'        => $participant->nip,
             'unit_kerja' => $participant->unit_kerja
         ];
+    }
+
+    // --- FITUR LOGIN (UNTUK YANG SUDAH PUNYA KUPON) ---
+    public function login()
+    {
+        $participant = Participant::where('nip', $this->nip)->first();
+
+        if ($participant && $participant->coupons()->exists()) {
+            session(['current_participant_nip' => $this->nip]);
+            return redirect()->route('halamanKupon');
+        } else {
+            $this->addError('system', 'Data tidak valid untuk login.');
+        }
     }
 
     public function checkLocation($lat, $lng)
@@ -129,7 +149,6 @@ class PresencePage extends Component
 
     public function klaimKupon()
     {
-
         if ($this->checkRateLimit()) {
             return;
         }
@@ -164,6 +183,11 @@ class PresencePage extends Component
 
     private function validateClaimRequest()
     {
+        if ($this->isAlreadyRegistered) {
+            $this->addError('system', 'Anda sudah memiliki kupon. Silakan login.');
+            return false;
+        }
+
         $this->validate([
             'photo' => 'required|image|max:' . self::MAX_UPLOAD_SIZE,
         ], [
@@ -193,14 +217,10 @@ class PresencePage extends Component
     private function uploadPhoto($nip)
     {
         $filename = 'selfie_' . $nip . '_' . time() . '.jpg';
-        // return $this->photo->storeAs('photos', $filename, 'public');
         return $this->photo->storeAs('photos', $filename, 's3');
+        // return $this->photo->storeAs('photos', $filename, 'public');
     }
 
-    /**
-     * Menjalankan transaksi database
-     * @throws Exception
-     */
     private function processTransaction($uploadedPath)
     {
         return DB::transaction(function () use ($uploadedPath) {
@@ -212,7 +232,6 @@ class PresencePage extends Component
                 throw new Exception('NIP ini sudah memiliki kupon (Gagal Double Claim).');
             }
 
-
             $availableCoupon = Coupon::whereNull('participant_id')
                 ->lockForUpdate()
                 ->first();
@@ -221,19 +240,13 @@ class PresencePage extends Component
                 throw new Exception('Mohon maaf, kupon undian telah habis!');
             }
 
-
-            if (!$availableCoupon) {
-                throw new Exception('Mohon maaf, kupon undian telah habis!');
-            }
-
-            // C. Update Peserta
+            // Update Peserta
             $participant->update([
                 'foto'         => basename($uploadedPath),
                 'status_hadir' => 'Hadir',
                 'latitude'     => $this->userLat,
                 'longitude'    => $this->userLng,
             ]);
-
 
             $availableCoupon->update([
                 'participant_id' => $participant->id
@@ -263,7 +276,6 @@ class PresencePage extends Component
         Log::error("Gagal Klaim Kupon [NIP: {$this->nip}]: " . $e->getMessage());
 
         $msg = $e->getMessage();
-        // Sembunyikan pesan teknis database deadlock
         if (str_contains($msg, 'lock') || str_contains($msg, 'Deadlock') || str_contains($msg, 'Serialization failure')) {
             $msg = "Sistem sedang sibuk, silakan coba tekan tombol lagi.";
         }
