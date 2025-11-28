@@ -15,7 +15,7 @@ class SettingSeeder extends Seeder
     {
         Setting::create([
             'key' => 'status_absensi',
-            'value' => 'buka'
+            'value' => 'tutup'
         ]);
     }
 }
