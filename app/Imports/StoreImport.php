@@ -7,45 +7,53 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
+use Maatwebsite\Excel\Concerns\WithStartRow;
 
-class StoreImport implements ToCollection, WithHeadingRow, WithChunkReading
+// ⚠️ PERHATIKAN: Saya SUDAH MENGHAPUS 'WithHeadingRow' di baris ini
+class StoreImport implements ToCollection, WithChunkReading, WithCustomCsvSettings, WithStartRow 
 {
-    /**
-     * @param array $row
-     *
-     * @return \Illuminate\Database\Eloquent\Model|null
-     */
+    public function getCsvSettings(): array
+    {
+        return [
+            'delimiter' => ';', // Tetap pakai titik koma
+        ];
+    }
+
+    // Mulai baca dari baris ke-2 (Baris 1 Header dilewati otomatis)
+    public function startRow(): int
+    {
+        return 2;
+    }
+
     public function collection(Collection $rows)
     {
         $dataToInsert = [];
         $now = Carbon::now();
 
         foreach ($rows as $row) {
-            // Validasi sederhana: Jika kode toko atau nama toko kosong, skip
-            // Enaknya pakai WithHeadingRow, kita panggil pakai nama key array-nya
-            // Excel: "Kode Toko" -> PHP: $row['kode_toko']
-
-            if (empty($row['kode_toko']) || empty($row['nama_toko'])) {
+            
+            // Validasi data kosong
+            // Kita pakai index angka karena WithHeadingRow sudah dihapus
+            if (empty(trim($row[0] ?? '')) || empty(trim($row[1] ?? ''))) {
                 continue;
             }
 
             $dataToInsert[] = [
-                'kode_toko'    => trim($row['kode_toko']), // Sesuaikan dengan Header di Excel
-                'nama_toko'    => $row['nama_toko'],
-                'jenis_produk' => $row['jenis_produk'] ?? 'Umum', // Default jika kosong
-                'stok'         => $row['stok'] ?? 0,
+                'kode_toko'    => trim($row[0]), 
+                'nama_toko'    => $row[1],
+                'jenis_produk' => $row[2] ?? 'Umum',
+                'stok'         => isset($row[3]) && is_numeric($row[3]) ? $row[3] : 0,
                 'created_at'   => $now,
                 'updated_at'   => $now,
             ];
         }
 
-        // Upsert Database
         if (!empty($dataToInsert)) {
             Store::upsert(
                 $dataToInsert,
-                ['kode_toko'], // Kolom Unik (Acuan update)
-                ['nama_toko', 'jenis_produk', 'stok', 'updated_at'] // Kolom yang diupdate jika ada
+                ['kode_toko'],
+                ['nama_toko', 'jenis_produk', 'stok', 'updated_at']
             );
         }
     }

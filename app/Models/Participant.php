@@ -25,7 +25,7 @@ class Participant extends Model
             // Cek apakah pakai S3 atau Lokal (Opsional, biar fleksibel)
             // Kalau yakin S3 terus, langsung return Storage::disk('s3')->url($this->foto);
 
-            return Storage::disk('s3')->url($this->foto);
+            return Storage::disk('s3')->temporaryUrl('photos/' . $this->foto, now()->addDays(2));
         }
 
         // Return Avatar Default
