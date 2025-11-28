@@ -19,5 +19,6 @@ class DatabaseSeeder extends Seeder
         ParticipantSeeder::run();
         RewardSeeder::run();
         StoreSeeder::run();
+        SettingSeeder::run();
     }
 }

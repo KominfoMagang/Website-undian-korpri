@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AttendanceController;
 use App\Livewire\Admin\CouponPage;
 use App\Livewire\Admin\DashboardPage;
 use App\Livewire\Admin\ParticipantPage;
@@ -20,4 +21,5 @@ Route::prefix('admin')->middleware('auth:web')->name('admin.')->group(function()
     Route::get('kategori-dan-hadiah', RewardConfigPage::class)->name('reward-config');
     Route::get('toko', StorePage::class)->name('store');
     Route::get('admin', AdminPage::class)->name('admin');
+    Route::post('/tutup-presensi-redirect', [AttendanceController::class, 'closeAndRedirect'])->name('close-attendance');
 });
