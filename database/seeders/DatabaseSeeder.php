@@ -16,9 +16,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         AdminSeeder::run();
-        ParticipantSeeder::run();
+        // ParticipantSeeder::run();
         RewardSeeder::run();
-        StoreSeeder::run();
+        // StoreSeeder::run();
         SettingSeeder::run();
     }
 }

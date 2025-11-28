@@ -4,6 +4,7 @@ namespace App\Livewire\Peserta;
 
 use App\Models\Coupon;
 use App\Models\Participant;
+use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -38,6 +39,7 @@ class PresencePage extends Component
 
     // State Baru: Menandakan user sudah punya kupon
     public bool $isAlreadyRegistered = false;
+    public bool $isClosedPresence = false;
 
     // Location States
     public bool $locationGranted = false;
@@ -47,8 +49,13 @@ class PresencePage extends Component
 
     public function mount()
     {
+        $settings = Setting::where('key', 'status_absensi')->first();
         if (session()->has('current_participant_nip')) {
             return redirect()->route('halamanKupon');
+        }
+        
+        if ($settings->value == 'tutup') {
+            $this->isClosedPresence = true;
         }
     }
 
@@ -83,7 +90,7 @@ class PresencePage extends Component
         // Cek apakah sudah punya kupon
         if ($participant->coupons()->exists()) {
             $this->isAlreadyRegistered = true;
-            $this->errorMessage = 'Anda sudah terdaftar, silakan login.'; 
+            $this->errorMessage = 'Anda sudah terdaftar, silakan login.';
         } else {
             $this->isAlreadyRegistered = false;
         }

@@ -87,185 +87,210 @@
         {{-- ================== FORM MUNCUL KALAU DALAM RADIUS ================== --}}
 
         <x-peserta.banner />
-
-        <!--==================BAGIAN FORM INPUT NIP==================-->
-        {{-- Header Input --}}
-        <div class="flex justify-between items-center mb-4">
-            <span class="text-gray-600 text-sm font-semibold">Cek NIP</span>
-            <span class="text-sm font-medium {{ strlen($nip) === 18 ? 'text-green-600' : 'text-gray-500' }}">
-                {{ strlen($nip) }}/18
-            </span>
-        </div>
-
-        {{-- Input Field --}}
-        <div class="mb-4">
-            <input type="text" inputmode="numeric" pattern="[0-9]*" wire:model.live.debounce.250ms="nip"
-                maxlength="18" placeholder="Masukkan NIP kamu"
-                class="w-full border-2 border-gray-300 rounded-lg p-3 text-sm font-semibold focus:border-blue-500 focus:outline-none transition-colors @error('nip') @enderror">
-
-            @if ($errorMessage)
-                <p class="text-red-500 text-sm mt-2 text-center font-bold bg-red-50 p-2 rounded">
-                    {{ $errorMessage }}
-                </p>
-            @endif
-        </div>
-
-        <!-- ================== LOADING STATE ================== -->
-        <div wire:loading wire:target="nip" class="w-full mb-4">
-            <div class="text-blue-600 font-semibold text-center animate-pulse flex justify-center items-center gap-2">
-                <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                        stroke-width="4">
-                    </circle>
-                    <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                    </path>
-                </svg>
-                Memverifikasi NIP...
+        @if (!$isClosedPresence)
+            {{-- Header Input --}}
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-gray-600 text-sm font-semibold">Cek NIP</span>
+                <span class="text-sm font-medium {{ strlen($nip) === 18 ? 'text-green-600' : 'text-gray-500' }}">
+                    {{ strlen($nip) }}/18
+                </span>
             </div>
-        </div>
 
-        <!-- ================== HASIL VERIFIKASI (DETAIL & UPLOAD) ================== -->
-        <div wire:loading.remove wire:target="nip">
-            @if ($showDetails)
-                <div class="animate-fade-in-up">
+            {{-- Input Field --}}
+            <div class="mb-4">
+                <input type="text" inputmode="numeric" pattern="[0-9]*" wire:model.live.debounce.250ms="nip"
+                    maxlength="18" placeholder="Masukkan NIP kamu"
+                    class="w-full border-2 border-gray-300 rounded-lg p-3 text-sm font-semibold focus:border-blue-500 focus:outline-none transition-colors @error('nip') @enderror">
 
-                    @if (!$isAlreadyRegistered)
-                        <div class="mb-4">
-                            <p
-                                class="text-green-600 font-semibold text-center bg-green-50 p-2 rounded border border-green-200 text-sm flex items-center justify-center gap-2">
-                                NIP kamu Terverifikasi Sebagai Peserta Doorprize
-                            </p>
-                        </div>
-                        {{-- 1. Pesan Sukses --}}
+                @if ($errorMessage)
+                    <p class="text-red-500 text-sm mt-2 text-center font-bold bg-red-50 p-2 rounded">
+                        {{ $errorMessage }}
+                    </p>
+                @endif
+            </div>
 
-                        {{-- 2. Detail Data Section --}}
-                        <div class="relative bg-blue-50 rounded-lg p-4 mb-4 overflow-hidden border border-blue-100">
-                            <img src="{{ asset('static/images/pattern.png') }}"
-                                class="absolute top-0 right-0 w-28 opacity-40 pointer-events-none select-none"
-                                alt="Pattern" onerror="this.style.display='none'" />
+            <!-- ================== LOADING STATE ================== -->
+            <div wire:loading wire:target="nip" class="w-full mb-4">
+                <div
+                    class="text-blue-600 font-semibold text-center animate-pulse flex justify-center items-center gap-2">
+                    <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                            stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    Memverifikasi NIP...
+                </div>
+            </div>
 
-                            <h3 class="font-bold text-gray-800 mb-3 relative z-10">Detail Data</h3>
+            <!-- ================== HASIL VERIFIKASI (DETAIL & UPLOAD) ================== -->
+            <div wire:loading.remove wire:target="nip">
+                @if ($showDetails)
+                    <div class="animate-fade-in-up">
 
-                            <div class="space-y-2 relative z-10">
-                                <div class="flex justify-start gap-2">
-                                    <span class="text-gray-600 text-sm min-w-[70px]">Nama:</span>
-                                    <span class="text-gray-800 text-sm font-bold">{{ $detailData['nama'] }}</span>
-                                </div>
-                                <div class="flex justify-start gap-2">
-                                    <span class="text-gray-600 text-sm min-w-[70px]">NIP:</span>
-                                    <span
-                                        class="text-gray-800 text-sm font-medium  rounded">{{ $detailData['nip'] }}</span>
-                                </div>
-                                <div class="flex justify-start gap-2">
-                                    <span class="text-gray-600 text-sm min-w-[70px]">Unit Kerja:</span>
-                                    <span
-                                        class="text-gray-800 text-sm font-medium">{{ $detailData['unit_kerja'] }}</span>
+                        @if (!$isAlreadyRegistered)
+                            <div class="mb-4">
+                                <p
+                                    class="text-green-600 font-semibold text-center bg-green-50 p-2 rounded border border-green-200 text-sm flex items-center justify-center gap-2">
+                                    NIP kamu Terverifikasi Sebagai Peserta Doorprize
+                                </p>
+                            </div>
+                            {{-- 1. Pesan Sukses --}}
+
+                            {{-- 2. Detail Data Section --}}
+                            <div class="relative bg-blue-50 rounded-lg p-4 mb-4 overflow-hidden border border-blue-100">
+                                <img src="{{ asset('static/images/pattern.png') }}"
+                                    class="absolute top-0 right-0 w-28 opacity-40 pointer-events-none select-none"
+                                    alt="Pattern" onerror="this.style.display='none'" />
+
+                                <h3 class="font-bold text-gray-800 mb-3 relative z-10">Detail Data</h3>
+
+                                <div class="space-y-2 relative z-10">
+                                    <div class="flex justify-start gap-2">
+                                        <span class="text-gray-600 text-sm min-w-[70px]">Nama:</span>
+                                        <span class="text-gray-800 text-sm font-bold">{{ $detailData['nama'] }}</span>
+                                    </div>
+                                    <div class="flex justify-start gap-2">
+                                        <span class="text-gray-600 text-sm min-w-[70px]">NIP:</span>
+                                        <span
+                                            class="text-gray-800 text-sm font-medium  rounded">{{ $detailData['nip'] }}</span>
+                                    </div>
+                                    <div class="flex justify-start gap-2">
+                                        <span class="text-gray-600 text-sm min-w-[70px]">Unit Kerja:</span>
+                                        <span
+                                            class="text-gray-800 text-sm font-medium">{{ $detailData['unit_kerja'] }}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {{-- 3. Upload Selfie Section --}}
-                        <div class="mb-4">
-                            <label for="photoInput"
-                                class="relative cursor-pointer bg-white border-2 border-dashed border-blue-300 rounded-xl block text-center hover:bg-blue-50 transition overflow-hidden group">
+                            {{-- 3. Upload Selfie Section --}}
+                            <div class="mb-4">
+                                <label for="photoInput"
+                                    class="relative cursor-pointer bg-white border-2 border-dashed border-blue-300 rounded-xl block text-center hover:bg-blue-50 transition overflow-hidden group">
 
-                                {{-- Loading Overlay saat Upload --}}
-                                <div x-show="isUploading" style="display: none;"
-                                    class="absolute inset-0 bg-white/90 z-20 flex flex-col items-center justify-center backdrop-blur-sm">
-                                    <div
-                                        class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-2">
-                                    </div>
-                                    <span class="text-xs font-bold text-blue-600">
-                                        Upload <span x-text="progress + '%'"></span>
-                                    </span>
-                                </div>
-
-                                @if ($photo)
-                                    {{-- Preview foto --}}
-                                    <div class="relative">
-                                        <img src="{{ $photo->temporaryUrl() }}"
-                                            class="w-full object-cover block rounded-lg" alt="Preview">
+                                    {{-- Loading Overlay saat Upload --}}
+                                    <div x-show="isUploading" style="display: none;"
+                                        class="absolute inset-0 bg-white/90 z-20 flex flex-col items-center justify-center backdrop-blur-sm">
                                         <div
-                                            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span
-                                                class="text-white text-sm font-bold bg-black/50 px-3 py-1 rounded-full">Ganti
-                                                Foto</span>
+                                            class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-2">
                                         </div>
+                                        <span class="text-xs font-bold text-blue-600">
+                                            Upload <span x-text="progress + '%'"></span>
+                                        </span>
                                     </div>
-                                @else
-                                    <div class="min-h-[150px] flex flex-col items-center justify-center p-6">
-                                        <img src="{{ asset('static/images/imgUpload.svg') }}"
-                                            class="mb-3 w-16 h-16 opacity-80" alt="Upload" />
-                                        <p class="text-gray-800 text-sm font-bold">Ambil Foto Selfie Untuk Kehadiran
-                                        </p>
-                                        <p class="text-gray-500 text-xs mt-1">Ketuk di sini untuk membuka kamera</p>
-                                    </div>
-                                @endif
-                            </label>
 
-                            {{-- Input File Hidden --}}
-                            <input type="file" id="photoInput" accept="image/*" capture="user"
-                                @change="compressAndUpload($event)" class="hidden">
+                                    @if ($photo)
+                                        {{-- Preview foto --}}
+                                        <div class="relative">
+                                            <img src="{{ $photo->temporaryUrl() }}"
+                                                class="w-full object-cover block rounded-lg" alt="Preview">
+                                            <div
+                                                class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <span
+                                                    class="text-white text-sm font-bold bg-black/50 px-3 py-1 rounded-full">Ganti
+                                                    Foto</span>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="min-h-[150px] flex flex-col items-center justify-center p-6">
+                                            <img src="{{ asset('static/images/imgUpload.svg') }}"
+                                                class="mb-3 w-16 h-16 opacity-80" alt="Upload" />
+                                            <p class="text-gray-800 text-sm font-bold">Ambil Foto Selfie Untuk
+                                                Kehadiran
+                                            </p>
+                                            <p class="text-gray-500 text-xs mt-1">Ketuk di sini untuk membuka kamera
+                                            </p>
+                                        </div>
+                                    @endif
+                                </label>
 
-                            @error('photo')
-                                <p class="text-red-500 text-sm mt-2 text-center font-semibold">{{ $message }}</p>
-                            @enderror
+                                {{-- Input File Hidden --}}
+                                <input type="file" id="photoInput" accept="image/*" capture="user"
+                                    @change="compressAndUpload($event)" class="hidden">
+
+                                @error('photo')
+                                    <p class="text-red-500 text-sm mt-2 text-center font-semibold">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        @endif
+
+                    </div>
+                @endif
+            </div>
+
+            @if (!$isAlreadyRegistered)
+                <!-- Checkbox Agreement -->
+                <div class="mb-4">
+                    <label class="flex items-start gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
+                        <input type="checkbox" class="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            wire:model.live="agreement">
+                        <div class="flex flex-col text-gray-600 text-xs leading-relaxed">
+                            <span class="font-semibold text-gray-800">Saya menyatakan data di atas benar.</span>
+                            <span>
+                                Data ini akan digunakan untuk undian doorprize.
+                            </span>
                         </div>
-                    @endif
-
+                    </label>
+                    @error('agreement')
+                        <span class="text-red-500 text-xs ml-6">{{ $message }}</span>
+                    @enderror
                 </div>
             @endif
-        </div>
 
-        @if (!$isAlreadyRegistered)
-            <!-- Checkbox Agreement -->
-            <div class="mb-4">
-                <label class="flex items-start gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
-                    <input type="checkbox" class="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                        wire:model.live="agreement">
-                    <div class="flex flex-col text-gray-600 text-xs leading-relaxed">
-                        <span class="font-semibold text-gray-800">Saya menyatakan data di atas benar.</span>
-                        <span>
-                            Data ini akan digunakan untuk undian doorprize.
+            @if ($isAlreadyRegistered)
+                <!-- TAMPILAN JIKA SUDAH TERDAFTAR (TOMBOL LOGIN) -->
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+                        <div class="bg-blue-100 p-1.5 rounded-full shrink-0">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-blue-800 text-sm">NIP Sudah Terdaftar</h4>
+                            <p class="text-xs text-blue-600 mt-1 leading-relaxed">
+                                Anda sudah melakukan presensi sebelumnya. Silakan masuk untuk melihat kupon undian Anda.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Login -->
+                    <button wire:click="login" wire:loading.attr="disabled"
+                        wire:loading.class="opacity-75 cursor-wait"
+                        class="w-full bg-[#5065A4] text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform transition-all flex items-center justify-center gap-2">
+
+                        <span wire:loading.remove wire:target="login">
+                            Masuk & Lihat Kupon
                         </span>
-                    </div>
-                </label>
-                @error('agreement')
-                    <span class="text-red-500 text-xs ml-6">{{ $message }}</span>
-                @enderror
-            </div>
-        @endif
 
-        @if ($isAlreadyRegistered)
-            <!-- TAMPILAN JIKA SUDAH TERDAFTAR (TOMBOL LOGIN) -->
-            <div class="space-y-4 animate-fade-in">
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
-                    <div class="bg-blue-100 p-1.5 rounded-full shrink-0">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-blue-800 text-sm">NIP Sudah Terdaftar</h4>
-                        <p class="text-xs text-blue-600 mt-1 leading-relaxed">
-                            Anda sudah melakukan presensi sebelumnya. Silakan masuk untuk melihat kupon undian Anda.
-                        </p>
-                    </div>
+                        <!-- Loading State untuk Login -->
+                        <span wire:loading wire:target="login" class="flex items-center gap-1">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                        </span>
+                    </button>
                 </div>
+            @else
+                <!-- TAMPILAN JIKA BELUM TERDAFTAR (TOMBOL KLAIM - ORIGINAL) -->
+                <button wire:click="klaimKupon" wire:loading.attr="disabled"
+                    wire:loading.class="opacity-75 cursor-wait" @if (!$showDetails || !$agreement || !$photo) disabled @endif
+                    class="w-full bg-[#5065A4] text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center gap-2">
 
-                <!-- Tombol Login -->
-                <button wire:click="login" wire:loading.attr="disabled" wire:loading.class="opacity-75 cursor-wait"
-                    class="w-full bg-[#5065A4] text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform transition-all flex items-center justify-center gap-2">
+                    <span wire:loading.remove wire:target="klaimKupon">Klaim Kupon</span>
 
-                    <span wire:loading.remove wire:target="login">
-                        Masuk & Lihat Kupon
-                    </span>
-
-                    <!-- Loading State untuk Login -->
-                    <span wire:loading wire:target="login" class="flex items-center gap-1">
+                    <!-- Loading State untuk Klaim -->
+                    <span wire:loading wire:target="klaimKupon" class="flex items-center gap-1">
                         <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
@@ -276,38 +301,24 @@
                         </svg>
                     </span>
                 </button>
-            </div>
+            @endif
+
+            <!-- Success Message -->
+            @if (session()->has('success'))
+                <div
+                    class="mt-6 bg-green-50 border border-green-200 text-green-800 px-4 py-4 rounded-xl text-center shadow-sm animate-bounce">
+                    <h4 class="font-bold text-lg mb-1">🎉 Berhasil!</h4>
+                    <p>{{ session('success') }}</p>
+                </div>
+            @endif
         @else
-            <!-- TAMPILAN JIKA BELUM TERDAFTAR (TOMBOL KLAIM - ORIGINAL) -->
-            <button wire:click="klaimKupon" wire:loading.attr="disabled" wire:loading.class="opacity-75 cursor-wait"
-                @if (!$showDetails || !$agreement || !$photo) disabled @endif
-                class="w-full bg-[#5065A4] text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center gap-2">
-
-                <span wire:loading.remove wire:target="klaimKupon">Klaim Kupon</span>
-
-                <!-- Loading State untuk Klaim -->
-                <span wire:loading wire:target="klaimKupon" class="flex items-center gap-1">
-                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                            stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                        </path>
-                    </svg>
-                </span>
-            </button>
-        @endif
-
-        <!-- Success Message -->
-        @if (session()->has('success'))
-            <div
-                class="mt-6 bg-green-50 border border-green-200 text-green-800 px-4 py-4 rounded-xl text-center shadow-sm animate-bounce">
-                <h4 class="font-bold text-lg mb-1">🎉 Berhasil!</h4>
-                <p>{{ session('success') }}</p>
+            <div class="mb-4">
+                <p
+                    class="text-red-600 font-semibold text-center bg-red-50 p-2 rounded border border-red-200 text-sm flex items-center justify-center gap-2">
+                    Maaf Pendaftaran kupon doorprize sudah ditutup!
+                </p>
             </div>
         @endif
-
     @endif
 
     {{-- ================= SCRIPT ALPINE.JS (FIXED) ================= --}}
