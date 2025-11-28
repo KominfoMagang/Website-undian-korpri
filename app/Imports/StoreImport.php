@@ -7,25 +7,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
-use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
-use Maatwebsite\Excel\Concerns\WithStartRow;
 
-// ⚠️ PERHATIKAN: Saya SUDAH MENGHAPUS 'WithHeadingRow' di baris ini
-class StoreImport implements ToCollection, WithChunkReading, WithCustomCsvSettings, WithStartRow 
+class StoreImport implements ToCollection, WithChunkReading
 {
-    public function getCsvSettings(): array
-    {
-        return [
-            'delimiter' => ';', // Tetap pakai titik koma
-        ];
-    }
-
-    // Mulai baca dari baris ke-2 (Baris 1 Header dilewati otomatis)
-    public function startRow(): int
-    {
-        return 2;
-    }
-
     public function collection(Collection $rows)
     {
         $dataToInsert = [];
@@ -33,17 +17,31 @@ class StoreImport implements ToCollection, WithChunkReading, WithCustomCsvSettin
 
         foreach ($rows as $row) {
             
-            // Validasi data kosong
-            // Kita pakai index angka karena WithHeadingRow sudah dihapus
-            if (empty(trim($row[0] ?? '')) || empty(trim($row[1] ?? ''))) {
-                continue;
+            $valKode = trim($row[0] ?? '');
+
+            // --- FILTER SAKTI ---
+            // 1. Cek kosong
+            if (empty($valKode)) continue;
+
+            // 2. Cek Tulisan Header (Manual)
+            // Kita bersihkan dulu stringnya dari karakter aneh biar yakin
+            $cleanStr = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $valKode));
+            if ($cleanStr == 'kodetoko') continue;
+
+            // 3. FILTER PAMUNGKAS: Cek Numeric
+            // Header "Kode Toko" itu BUKAN angka. Data "10542" itu angka.
+            // Jadi kalau BUKAN angka, kita anggap itu header/sampah, SKIP aja.
+            if (!is_numeric($valKode)) {
+                continue; 
             }
+            // --------------------
 
             $dataToInsert[] = [
-                'kode_toko'    => trim($row[0]), 
+                'kode_toko'    => $valKode,
                 'nama_toko'    => $row[1],
                 'jenis_produk' => $row[2] ?? 'Umum',
-                'stok'         => isset($row[3]) && is_numeric($row[3]) ? $row[3] : 0,
+                // Pastikan stok jadi angka, default 0
+                'stok'         => isset($row[3]) && is_numeric($row[3]) ? $row[3] : 0, 
                 'created_at'   => $now,
                 'updated_at'   => $now,
             ];

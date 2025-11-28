@@ -36,10 +36,12 @@ class StorePage extends Component
 
     public function generateKodeToko()
     {
-        $code = rand(0, 999);
+        // Generate angka 3 digit (100 - 999)
+        $code = rand(100, 999);
 
+        // Cek unik
         while (Store::where('kode_toko', $code)->exists()) {
-            $code = rand(0, 999);
+            $code = rand(100, 999);
         }
 
         $this->kode_toko = $code;
