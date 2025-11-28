@@ -10,10 +10,17 @@
             <div class="p-4 pt-20 space-y-3">
 
                 {{-- Status Badge --}}
+                @if($statusCoupon == 'Aktif')
                 <span
                     class="inline-flex items-center px-3 py-1 rounded-full text-[14px] font-semibold bg-green-700 text-white">
                     {{ $statusCoupon }}
                 </span>
+                @else
+                <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-[14px] font-semibold bg-red-700 text-white">
+                    {{ $statusCoupon }}
+                </span>
+                @endif
 
                 {{-- Nomor Kupon --}}
                 <div class="space-y-1">
