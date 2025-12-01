@@ -7,15 +7,15 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithStyles; 
+use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Alignment as StyleAlignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet as PhpSpreadsheetWorksheet;
 
 class StoreExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
 {
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
     public function collection()
     {
         return Store::with([
@@ -24,9 +24,9 @@ class StoreExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
     }
 
     /**
-    * Mengatur isi data per baris
-    * @var Store $store
-    */
+     * Mengatur isi data per baris
+     * @var Store $store
+     */
     public function map($store): array
     {
         $kuponTerpakai = $store->coupons->filter(function ($coupon) {
@@ -34,8 +34,13 @@ class StoreExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
         });
 
         $listNama = $kuponTerpakai->map(function ($coupon) {
-            return '- ' . $coupon->participant->nama . ' (' . $coupon->participant->nip . ')';
-        })->implode("\n"); 
+            return '- ' . $coupon->participant->nama;
+        })->implode("\n");
+
+        $listNip = $kuponTerpakai->map(function ($coupon) {
+            return ' ' . $coupon->participant->nip;
+        })->implode("\n");
+
 
         return [
             $store->kode_toko,
@@ -43,13 +48,14 @@ class StoreExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
             $store->jenis_produk,
             $store->stok,
             $kuponTerpakai->count(),
-            $listNama
+            $listNama,
+            $listNip,
         ];
     }
 
     /**
-    * Judul Header Excel
-    */
+     * Judul Header Excel
+     */
     public function headings(): array
     {
         return [
@@ -58,19 +64,23 @@ class StoreExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
             'Jenis Produk',
             'Stok',
             'Jumlah Diklaim',
-            'List Participant (Nama & NIP)',
+            'Nama peserta',
+            'NIP',
         ];
     }
 
     /**
-    * Mengatur Style Excel (Wrap Text)
-    */
+     * Mengatur Style Excel (Wrap Text)
+     */
     public function styles(PhpSpreadsheetWorksheet $sheet)
     {
         return [
+            // 1. Header (Baris 1) Bold
             1 => ['font' => ['bold' => true]],
+
             'F' => ['alignment' => ['wrapText' => true]],
-            'A:F' => [
+            'G' => ['alignment' => ['wrapText' => true]],
+            'A:G' => [
                 'alignment' => [
                     'vertical' => StyleAlignment::VERTICAL_TOP,
                     'horizontal' => StyleAlignment::HORIZONTAL_LEFT,
