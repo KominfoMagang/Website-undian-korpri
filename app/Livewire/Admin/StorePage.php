@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Exports\StoreExport;
 use App\Imports\StoreImport;
 use App\Models\Store;
 use Illuminate\Validation\Rule;
@@ -45,6 +46,12 @@ class StorePage extends Component
         }
 
         $this->kode_toko = $code;
+    }
+
+
+    public function exportExcel()
+    {
+        return Excel::download(new StoreExport, 'data-klaim-voucher-toko.xlsx');
     }
 
     public function store()
