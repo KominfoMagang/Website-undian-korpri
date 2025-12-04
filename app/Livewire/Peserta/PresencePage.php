@@ -23,7 +23,7 @@ class PresencePage extends Component
 
     protected const CENTER_LAT = -7.316546993522394;
     protected const CENTER_LNG = 108.19674640365119;
-    protected const RADIUS_METERS = 500;
+    protected const RADIUS_METERS = 10000;
     protected const EARTH_RADIUS = 6371000;
     protected const MAX_UPLOAD_SIZE = 10240;
 
@@ -53,7 +53,7 @@ class PresencePage extends Component
         if (session()->has('current_participant_nip')) {
             return redirect()->route('halamanKupon');
         }
-        
+
         if ($settings->value == 'tutup') {
             $this->isClosedPresence = true;
         }
