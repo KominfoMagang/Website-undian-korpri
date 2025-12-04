@@ -19,6 +19,31 @@ class Winner extends Component
         $this->limit += 6; // Tambah 6 data lagi kalau diklik
     }
 
+    public function cancelWinner($winnerId)
+    {
+        $winner = ModelsWinner::with('reward', 'participant')->find($winnerId);
+
+        if (!$winner) return;
+
+        // 1. Kembalikan Status Peserta (Belum Menang)
+        $participant = $winner->participant;
+        if ($participant) {
+            $participant->update(['sudah_menang' => false]);
+        }
+
+        // 2. Kembalikan Stok Hadiah (+1)
+        $reward = $winner->reward;
+        if ($reward) {
+            $reward->increment('stok');
+        }
+
+        // 3. Hapus Data Pemenang
+        $winner->delete();
+
+        // 4. Refresh / Notifikasi
+        $this->dispatch('winner-cancelled'); // Opsional buat trigger JS kalau perlu
+    }
+
     public function render()
     {
         $allWinners = ModelsWinner::with([
